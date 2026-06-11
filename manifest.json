@@ -1,0 +1,27 @@
+{
+    "manifest_version":  3,
+    "name":  "Gmail View Next",
+    "version":  "0.15.2",
+    "description":  "A resilient, newspaper-inspired Gmail inbox view with configurable layout and local sender marks.",
+    "permissions":  [
+                        "storage"
+                    ],
+    "host_permissions":  [
+                             "https://mail.google.com/*"
+                         ],
+    "content_scripts":  [
+                            {
+                                "matches":  [
+                                                "https://mail.google.com/*"
+                                            ],
+                                "js":  [
+                                           "src/core.js",
+                                           "src/gmail-adapter.js",
+                                           "src/styles.js",
+                                           "src/content.js"
+                                       ],
+                                "run_at":  "document_idle"
+                            }
+                        ],
+    "options_page":  "options/options.html"
+}

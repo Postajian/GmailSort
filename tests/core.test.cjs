@@ -1,0 +1,155 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const core = require('../src/core.js');
+
+const NOW = new Date('2026-06-08T12:00:00+02:00');
+
+test('normalizes settings and clamps layout values', () => {
+  const value = core.normalizeSettings({
+    enabled: false,
+    masthead: '  A VERY LONG CUSTOM INBOX TITLE  ',
+    rowHeight: 500,
+    inboxFontSize: 2,
+    inboxLetterSpacing: 99,
+    inboxWordSpacing: -4,
+    inboxOffset: 20000,
+    sidebarWidth: 999,
+    editorScale: 9,
+    labelFontSize: 99,
+    senderFontSize: 2,
+    senderTextGap: 999,
+    groupFontSize: 90,
+    logoSize: 2,
+    subjectFontSize: 90,
+    previewFontSize: 2,
+    dateFontSize: 90,
+    senderWidth: 20,
+    contentIndent: 999,
+    senderOffset: -20000,
+    timeSentOffset: 20000,
+    logoOffset: -10,
+    subjectGap: -20000,
+    subjectWidth: 10,
+    previewOffset: -20000,
+    dateOffset: 20000,
+    rightInset: 'bad',
+    headerSenderX: -50,
+    headerDateX: 50000
+  });
+
+  assert.equal(value.enabled, false);
+  assert.equal(value.masthead.length, 24);
+  assert.equal(value.rowHeight, 72);
+  assert.equal(value.inboxFontSize, 8);
+  assert.equal(value.inboxLetterSpacing, 16);
+  assert.equal(value.inboxWordSpacing, 0);
+  assert.equal(value.inboxOffset, 10000);
+  assert.equal(value.sidebarWidth, 720);
+  assert.equal(value.editorScale, 1.25);
+  assert.equal(value.labelFontSize, 32);
+  assert.equal(value.senderFontSize, 8);
+  assert.equal(value.senderTextGap, 80);
+  assert.equal(value.groupFontSize, 40);
+  assert.equal(value.logoSize, 10);
+  assert.equal(value.subjectFontSize, 40);
+  assert.equal(value.previewFontSize, 8);
+  assert.equal(value.dateFontSize, 40);
+  assert.equal(value.senderWidth, 160);
+  assert.equal(value.contentIndent, 240);
+  assert.equal(value.senderOffset, -10000);
+  assert.equal(value.timeSentOffset, 10000);
+  assert.equal(value.logoOffset, -10);
+  assert.equal(value.subjectGap, -10000);
+  assert.equal(value.subjectWidth, 280);
+  assert.equal(value.previewOffset, -10000);
+  assert.equal(value.dateOffset, 10000);
+  assert.equal(value.rightInset, core.DEFAULT_SETTINGS.rightInset);
+  assert.equal(value.headerSenderX, -1);
+  assert.equal(value.headerDateX, 10000);
+});
+
+test('uses the enlarged custom-label default', () => {
+  assert.equal(core.DEFAULT_SETTINGS.labelFontSize, 18);
+});
+
+test('keeps Gmail category tabs visible by default', () => {
+  assert.equal(core.DEFAULT_SETTINGS.hideTabs, false);
+  assert.equal(core.normalizeSettings({}).hideTabs, false);
+  assert.equal(core.normalizeSettings({ hideTabs: true }).hideTabs, true);
+});
+
+test('recognizes inbox, thread, and other routes', () => {
+  assert.equal(core.routeMode('#inbox'), 'inbox');
+  assert.equal(core.routeMode('#inbox/FMfcgzQ123456789'), 'thread');
+  assert.equal(core.routeMode('#sent'), 'other');
+});
+
+test('creates a centered screen-fit layout without changing typography', () => {
+  const value = core.centeredLayoutSettings({
+    ...core.DEFAULT_SETTINGS,
+    senderFontSize: 19,
+    senderOffset: 700,
+    headerDateX: 9000
+  }, 2270);
+
+  assert.equal(value.senderFontSize, 19);
+  assert.equal(value.senderWidth, 200);
+  assert.equal(value.contentIndent, 148);
+  assert.equal(value.subjectWidth, 493);
+  assert.equal(value.senderOffset, 0);
+  assert.equal(value.logoOffset, 4);
+  assert.equal(value.subjectGap, 30);
+  assert.equal(value.rightInset, 16);
+  assert.equal(value.headerDateX, -1);
+  assert.equal(value.senderTextGap, 20);
+  assert.equal(value.groupTextGap, 20);
+  assert.equal(value.logoTextGap, 20);
+  assert.equal(value.subjectTextGap, 20);
+  assert.equal(value.previewTextGap, 20);
+  assert.equal(value.dateTextGap, 20);
+});
+
+test('parses a same-day clock without moving into the future', () => {
+  assert.equal(
+    core.parseGmailDate('11:30', NOW).toISOString(),
+    '2026-06-08T09:30:00.000Z'
+  );
+  assert.equal(
+    core.parseGmailDate('23:30', NOW).toISOString(),
+    '2026-06-07T21:30:00.000Z'
+  );
+});
+
+test('parses English and German short dates', () => {
+  assert.equal(core.parseGmailDate('Jun 7', NOW).getMonth(), 5);
+  assert.equal(core.parseGmailDate('Mai 30', NOW).getMonth(), 4);
+  assert.equal(core.parseGmailDate('Okt 2, 2025', NOW).getMonth(), 9);
+  assert.equal(core.parseGmailDate('7. Juni', NOW).getMonth(), 5);
+});
+
+test('groups messages by Gmail-style calendar buckets', () => {
+  assert.equal(core.groupForDate(new Date('2026-06-08T11:00:00+02:00'), NOW), 'LAST 24 HOURS');
+  assert.equal(core.groupForDate(new Date('2026-06-07T00:01:00+02:00'), NOW), 'LAST 24 HOURS');
+  assert.equal(core.groupForDate(new Date('2026-06-06T11:00:00+02:00'), NOW), 'LAST 3 DAYS');
+  assert.equal(core.groupForDate(new Date('2026-06-03T11:00:00+02:00'), NOW), 'LAST 7 DAYS');
+  assert.equal(
+    core.groupForDate(
+      new Date('2026-06-01T11:00:00+02:00'),
+      new Date('2026-06-20T12:00:00+02:00')
+    ),
+    'THIS MONTH'
+  );
+  assert.equal(core.groupForDate(new Date('2026-05-01T11:00:00+02:00'), NOW), 'OLDER');
+});
+
+test('uses category colors for nested labels and stable fallback colors', () => {
+  assert.equal(core.labelColor('Finance/PayPal'), core.CATEGORY_COLORS.finance);
+  assert.equal(core.labelColor('Tools/Anthropic'), core.CATEGORY_COLORS.tools);
+  assert.equal(core.labelColor('Unknown Sender'), core.labelColor('Unknown Sender'));
+});
+
+test('creates local sender monograms without network data', () => {
+  assert.equal(core.senderMonogram('Ada Lovelace', 'ada@example.com'), 'AL');
+  assert.equal(core.senderMonogram('GitHub', 'noreply@github.com'), 'GI');
+  assert.equal(core.senderMonogram('', 'hello.world@example.com'), 'HE');
+});
