@@ -76,7 +76,7 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F{position:relative!important;z-index:0!important;isolation:isolate!important;background-color:var(--gvn-paper)!important;overflow:visible!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-tabs="true"] .aKh{display:none!important;}',
       (settings.mergeTabsRow
-        ? 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh{position:relative!important;z-index:5!important;margin-top:var(--gvn-tabs-merge,0px)!important;margin-left:var(--gvn-tabs-left,0px)!important;width:var(--gvn-tabs-width,auto)!important;min-width:0!important;}'
+        ? 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh{position:fixed!important;z-index:999!important;top:var(--gvn-tabs-top,-9999px)!important;left:var(--gvn-tabs-left,0px)!important;width:var(--gvn-tabs-width,auto)!important;margin:0!important;min-width:0!important;background:transparent!important;}'
         : ''),
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F{margin-top:66px!important;width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;max-width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;min-width:0!important;table-layout:fixed!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F col.yY{width:' + senderWidth + 'px!important;min-width:' + senderWidth + 'px!important;}',

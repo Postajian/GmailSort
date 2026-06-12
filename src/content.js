@@ -1995,7 +1995,7 @@
   function mergeTabsRow() {
     var root = document.documentElement;
     var clear = function () {
-      root.style.removeProperty('--gvn-tabs-merge');
+      root.style.removeProperty('--gvn-tabs-top');
       root.style.removeProperty('--gvn-tabs-left');
       root.style.removeProperty('--gvn-tabs-width');
     };
@@ -2022,12 +2022,11 @@
       clear();
       return;
     }
-    root.style.setProperty(
-      '--gvn-tabs-merge',
-      '-' + Math.round(toolbar.getBoundingClientRect().height) + 'px'
-    );
-    root.style.setProperty('--gvn-tabs-left', '150px');
-    root.style.setProperty('--gvn-tabs-width', 'calc(100% - 380px)');
+    var barRect = toolbar.getBoundingClientRect();
+    var width = Math.max(200, Math.round(barRect.width - 380));
+    root.style.setProperty('--gvn-tabs-top', Math.round(barRect.top) + 'px');
+    root.style.setProperty('--gvn-tabs-left', Math.round(barRect.left + 150) + 'px');
+    root.style.setProperty('--gvn-tabs-width', width + 'px');
   }
 
   function refresh() {
@@ -2106,7 +2105,7 @@
     document.documentElement.removeAttribute('data-gvn-sidebar-sized');
     document.documentElement.style.removeProperty('--gvn-sidebar-width');
     document.documentElement.style.removeProperty('--gvn-table-width');
-    document.documentElement.style.removeProperty('--gvn-tabs-merge');
+    document.documentElement.style.removeProperty('--gvn-tabs-top');
     document.documentElement.style.removeProperty('--gvn-tabs-left');
     document.documentElement.style.removeProperty('--gvn-tabs-width');
     clearSidebarTargets();
