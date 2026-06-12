@@ -5,6 +5,7 @@
 
   var SELECTORS = Object.freeze({
     row: 'tr.zA',
+    unreadRow: 'tr.zA.zE',
     table: 'table.F',
     inboxViewport: '.AO',
     senderCell: 'td.yX',

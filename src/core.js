@@ -6,7 +6,7 @@
   'use strict';
 
   var DAY_MS = 24 * 60 * 60 * 1000;
-  var LAYOUT_VERSION = 13;
+  var LAYOUT_VERSION = 14;
   var DEFAULT_SETTINGS = Object.freeze({
     enabled: true,
     masthead: 'INBOX',
@@ -14,11 +14,13 @@
     hideRail: true,
     colorLabels: true,
     showSenderMarks: true,
+    unreadEmphasis: true,
+    groupUnreadCounts: true,
     sidebarWidth: 0,
     editorScale: 0.6,
     labelFontSize: 18,
     sortLabelsByActivity: true,
-    rowHeight: 35,
+    rowHeight: 38,
     inboxFontSize: 24,
     inboxBold: true,
     inboxItalic: false,
@@ -97,6 +99,11 @@
     misc: '#667085'
   });
 
+  var MONTH_LABELS = Object.freeze([
+    'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+    'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+  ]);
+
   var MONTHS = Object.freeze({
     jan: 0, january: 0, januar: 0,
     feb: 1, february: 1, februar: 1,
@@ -133,6 +140,8 @@
       hideRail: value.hideRail !== false,
       colorLabels: value.colorLabels !== false,
       showSenderMarks: value.showSenderMarks !== false,
+      unreadEmphasis: value.unreadEmphasis !== false,
+      groupUnreadCounts: value.groupUnreadCounts !== false,
       sidebarWidth: clampNumber(value.sidebarWidth, 0, 720, DEFAULT_SETTINGS.sidebarWidth),
       editorScale: clampNumber(value.editorScale, 0.45, 1.25, DEFAULT_SETTINGS.editorScale),
       labelFontSize: clampNumber(value.labelFontSize, 10, 32, DEFAULT_SETTINGS.labelFontSize),
@@ -327,7 +336,7 @@
       date.getFullYear() === now.getFullYear() &&
       date.getMonth() === now.getMonth()
     ) return 'THIS MONTH';
-    return 'OLDER';
+    return MONTH_LABELS[date.getMonth()] + ' ' + date.getFullYear();
   }
 
   function groupForCandidates(candidates, now) {

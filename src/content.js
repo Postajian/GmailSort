@@ -195,6 +195,13 @@
           if (previousLayoutVersion < 13) {
             value.hideTabs = false;
           }
+          if (
+            previousLayoutVersion < 14 &&
+            (!Object.prototype.hasOwnProperty.call(storedValue, 'rowHeight') ||
+              Number(storedValue.rowHeight) === 35)
+          ) {
+            value.rowHeight = Core.DEFAULT_SETTINGS.rowHeight;
+          }
           [
             'senderFontSize',
             'groupFontSize',
@@ -229,6 +236,7 @@
             dateOffset: value.dateOffset,
             labelFontSize: value.labelFontSize,
             hideTabs: value.hideTabs,
+            rowHeight: value.rowHeight,
             headerDateX: value.headerDateX,
             layoutVersion: Core.LAYOUT_VERSION
           }, function (saveError) {
@@ -1520,17 +1528,33 @@
   function decorateRows(rows) {
     var now = new Date();
     var previousGroup = null;
+    var partsList = rows.map(function (row) {
+      return Adapter.rowParts(row);
+    });
+    var groups = partsList.map(function (parts) {
+      return Core.groupForCandidates(Adapter.dateCandidates(parts), now);
+    });
+    var unreadByGroup = {};
+    rows.forEach(function (row, index) {
+      if (row.matches(Adapter.SELECTORS.unreadRow)) {
+        unreadByGroup[groups[index]] = (unreadByGroup[groups[index]] || 0) + 1;
+      }
+    });
 
-    rows.forEach(function (row) {
-      var parts = Adapter.rowParts(row);
-      var group = Core.groupForCandidates(Adapter.dateCandidates(parts), now);
+    rows.forEach(function (row, index) {
+      var parts = partsList[index];
+      var group = groups[index];
       var isGroupStart = group !== previousGroup;
       row.removeAttribute('data-gvn-group');
       if (parts.contentCell) parts.contentCell.removeAttribute('data-gvn-group');
 
       if (isGroupStart) {
-        row.setAttribute('data-gvn-group', group);
-        if (parts.contentCell) parts.contentCell.setAttribute('data-gvn-group', group);
+        var unread = unreadByGroup[group] || 0;
+        var display = state.settings.groupUnreadCounts && unread > 0
+          ? group + ' — ' + unread + ' NEW'
+          : group;
+        row.setAttribute('data-gvn-group', display);
+        if (parts.contentCell) parts.contentCell.setAttribute('data-gvn-group', display);
         previousGroup = group;
       }
 

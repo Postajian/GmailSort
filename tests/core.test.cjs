@@ -139,7 +139,26 @@ test('groups messages by Gmail-style calendar buckets', () => {
     ),
     'THIS MONTH'
   );
-  assert.equal(core.groupForDate(new Date('2026-05-01T11:00:00+02:00'), NOW), 'OLDER');
+  assert.equal(core.groupForDate(new Date('2026-05-01T11:00:00+02:00'), NOW), 'MAY 2026');
+});
+
+test('labels archive months by name and keeps OLDER for unparseable dates', () => {
+  assert.equal(core.groupForDate(new Date('2026-05-19T11:00:00+02:00'), NOW), 'MAY 2026');
+  assert.equal(core.groupForDate(new Date('2025-12-24T11:00:00+01:00'), NOW), 'DECEMBER 2025');
+  assert.equal(core.groupForDate(new Date('invalid'), NOW), 'OLDER');
+});
+
+test('enables unread emphasis and group unread counts by default', () => {
+  assert.equal(core.DEFAULT_SETTINGS.unreadEmphasis, true);
+  assert.equal(core.DEFAULT_SETTINGS.groupUnreadCounts, true);
+  assert.equal(core.normalizeSettings({}).unreadEmphasis, true);
+  assert.equal(core.normalizeSettings({ unreadEmphasis: false }).unreadEmphasis, false);
+  assert.equal(core.normalizeSettings({ groupUnreadCounts: false }).groupUnreadCounts, false);
+});
+
+test('uses the taller default row height', () => {
+  assert.equal(core.DEFAULT_SETTINGS.rowHeight, 38);
+  assert.equal(core.normalizeSettings({}).rowHeight, 38);
 });
 
 test('uses category colors for nested labels and stable fallback colors', () => {
