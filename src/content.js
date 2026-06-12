@@ -1992,6 +1992,44 @@
     }
   }
 
+  function mergeTabsRow() {
+    var root = document.documentElement;
+    var clear = function () {
+      root.style.removeProperty('--gvn-tabs-merge');
+      root.style.removeProperty('--gvn-tabs-left');
+      root.style.removeProperty('--gvn-tabs-width');
+    };
+    if (
+      !state.settings.enabled ||
+      !state.settings.mergeTabsRow ||
+      state.settings.hideTabs ||
+      Core.routeMode(location.hash) !== 'inbox'
+    ) {
+      clear();
+      return;
+    }
+    var tabs = document.querySelector(Adapter.SELECTORS.tabs);
+    var toolbar = null;
+    var bars = document.querySelectorAll(Adapter.SELECTORS.listToolbar);
+    for (var i = 0; i < bars.length; i++) {
+      var rect = bars[i].getBoundingClientRect();
+      if (rect.height > 0 && rect.width > 0) {
+        toolbar = bars[i];
+        break;
+      }
+    }
+    if (!tabs || !toolbar) {
+      clear();
+      return;
+    }
+    root.style.setProperty(
+      '--gvn-tabs-merge',
+      '-' + Math.round(toolbar.getBoundingClientRect().height) + 'px'
+    );
+    root.style.setProperty('--gvn-tabs-left', '150px');
+    root.style.setProperty('--gvn-tabs-width', 'calc(100% - 380px)');
+  }
+
   function refresh() {
     state.frame = 0;
     if (state.destroyed) return;
@@ -1999,6 +2037,7 @@
     try {
       updateRootFlags();
       positionSidebarResizer();
+      mergeTabsRow();
       var overlay = document.getElementById('gmail-view-next-ui');
       var mode = Core.routeMode(location.hash);
       if (state.settings.enabled) decorateLabels();
@@ -2067,6 +2106,9 @@
     document.documentElement.removeAttribute('data-gvn-sidebar-sized');
     document.documentElement.style.removeProperty('--gvn-sidebar-width');
     document.documentElement.style.removeProperty('--gvn-table-width');
+    document.documentElement.style.removeProperty('--gvn-tabs-merge');
+    document.documentElement.style.removeProperty('--gvn-tabs-left');
+    document.documentElement.style.removeProperty('--gvn-tabs-width');
     clearSidebarTargets();
     var style = document.getElementById('gmail-view-next-css');
     var overlay = document.getElementById('gmail-view-next-ui');

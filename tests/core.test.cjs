@@ -156,6 +156,12 @@ test('enables unread emphasis and group unread counts by default', () => {
   assert.equal(core.normalizeSettings({ groupUnreadCounts: false }).groupUnreadCounts, false);
 });
 
+test('merges the tabs row into the toolbar row by default', () => {
+  assert.equal(core.DEFAULT_SETTINGS.mergeTabsRow, true);
+  assert.equal(core.normalizeSettings({}).mergeTabsRow, true);
+  assert.equal(core.normalizeSettings({ mergeTabsRow: false }).mergeTabsRow, false);
+});
+
 test('uses the taller default row height', () => {
   assert.equal(core.DEFAULT_SETTINGS.rowHeight, 38);
   assert.equal(core.normalizeSettings({}).rowHeight, 38);

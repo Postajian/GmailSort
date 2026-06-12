@@ -19,6 +19,7 @@
     dateCell: 'td.xW',
     actionCell: 'td.bq4',
     tabs: '.aKh',
+    listToolbar: '.G-atb',
     rail: '.bAw, .aUx',
     navigation: '[role="navigation"]',
     labelEntry: 'div[data-tooltip]',
