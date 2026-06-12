@@ -1998,6 +1998,7 @@
       root.style.removeProperty('--gvn-tabs-top');
       root.style.removeProperty('--gvn-tabs-left');
       root.style.removeProperty('--gvn-tabs-width');
+      root.style.removeProperty('--gvn-tabs-height');
     };
     if (
       !state.settings.enabled ||
@@ -2034,6 +2035,7 @@
     root.style.setProperty('--gvn-tabs-top', Math.round(barRect.top) + 'px');
     root.style.setProperty('--gvn-tabs-left', left + 'px');
     root.style.setProperty('--gvn-tabs-width', width + 'px');
+    root.style.setProperty('--gvn-tabs-height', Math.round(barRect.height) + 'px');
   }
 
   function refresh() {
@@ -2115,6 +2117,7 @@
     document.documentElement.style.removeProperty('--gvn-tabs-top');
     document.documentElement.style.removeProperty('--gvn-tabs-left');
     document.documentElement.style.removeProperty('--gvn-tabs-width');
+    document.documentElement.style.removeProperty('--gvn-tabs-height');
     clearSidebarTargets();
     var style = document.getElementById('gmail-view-next-css');
     var overlay = document.getElementById('gmail-view-next-ui');
