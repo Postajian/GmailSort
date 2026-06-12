@@ -44,8 +44,8 @@
     var editorSelectSize = Math.max(13, Math.round(20 * editorScale));
     var editorNameWidth = Math.max(38, Math.round(58 * editorScale));
     var editorValueWidth = Math.max(30, Math.round(42 * editorScale));
-    var editorTop = 34;
-    var editorMastheadHeight = editorTop + editorHeight + 4;
+    var editorTop = 4;
+    var editorMastheadHeight = editorTop + editorHeight + 42;
     var editorRightReserve = Math.max(182, Math.round(286 * editorScale));
     var editorSidePadding = Math.max(7, Math.round(13 * editorScale));
     var editorActionFont = Math.max(10, Math.round(15 * editorScale));
@@ -84,6 +84,7 @@
         ? 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh{position:fixed!important;z-index:999!important;top:var(--gvn-tabs-top,-9999px)!important;left:var(--gvn-tabs-left,0px)!important;width:var(--gvn-tabs-width,auto)!important;margin:0!important;min-width:0!important;background:transparent!important;}'
         : ''),
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F{margin-top:66px!important;width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;max-width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;min-width:0!important;table-layout:fixed!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"]:has(#gmail-view-next-ui[data-editing="true"]) table.F{margin-top:' + (78 + editorHeight) + 'px!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F col.yY{width:' + senderWidth + 'px!important;min-width:' + senderWidth + 'px!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] td.yX{width:' + senderWidth + 'px!important;min-width:' + senderWidth + 'px!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA,',
@@ -186,25 +187,25 @@
       '#gmail-view-next-ui .gvn-masthead{position:relative;z-index:2;height:34px;border-bottom:2px solid #000;background:var(--gvn-paper);box-sizing:border-box;text-align:center;font-family:' + FONT + ';font-size:' + inboxFontSize + 'px;font-weight:' + (settings.inboxBold ? 900 : 400) + ';font-style:' + (settings.inboxItalic ? 'italic' : 'normal') + ';letter-spacing:' + settings.inboxLetterSpacing + 'px;word-spacing:' + settings.inboxWordSpacing + 'px;line-height:30px;text-transform:uppercase;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-masthead{height:' + editorMastheadHeight + 'px;}',
       '#gmail-view-next-ui .gvn-masthead-title{position:absolute;top:0;left:50%;display:inline-block;padding-bottom:2px;transform:translateX(-50%);pointer-events:none;white-space:nowrap;}',
-      '#gmail-view-next-ui[data-editing="true"] .gvn-masthead-title{pointer-events:auto;cursor:ew-resize;outline:0;background:#fffdf5;}',
-      '#gmail-view-next-ui[data-editing="true"] .gvn-masthead-title[data-selected="true"]{box-shadow:inset 0 -2px 0 var(--gvn-gold);}',
-      '#gmail-view-next-ui .gvn-edit-button{position:absolute;right:8px;top:5px;height:22px;padding:0 9px;border:1px solid #000;background:#fff;color:#000;font:700 10px/20px Arial,sans-serif;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;pointer-events:auto;}',
+      '#gmail-view-next-ui[data-editing="true"] .gvn-masthead-title{pointer-events:auto;cursor:ew-resize;outline:0;background:transparent;border-radius:4px;top:auto;bottom:4px;}',
+      '#gmail-view-next-ui[data-editing="true"] .gvn-masthead-title[data-selected="true"]{background:#f4f0e3;}',
+      '#gmail-view-next-ui .gvn-edit-button{position:absolute;right:8px;top:5px;height:22px;padding:0 10px;border:1px solid #000;border-radius:6px;background:#fff;color:#000;font:600 10px/20px Arial,sans-serif;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;pointer-events:auto;}',
       '#gmail-view-next-ui .gvn-edit-button:hover,#gmail-view-next-ui[data-editing="true"] .gvn-edit-button{background:#000;color:#fff;}',
-      '#gmail-view-next-ui .gvn-label-edit-button{position:absolute;right:112px;top:5px;height:22px;padding:0 9px;border:1px solid #000;background:#fff;color:#000;font:700 10px/20px Arial,sans-serif;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;pointer-events:auto;}',
+      '#gmail-view-next-ui .gvn-label-edit-button{position:absolute;right:112px;top:5px;height:22px;padding:0 10px;border:1px solid #000;border-radius:6px;background:#fff;color:#000;font:600 10px/20px Arial,sans-serif;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;pointer-events:auto;}',
       '#gmail-view-next-ui .gvn-label-edit-button:hover,#gmail-view-next-ui[data-label-editing="true"] .gvn-label-edit-button{background:#000;color:#fff;}',
-      '#gmail-view-next-ui .gvn-center-button{display:none;position:absolute;right:132px;top:5px;height:22px;padding:0 9px;border:1px solid #000;background:#fff;color:#000;font:700 10px/20px Arial,sans-serif;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;pointer-events:auto;}',
+      '#gmail-view-next-ui .gvn-center-button{display:none;position:absolute;right:132px;top:5px;height:22px;padding:0 10px;border:1px solid #000;border-radius:6px;background:#fff;color:#000;font:600 10px/20px Arial,sans-serif;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;pointer-events:auto;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-center-button{display:block;}',
       '#gmail-view-next-ui .gvn-center-button:hover{background:var(--gvn-gold);color:#000;}',
       '#gmail-view-next-ui .gvn-type-editor{display:none;position:absolute;left:8px;top:5px;height:22px;align-items:center;gap:5px;font:700 10px/20px Arial,sans-serif;letter-spacing:.5px;pointer-events:auto;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-type-editor{display:flex;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-type-editor,#gmail-view-next-ui[data-editing="true"] .gvn-center-button,#gmail-view-next-ui[data-editing="true"] .gvn-edit-button{top:' + editorTop + 'px;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-type-editor{right:' + editorRightReserve + 'px;height:' + editorHeight + 'px;gap:' + editorGap + 'px;font:700 ' + editorFontSize + 'px/' + editorHeight + 'px Arial,sans-serif;letter-spacing:0;flex-wrap:nowrap;overflow:visible;}',
-      '#gmail-view-next-ui .gvn-type-editor button{min-width:' + editorMinWidth + 'px;height:' + editorHeight + 'px;padding:0 ' + editorPadding + 'px;border:1px solid #000;background:#fff;color:#000;font:800 ' + editorFontSize + 'px/' + editorLineHeight + 'px Arial,sans-serif;white-space:nowrap;cursor:pointer;}',
-      '#gmail-view-next-ui .gvn-type-editor button:hover,#gmail-view-next-ui .gvn-type-editor button[data-active="true"]{background:#000;color:#fff;}',
+      '#gmail-view-next-ui .gvn-type-editor button{min-width:' + editorMinWidth + 'px;height:' + editorHeight + 'px;padding:0 ' + editorPadding + 'px;border:1px solid #000;border-radius:5px;background:#fff;color:#000;font:600 ' + editorFontSize + 'px/' + editorLineHeight + 'px Arial,sans-serif;white-space:nowrap;cursor:pointer;}',
+      '#gmail-view-next-ui .gvn-type-editor button:hover,#gmail-view-next-ui .gvn-type-editor button[data-active="true"]{background:#000;color:#fff;border-color:#000;}',
       '#gmail-view-next-ui .gvn-type-editor button:disabled{opacity:.35;cursor:default;}',
       '#gmail-view-next-ui .gvn-select-all{width:' + editorSelectSize + 'px;height:' + editorSelectSize + 'px;margin:0 1px;accent-color:#555;cursor:pointer;}',
-      '#gmail-view-next-ui .gvn-type-name{min-width:' + editorNameWidth + 'px;text-align:left;font-size:' + editorFontSize + 'px;}',
-      '#gmail-view-next-ui .gvn-type-value{min-width:' + editorValueWidth + 'px;text-align:center;font-size:' + editorFontSize + 'px;}',
+      '#gmail-view-next-ui .gvn-type-name{display:none;}',
+      '#gmail-view-next-ui .gvn-type-value{min-width:' + editorValueWidth + 'px;text-align:center;font-size:' + editorFontSize + 'px;font-weight:700;}',
       '#gmail-view-next-ui .gvn-editor-resizer{position:relative;display:block;flex:0 0 ' + Math.max(12, Math.round(18 * editorScale)) + 'px;min-width:' + Math.max(12, Math.round(18 * editorScale)) + 'px!important;width:' + Math.max(12, Math.round(18 * editorScale)) + 'px;height:' + editorHeight + 'px;padding:0!important;border:0!important;background:transparent!important;cursor:ew-resize;touch-action:none;outline:0;}',
       '#gmail-view-next-ui .gvn-editor-resizer::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);background:#ededed;}',
       '#gmail-view-next-ui .gvn-editor-resizer::after{content:"";position:absolute;left:50%;top:50%;width:8px;height:' + Math.max(12, Math.round(editorHeight * 0.65)) + 'px;transform:translate(-50%,-50%);border:1px solid #d8d8d8;background:#fff;}',
@@ -223,8 +224,8 @@
       '#gmail-view-next-ui .gvn-column-label[data-column="preview"]{font-weight:' + (settings.previewBold ? 1000 : 400) + ';font-style:' + (settings.previewItalic ? 'italic' : 'normal') + ';letter-spacing:' + settings.previewLetterSpacing + 'px;word-spacing:' + settings.previewWordSpacing + 'px;}',
       '#gmail-view-next-ui .gvn-column-label[data-column="date"]{font-weight:' + (settings.dateBold ? 1000 : 400) + ';font-style:' + (settings.dateItalic ? 'italic' : 'normal') + ';letter-spacing:' + settings.dateLetterSpacing + 'px;word-spacing:' + settings.dateWordSpacing + 'px;}',
       '#gmail-view-next-ui .gvn-column-label{pointer-events:none;user-select:none;}',
-      '#gmail-view-next-ui[data-editing="true"] .gvn-column-label{z-index:6;pointer-events:auto;cursor:ew-resize;padding:0 3px;margin-left:-3px;outline:0;background:#fffdf5;}',
-      '#gmail-view-next-ui[data-editing="true"] .gvn-column-label[data-selected="true"]{box-shadow:inset 0 -2px 0 var(--gvn-gold);}',
+      '#gmail-view-next-ui[data-editing="true"] .gvn-column-label{z-index:6;pointer-events:auto;cursor:ew-resize;padding:0 6px;margin-left:-6px;outline:0;background:transparent;border-radius:4px;}',
+      '#gmail-view-next-ui[data-editing="true"] .gvn-column-label[data-selected="true"]{background:#f4f0e3;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-column-label:hover,#gmail-view-next-ui[data-editing="true"] .gvn-column-label:focus,#gmail-view-next-ui[data-editing="true"] .gvn-column-label[data-active="true"]{color:#fff;background:#000;}',
       '#gmail-view-next-ui .gvn-resize-handle{display:none;position:absolute;z-index:4;top:0;width:18px;height:26px;transform:translateX(-9px);cursor:col-resize;pointer-events:auto;touch-action:none;outline:0;}',
       '#gmail-view-next-ui .gvn-resize-handle::before{content:"";position:absolute;left:8px;top:-1px;width:2px;height:29px;background:#ededed!important;}',
@@ -232,7 +233,7 @@
       '#gmail-view-next-ui .gvn-column-check{display:none;position:absolute;z-index:12;top:5px;width:14px!important;height:14px!important;margin:0!important;border:1px solid #777!important;border-radius:2px!important;box-sizing:border-box!important;opacity:1!important;visibility:visible!important;-webkit-appearance:none!important;appearance:none!important;background:#fff!important;box-shadow:0 0 0 1px rgba(255,255,255,.9)!important;cursor:pointer;pointer-events:auto;}',
       '#gmail-view-next-ui .gvn-column-check:checked{border-color:#555!important;background:#555!important;}',
       '#gmail-view-next-ui .gvn-column-check:checked::after{content:"";position:absolute;left:3px;top:2px;width:6px;height:3px;border:solid #fff;border-width:0 0 2px 2px;transform:rotate(-45deg);}',
-      '#gmail-view-next-ui[data-editing="true"] .gvn-columns{overflow:visible;pointer-events:auto;background:#fffdf5;}',
+      '#gmail-view-next-ui[data-editing="true"] .gvn-columns{overflow:visible;pointer-events:auto;background:#fff;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-resize-handle{display:block;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-column-check{display:block;}',
       '#gmail-view-next-ui[data-label-editing="true"] .gvn-resize-handle,#gmail-view-next-ui[data-label-editing="true"] .gvn-column-check{display:none!important;}',
