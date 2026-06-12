@@ -1,6 +1,6 @@
 ﻿{
     "name":  "gmail-view-next",
-    "version":  "0.18.2",
+    "version":  "0.18.7",
     "private":  true,
     "description":  "A safer, modular rewrite of the Gmail View browser extension.",
     "scripts":  {

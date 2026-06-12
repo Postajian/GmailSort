@@ -2023,9 +2023,16 @@
       return;
     }
     var barRect = toolbar.getBoundingClientRect();
-    var width = Math.max(200, Math.round(barRect.width - 380));
+    var inboxParts = Adapter.locateInbox();
+    var tableRect = inboxParts.table ? inboxParts.table.getBoundingClientRect() : barRect;
+    var width = Math.max(200, Math.round(barRect.width * 0.62));
+    var left = Math.round(tableRect.left + tableRect.width / 2 - width / 2);
+    var minLeft = Math.round(barRect.left + 170);
+    var maxLeft = Math.round(barRect.right - 8 - width);
+    if (left > maxLeft) left = maxLeft;
+    if (left < minLeft) left = minLeft;
     root.style.setProperty('--gvn-tabs-top', Math.round(barRect.top) + 'px');
-    root.style.setProperty('--gvn-tabs-left', Math.round(barRect.left + 150) + 'px');
+    root.style.setProperty('--gvn-tabs-left', left + 'px');
     root.style.setProperty('--gvn-tabs-width', width + 'px');
   }
 
