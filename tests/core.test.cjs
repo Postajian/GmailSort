@@ -167,6 +167,15 @@ test('uses the taller default row height', () => {
   assert.equal(core.normalizeSettings({}).rowHeight, 38);
 });
 
+test('controls the gaps above and below group labels separately', () => {
+  assert.equal(core.DEFAULT_SETTINGS.groupLineGapTop, 9);
+  assert.equal(core.DEFAULT_SETTINGS.groupLineGapBottom, 14);
+  assert.equal(core.normalizeSettings({}).groupLineGapTop, 9);
+  assert.equal(core.normalizeSettings({}).groupLineGapBottom, 14);
+  assert.equal(core.normalizeSettings({ groupLineGapTop: 0 }).groupLineGapTop, 2);
+  assert.equal(core.normalizeSettings({ groupLineGapBottom: 500 }).groupLineGapBottom, 40);
+});
+
 test('uses category colors for nested labels and stable fallback colors', () => {
   assert.equal(core.labelColor('Finance/PayPal'), core.CATEGORY_COLORS.finance);
   assert.equal(core.labelColor('Tools/Anthropic'), core.CATEGORY_COLORS.tools);

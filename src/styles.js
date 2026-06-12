@@ -52,6 +52,11 @@
     var labelFontSize = Math.round(settings.labelFontSize);
     var senderTextGap = Math.round(settings.senderTextGap);
     var groupTextGap = Math.round(settings.groupTextGap);
+    var groupLineGapTop = Math.round(settings.groupLineGapTop);
+    var groupLineGapBottom = Math.round(settings.groupLineGapBottom);
+    var groupLabelTop = 2 + groupLineGapTop;
+    var groupBottomLine = groupLabelTop + 20 + groupLineGapBottom;
+    var groupRowPadding = groupBottomLine + 2 + 8;
     var logoTextGap = Math.round(settings.logoTextGap);
     var subjectTextGap = Math.round(settings.subjectTextGap);
     var previewTextGap = Math.round(settings.previewTextGap);
@@ -137,12 +142,12 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA .xT .y2{position:relative!important;left:' + previewOffset + 'px!important;flex:0 0 ' + PREVIEW_WIDTH + 'px!important;width:' + PREVIEW_WIDTH + 'px!important;max-width:' + PREVIEW_WIDTH + 'px!important;min-width:0!important;box-sizing:border-box!important;padding-left:' + previewTextGap + 'px!important;overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent)!important;mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent)!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA td.a4W .brd{position:relative!important;left:var(--gvn-attachment-shift,0px)!important;box-sizing:border-box!important;margin-left:0!important;}',
 
-      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-group] td{padding-top:40px!important;}',
-      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-group]{background-color:var(--gvn-paper)!important;background-image:linear-gradient(#000,#000),linear-gradient(#000,#000)!important;background-repeat:no-repeat!important;background-size:100% 2px,100% 2px!important;background-position:0 0,0 30px!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-group] td{padding-top:' + groupRowPadding + 'px!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-group]{background-color:var(--gvn-paper)!important;background-image:linear-gradient(#000,#000),linear-gradient(#000,#000)!important;background-repeat:no-repeat!important;background-size:100% 2px,100% 2px!important;background-position:0 0,0 ' + groupBottomLine + 'px!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-group] td{background-color:transparent!important;background-image:none!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-group] td.xW{border-left:0!important;background-color:transparent!important;background-image:none!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] td.a4W[data-gvn-group]{position:relative!important;overflow:visible!important;}',
-      'html[data-gvn-active="true"][data-gvn-route="inbox"] td.a4W[data-gvn-group]::before{content:attr(data-gvn-group);position:absolute;top:5px;left:' + groupLabelLeft + 'px;width:220px;box-sizing:border-box;padding-left:' + groupTextGap + 'px;border-left:0;text-align:left;font-family:' + FONT + '!important;font-size:' + groupFontSize + 'px!important;font-weight:' + (settings.groupBold ? 1000 : 400) + '!important;font-style:' + (settings.groupItalic ? 'italic' : 'normal') + '!important;line-height:20px;color:var(--gvn-ink)!important;letter-spacing:' + settings.groupLetterSpacing + 'px!important;word-spacing:' + settings.groupWordSpacing + 'px!important;text-transform:uppercase;pointer-events:none!important;white-space:nowrap;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] td.a4W[data-gvn-group]::before{content:attr(data-gvn-group);position:absolute;top:' + groupLabelTop + 'px;left:' + groupLabelLeft + 'px;width:220px;box-sizing:border-box;padding-left:' + groupTextGap + 'px;border-left:0;text-align:left;font-family:' + FONT + '!important;font-size:' + groupFontSize + 'px!important;font-weight:' + (settings.groupBold ? 1000 : 400) + '!important;font-style:' + (settings.groupItalic ? 'italic' : 'normal') + '!important;line-height:20px;color:var(--gvn-ink)!important;letter-spacing:' + settings.groupLetterSpacing + 'px!important;word-spacing:' + settings.groupWordSpacing + 'px!important;text-transform:uppercase;pointer-events:none!important;white-space:nowrap;}',
 
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA,',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA td,',
