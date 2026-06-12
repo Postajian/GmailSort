@@ -568,6 +568,62 @@
     saveLayoutSetting('editorScale');
   }
 
+  function commitTypedValue(node, property) {
+    var text = String(node.textContent || '').replace(',', '.').replace(/[^0-9.\-]/g, '');
+    var parsed = Number(text);
+    if (!Number.isFinite(parsed) || state.editingLabels) {
+      updateTypeEditor();
+      return;
+    }
+    var keys = selectedTypography().map(function (item) {
+      return property === 'size' ? item.definition.size : item.definition[property];
+    }).filter(Boolean);
+    if (!keys.length) {
+      updateTypeEditor();
+      return;
+    }
+    var next = Object.assign({}, state.settings);
+    keys.forEach(function (key) {
+      next[key] = parsed;
+    });
+    state.settings = Core.normalizeSettings(next);
+    installStyle();
+    scheduleRefresh();
+    saveLayoutSettings(keys);
+    updateTypeEditor();
+  }
+
+  function makeValueEditable(node, property) {
+    try {
+      node.contentEditable = 'plaintext-only';
+    } catch (error) {
+      node.contentEditable = 'true';
+    }
+    node.setAttribute('role', 'textbox');
+    node.setAttribute('aria-label', 'Type a value and press Enter');
+    node.title = 'Click, type a number, press Enter';
+    node.addEventListener('keydown', function (event) {
+      event.stopPropagation();
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        node.blur();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        node.blur();
+      }
+    });
+    node.addEventListener('focus', function () {
+      var range = document.createRange();
+      range.selectNodeContents(node);
+      var selection = getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    });
+    node.addEventListener('blur', function () {
+      commitTypedValue(node, property);
+    });
+  }
+
   function ensureOverlay() {
     var overlay = document.getElementById('gmail-view-next-ui');
     if (overlay) return overlay;
@@ -605,6 +661,7 @@
     typeEditor.appendChild(decreaseType);
     var typeValue = document.createElement('output');
     typeValue.className = 'gvn-type-value';
+    makeValueEditable(typeValue, 'size');
     typeEditor.appendChild(typeValue);
     var increaseType = document.createElement('button');
     increaseType.type = 'button';
@@ -649,6 +706,13 @@
       button.title = item[3];
       button.addEventListener('click', adjustSelectedStyle);
       typeEditor.appendChild(button);
+      if (item[2].charAt(0) === '-') {
+        var styleValue = document.createElement('output');
+        styleValue.className = 'gvn-style-value';
+        styleValue.setAttribute('data-style-value', item[1]);
+        makeValueEditable(styleValue, item[1]);
+        typeEditor.appendChild(styleValue);
+      }
     });
     var editorResizer = document.createElement('div');
     editorResizer.className = 'gvn-editor-resizer';
@@ -1021,7 +1085,7 @@
           ? labelNames.length + (labelNames.length === 1 ? ' label' : ' labels')
           : 'Labels';
       }
-      if (labelValue) {
+      if (labelValue && document.activeElement !== labelValue) {
         var labelSizes = labelNames.map(function (name) {
           return Math.round(labelTypographyFor(name).size);
         });
@@ -1060,6 +1124,10 @@
       overlay.querySelectorAll('[data-style-adjust]').forEach(function (button) {
         button.disabled = true;
       });
+      overlay.querySelectorAll('[data-style-value]').forEach(function (output) {
+        if (document.activeElement === output) return;
+        output.textContent = '--';
+      });
       document.querySelectorAll('.gvn-label-check').forEach(function (checkbox) {
         checkbox.checked = !!state.selectedLabels[
           checkbox.getAttribute('data-label-name')
@@ -1075,7 +1143,7 @@
         ? selected[0].definition.label
         : selected.length + ' columns';
     }
-    if (value) {
+    if (value && document.activeElement !== value) {
       if (!selected.length) {
         value.textContent = '--';
       } else {
@@ -1130,6 +1198,23 @@
       button.disabled = !selected.some(function (item) {
         return !!item.definition[property];
       });
+    });
+    overlay.querySelectorAll('[data-style-value]').forEach(function (output) {
+      if (document.activeElement === output) return;
+      var property = output.getAttribute('data-style-value');
+      var keys = selected.map(function (item) {
+        return item.definition[property];
+      }).filter(Boolean);
+      if (!keys.length) {
+        output.textContent = '--';
+        return;
+      }
+      var values = keys.map(function (key) {
+        return Math.round(Number(state.settings[key]) * 10) / 10;
+      });
+      output.textContent = values.every(function (item) { return item === values[0]; })
+        ? values[0] + 'px'
+        : 'Mixed';
     });
   }
 
