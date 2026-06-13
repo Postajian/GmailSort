@@ -2214,6 +2214,56 @@
     root.style.setProperty('--gvn-tabs-height', Math.round(barRect.height) + 'px');
   }
 
+  function hideHealthWarning() {
+    var w = document.getElementById('gmail-view-next-health');
+    if (w) w.remove();
+  }
+
+  function showHealthWarning() {
+    if (document.getElementById('gmail-view-next-health')) return;
+    var bar = document.createElement('div');
+    bar.id = 'gmail-view-next-health';
+    bar.setAttribute('role', 'status');
+    var msg = document.createElement('span');
+    msg.textContent = 'GmailView: Gmail’s layout looks different — the newspaper view may need a selector update.';
+    bar.appendChild(msg);
+    var dismiss = document.createElement('button');
+    dismiss.type = 'button';
+    dismiss.textContent = 'Dismiss';
+    dismiss.addEventListener('click', function () {
+      state.healthDismissed = true;
+      hideHealthWarning();
+    });
+    bar.appendChild(dismiss);
+    document.body.appendChild(bar);
+  }
+
+  // Warning Insurance: if Gmail is loaded on the inbox route but our core
+  // selectors find no table/rows for several seconds, warn instead of failing silently.
+  function checkSelectorHealth() {
+    if (state.healthDismissed) return;
+    var inbox = Core.routeMode(location.hash) === 'inbox';
+    var gmailLoaded = !!Adapter.locateSidebar();
+    var healthy = !!Adapter.locateInbox().table || Adapter.findRows(document).length > 0;
+    if (!state.settings.enabled || !inbox || !gmailLoaded || healthy) {
+      state.firstHealthMiss = 0;
+      hideHealthWarning();
+      return;
+    }
+    var now = Date.now();
+    if (!state.firstHealthMiss) {
+      state.firstHealthMiss = now;
+      if (!state.healthTimer) {
+        state.healthTimer = setTimeout(function () {
+          state.healthTimer = 0;
+          scheduleRefresh();
+        }, 6500);
+      }
+    } else if (now - state.firstHealthMiss > 6000) {
+      showHealthWarning();
+    }
+  }
+
   function refresh() {
     state.frame = 0;
     if (state.destroyed) return;
@@ -2222,6 +2272,7 @@
       updateRootFlags();
       positionSidebarResizer();
       mergeTabsRow();
+      checkSelectorHealth();
       var overlay = document.getElementById('gmail-view-next-ui');
       var mode = Core.routeMode(location.hash);
       if (state.settings.enabled) decorateLabels();
@@ -2268,6 +2319,8 @@
     if (state.frame) cancelAnimationFrame(state.frame);
     if (state.labelActivitySaveTimer) clearTimeout(state.labelActivitySaveTimer);
     if (state.labelTypographySaveTimer) clearTimeout(state.labelTypographySaveTimer);
+    if (state.healthTimer) clearTimeout(state.healthTimer);
+    hideHealthWarning();
     if (state.observer) state.observer.disconnect();
     if (state.resizeObserver) state.resizeObserver.disconnect();
     state.listeners.forEach(function (remove) { remove(); });

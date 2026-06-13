@@ -79,6 +79,9 @@
     return [
       ':root{--gvn-gold:' + GOLD + ';--gvn-divider:' + dividerColor + ';--gvn-ink:' + INK + ';--gvn-muted:' + muted + ';--gvn-paper:' + paper + ';--gvn-sidebar-width:' + sidebarWidth + 'px;}',
       '.gvn-label-count{margin-left:6px;font-weight:600;opacity:.7;}',
+      '#gmail-view-next-health{position:fixed;z-index:2147483647;top:12px;left:50%;transform:translateX(-50%);max-width:540px;display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff8e1;color:#5f4b00;border:1px solid #e0c200;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.18);font:13px/1.45 Arial,sans-serif;}',
+      '#gmail-view-next-health button{flex:0 0 auto;border:1px solid #b58900;background:#fff;color:#5f4b00;border-radius:5px;padding:4px 10px;font:600 12px Arial,sans-serif;cursor:pointer;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA:hover td.bq4 .T-I{opacity:1!important;visibility:visible!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] body,',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] .aAU,',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] .nH{background-color:' + outer + '!important;}',
