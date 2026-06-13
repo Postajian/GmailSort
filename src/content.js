@@ -1983,33 +1983,28 @@
   function updateLabelCount(count) {
     var nav = Adapter.locateSidebar();
     if (!nav) return;
-    var header = state.labelHeader && nav.contains(state.labelHeader)
-      ? state.labelHeader
-      : null;
-    if (!header) {
-      var nodes = nav.querySelectorAll('div,span,h1,h2,h3');
-      var best = null;
-      var bestDepth = Infinity;
-      for (var i = 0; i < nodes.length; i++) {
-        var el = nodes[i];
-        if (el.querySelector && el.querySelector('.gvn-label-count')) continue;
-        if (el.textContent && el.textContent.trim() === 'Labels') {
-          var depth = el.querySelectorAll('*').length;
-          if (depth < bestDepth) { best = el; bestDepth = depth; }
-        }
+    var existing = nav.querySelector('.gvn-label-count');
+    if (existing) { existing.textContent = String(count); return; }
+    var anchor = null;
+    var anchorMode = '';
+    var withAria = nav.querySelectorAll('[aria-label],[data-tooltip]');
+    for (var i = 0; i < withAria.length; i++) {
+      var a = (withAria[i].getAttribute('aria-label') || '') + ' ' + (withAria[i].getAttribute('data-tooltip') || '');
+      if (/create\s+new\s+label|neues?\s+label/i.test(a)) { anchor = withAria[i]; anchorMode = 'before'; break; }
+    }
+    if (!anchor) {
+      var nodes = nav.querySelectorAll('div,span,h2,h3');
+      for (var j = 0; j < nodes.length; j++) {
+        if (nodes[j].childElementCount === 0 && (nodes[j].textContent || '').trim() === 'Labels') { anchor = nodes[j]; anchorMode = 'after'; break; }
       }
-      header = best;
-      state.labelHeader = header;
     }
-    if (!header) return;
-    var badge = header.querySelector('.gvn-label-count');
-    if (!badge) {
-      badge = document.createElement('span');
-      badge.className = 'gvn-label-count';
-      badge.setAttribute('aria-hidden', 'true');
-      header.appendChild(badge);
-    }
-    badge.textContent = ' ' + count;
+    if (!anchor) return;
+    var badge = document.createElement('span');
+    badge.className = 'gvn-label-count';
+    badge.setAttribute('aria-hidden', 'true');
+    badge.textContent = String(count);
+    if (anchorMode === 'before' && anchor.parentElement) anchor.parentElement.insertBefore(badge, anchor);
+    else anchor.appendChild(badge);
   }
 
   function positionOverlay(firstRow) {

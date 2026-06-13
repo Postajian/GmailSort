@@ -78,6 +78,7 @@
 
     return [
       ':root{--gvn-gold:' + GOLD + ';--gvn-divider:' + dividerColor + ';--gvn-ink:' + INK + ';--gvn-muted:' + muted + ';--gvn-paper:' + paper + ';--gvn-sidebar-width:' + sidebarWidth + 'px;}',
+      '.gvn-label-count{margin-left:6px;font-weight:600;opacity:.7;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] body,',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] .aAU,',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] .nH{background-color:' + outer + '!important;}',
