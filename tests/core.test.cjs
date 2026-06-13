@@ -162,6 +162,12 @@ test('merges the tabs row into the toolbar row by default', () => {
   assert.equal(core.normalizeSettings({ mergeTabsRow: false }).mergeTabsRow, false);
 });
 
+test('uses a transparent background by default so Gmail themes show through', () => {
+  assert.equal(core.DEFAULT_SETTINGS.transparentBackground, true);
+  assert.equal(core.normalizeSettings({}).transparentBackground, true);
+  assert.equal(core.normalizeSettings({ transparentBackground: false }).transparentBackground, false);
+});
+
 test('uses the taller default row height', () => {
   assert.equal(core.DEFAULT_SETTINGS.rowHeight, 38);
   assert.equal(core.normalizeSettings({}).rowHeight, 38);
