@@ -22,11 +22,22 @@
         <label class="check"><input type="checkbox" name="hideRail"> Hide the right-side app rail</label>
         <label class="check"><input type="checkbox" name="colorLabels"> Color uncolored custom labels</label>
         <label class="check"><input type="checkbox" name="showSenderMarks"> Show local sender monograms</label>
-        <label class="check"><input type="checkbox" name="sortLabelsByActivity"> Sort custom labels by recent new-mail activity</label>
+        <label class="check"><input type="checkbox" name="sortLabelsByActivity"> Sort custom labels by recent new-mail activity (off recommended)</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Appearance</legend>
+        <label class="check"><input type="checkbox" name="transparentBackground"> Transparent background &mdash; show your Gmail theme</label>
+        <label class="check"><input type="checkbox" name="readablePanel"> White reading panel (off = newspaper fully see-through)</label>
+        <label class="check"><input type="checkbox" name="mergeTabsRow"> Merge category tabs into the toolbar row</label>
+        <label class="check"><input type="checkbox" name="unreadEmphasis"> Emphasize unread mail (bold + gold dot &amp; edge)</label>
+        <label class="check"><input type="checkbox" name="groupUnreadCounts"> Show &ldquo;&mdash; N NEW&rdquo; counts on date-group lines</label>
       </fieldset>
 
       <fieldset>
         <legend>Layout</legend>
+        <label>Group line gap &mdash; top <input type="number" name="groupLineGapTop" min="2" max="40" step="1"></label>
+        <label>Group line gap &mdash; bottom <input type="number" name="groupLineGapBottom" min="2" max="40" step="1"></label>
         <label>Masthead text <input type="text" name="masthead" maxlength="24"></label>
         <label>Sidebar width (0 = automatic) <input type="number" name="sidebarWidth" min="0" max="720" step="4"></label>
         <label>Edit ribbon scale <input type="number" name="editorScale" min="0.45" max="1.25" step="0.05"></label>
