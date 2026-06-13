@@ -1983,33 +1983,28 @@
   function updateLabelCount(count) {
     var nav = Adapter.locateSidebar();
     if (!nav) return;
-    var header = state.labelHeader && nav.contains(state.labelHeader)
-      ? state.labelHeader
-      : null;
-    if (!header) {
-      var nodes = nav.querySelectorAll('div,span,h1,h2,h3');
-      var best = null;
-      var bestDepth = Infinity;
-      for (var i = 0; i < nodes.length; i++) {
-        var el = nodes[i];
-        if (el.querySelector && el.querySelector('.gvn-label-count')) continue;
-        if (el.textContent && el.textContent.trim() === 'Labels') {
-          var depth = el.querySelectorAll('*').length;
-          if (depth < bestDepth) { best = el; bestDepth = depth; }
-        }
+    var existing = nav.querySelector('.gvn-label-count');
+    if (existing) { existing.textContent = String(count); return; }
+    var anchor = null;
+    var anchorMode = '';
+    var withAria = nav.querySelectorAll('[aria-label],[data-tooltip]');
+    for (var i = 0; i < withAria.length; i++) {
+      var a = (withAria[i].getAttribute('aria-label') || '') + ' ' + (withAria[i].getAttribute('data-tooltip') || '');
+      if (/create\s+new\s+label|neues?\s+label/i.test(a)) { anchor = withAria[i]; anchorMode = 'before'; break; }
+    }
+    if (!anchor) {
+      var nodes = nav.querySelectorAll('div,span,h2,h3');
+      for (var j = 0; j < nodes.length; j++) {
+        if (nodes[j].childElementCount === 0 && (nodes[j].textContent || '').trim() === 'Labels') { anchor = nodes[j]; anchorMode = 'after'; break; }
       }
-      header = best;
-      state.labelHeader = header;
     }
-    if (!header) return;
-    var badge = header.querySelector('.gvn-label-count');
-    if (!badge) {
-      badge = document.createElement('span');
-      badge.className = 'gvn-label-count';
-      badge.setAttribute('aria-hidden', 'true');
-      header.appendChild(badge);
-    }
-    badge.textContent = ' ' + count;
+    if (!anchor) return;
+    var badge = document.createElement('span');
+    badge.className = 'gvn-label-count';
+    badge.setAttribute('aria-hidden', 'true');
+    badge.textContent = String(count);
+    if (anchorMode === 'before' && anchor.parentElement) anchor.parentElement.insertBefore(badge, anchor);
+    else anchor.appendChild(badge);
   }
 
   function positionOverlay(firstRow) {
@@ -2219,6 +2214,56 @@
     root.style.setProperty('--gvn-tabs-height', Math.round(barRect.height) + 'px');
   }
 
+  function hideHealthWarning() {
+    var w = document.getElementById('gmail-view-next-health');
+    if (w) w.remove();
+  }
+
+  function showHealthWarning() {
+    if (document.getElementById('gmail-view-next-health')) return;
+    var bar = document.createElement('div');
+    bar.id = 'gmail-view-next-health';
+    bar.setAttribute('role', 'status');
+    var msg = document.createElement('span');
+    msg.textContent = 'GmailView: Gmail’s layout looks different — the newspaper view may need a selector update.';
+    bar.appendChild(msg);
+    var dismiss = document.createElement('button');
+    dismiss.type = 'button';
+    dismiss.textContent = 'Dismiss';
+    dismiss.addEventListener('click', function () {
+      state.healthDismissed = true;
+      hideHealthWarning();
+    });
+    bar.appendChild(dismiss);
+    document.body.appendChild(bar);
+  }
+
+  // Warning Insurance: if Gmail is loaded on the inbox route but our core
+  // selectors find no table/rows for several seconds, warn instead of failing silently.
+  function checkSelectorHealth() {
+    if (state.healthDismissed) return;
+    var inbox = Core.routeMode(location.hash) === 'inbox';
+    var gmailLoaded = !!Adapter.locateSidebar();
+    var healthy = !!Adapter.locateInbox().table || Adapter.findRows(document).length > 0;
+    if (!state.settings.enabled || !inbox || !gmailLoaded || healthy) {
+      state.firstHealthMiss = 0;
+      hideHealthWarning();
+      return;
+    }
+    var now = Date.now();
+    if (!state.firstHealthMiss) {
+      state.firstHealthMiss = now;
+      if (!state.healthTimer) {
+        state.healthTimer = setTimeout(function () {
+          state.healthTimer = 0;
+          scheduleRefresh();
+        }, 6500);
+      }
+    } else if (now - state.firstHealthMiss > 6000) {
+      showHealthWarning();
+    }
+  }
+
   function refresh() {
     state.frame = 0;
     if (state.destroyed) return;
@@ -2227,6 +2272,7 @@
       updateRootFlags();
       positionSidebarResizer();
       mergeTabsRow();
+      checkSelectorHealth();
       var overlay = document.getElementById('gmail-view-next-ui');
       var mode = Core.routeMode(location.hash);
       if (state.settings.enabled) decorateLabels();
@@ -2273,6 +2319,8 @@
     if (state.frame) cancelAnimationFrame(state.frame);
     if (state.labelActivitySaveTimer) clearTimeout(state.labelActivitySaveTimer);
     if (state.labelTypographySaveTimer) clearTimeout(state.labelTypographySaveTimer);
+    if (state.healthTimer) clearTimeout(state.healthTimer);
+    hideHealthWarning();
     if (state.observer) state.observer.disconnect();
     if (state.resizeObserver) state.resizeObserver.disconnect();
     state.listeners.forEach(function (remove) { remove(); });
