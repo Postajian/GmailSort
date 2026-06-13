@@ -6,7 +6,7 @@
   'use strict';
 
   var DAY_MS = 24 * 60 * 60 * 1000;
-  var LAYOUT_VERSION = 14;
+  var LAYOUT_VERSION = 15;
   var DEFAULT_SETTINGS = Object.freeze({
     enabled: true,
     masthead: 'INBOX',
@@ -22,7 +22,7 @@
     sidebarWidth: 0,
     editorScale: 0.6,
     labelFontSize: 18,
-    sortLabelsByActivity: true,
+    sortLabelsByActivity: false,
     rowHeight: 38,
     inboxFontSize: 24,
     inboxBold: true,

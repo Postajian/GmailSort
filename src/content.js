@@ -202,6 +202,9 @@
           ) {
             value.rowHeight = Core.DEFAULT_SETTINGS.rowHeight;
           }
+          if (previousLayoutVersion < 15) {
+            value.sortLabelsByActivity = false;
+          }
           [
             'senderFontSize',
             'groupFontSize',
@@ -237,6 +240,7 @@
             labelFontSize: value.labelFontSize,
             hideTabs: value.hideTabs,
             rowHeight: value.rowHeight,
+            sortLabelsByActivity: value.sortLabelsByActivity,
             headerDateX: value.headerDateX,
             layoutVersion: Core.LAYOUT_VERSION
           }, function (saveError) {
@@ -1663,6 +1667,10 @@
       var swatch = entry.querySelector(Adapter.SELECTORS.labelSwatch);
       if (swatch) swatch.style.removeProperty('--gvn-label-color');
     });
+    document.querySelectorAll('.gvn-label-count').forEach(function (badge) {
+      badge.remove();
+    });
+    state.labelHeader = null;
   }
 
   function decorateRows(rows) {
@@ -1968,7 +1976,40 @@
     });
     updateLabelActivity(items);
     sortLabelsByActivity(items);
+    updateLabelCount(items.length);
     if (state.editingLabels) updateTypeEditor();
+  }
+
+  function updateLabelCount(count) {
+    var nav = Adapter.locateSidebar();
+    if (!nav) return;
+    var header = state.labelHeader && nav.contains(state.labelHeader)
+      ? state.labelHeader
+      : null;
+    if (!header) {
+      var nodes = nav.querySelectorAll('div,span,h1,h2,h3');
+      var best = null;
+      var bestDepth = Infinity;
+      for (var i = 0; i < nodes.length; i++) {
+        var el = nodes[i];
+        if (el.querySelector && el.querySelector('.gvn-label-count')) continue;
+        if (el.textContent && el.textContent.trim() === 'Labels') {
+          var depth = el.querySelectorAll('*').length;
+          if (depth < bestDepth) { best = el; bestDepth = depth; }
+        }
+      }
+      header = best;
+      state.labelHeader = header;
+    }
+    if (!header) return;
+    var badge = header.querySelector('.gvn-label-count');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'gvn-label-count';
+      badge.setAttribute('aria-hidden', 'true');
+      header.appendChild(badge);
+    }
+    badge.textContent = ' ' + count;
   }
 
   function positionOverlay(firstRow) {
