@@ -194,6 +194,14 @@ test('uses category colors for nested labels and stable fallback colors', () => 
   assert.equal(core.labelColor('Unknown Sender'), core.labelColor('Unknown Sender'));
 });
 
+test('colors the user own label families consistently', () => {
+  assert.equal(core.labelColor('Money/PayPal'), core.CATEGORY_COLORS.money);
+  assert.equal(core.labelColor('Money/Klarna'), core.CATEGORY_COLORS.money);
+  assert.equal(core.labelColor('Shopping/Tech'), core.CATEGORY_COLORS.shopping);
+  assert.equal(core.labelColor('School/WU'), core.CATEGORY_COLORS.school);
+  assert.equal(core.labelColor('WIFI/Wien'), core.CATEGORY_COLORS.wifi);
+});
+
 test('creates local sender monograms without network data', () => {
   assert.equal(core.senderMonogram('Ada Lovelace', 'ada@example.com'), 'AL');
   assert.equal(core.senderMonogram('GitHub', 'noreply@github.com'), 'GI');

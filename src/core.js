@@ -101,7 +101,19 @@
     people: '#c24178',
     travel: '#147d92',
     events: '#9333a8',
-    misc: '#667085'
+    misc: '#667085',
+    // User's own top-level label families (so each family shares one colour)
+    money: '#238636',
+    linkedin: '#0a66c2',
+    newsletters: '#c2413b',
+    booking: '#0e7490',
+    domains: '#6d28d9',
+    insurance: '#0f766e',
+    school: '#4f46b5',
+    swiss: '#dc2626',
+    wifi: '#0891b2',
+    social: '#1d9bf0',
+    housing: '#92400e'
   });
 
   var MONTH_LABELS = Object.freeze([
