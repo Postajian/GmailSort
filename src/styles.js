@@ -81,6 +81,7 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"] body,',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] .aAU,',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] .nH{background-color:' + outer + '!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] .G-atb{background-color:var(--gvn-paper)!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-rail="true"] .bAw:not(:has(.IU)),',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-rail="true"] .aUx:not(:has(.IU)){display:none!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-sidebar-sized="true"] [data-gvn-sidebar-host="true"]{width:var(--gvn-sidebar-width)!important;min-width:var(--gvn-sidebar-width)!important;max-width:var(--gvn-sidebar-width)!important;flex:0 0 var(--gvn-sidebar-width)!important;}',
