@@ -68,16 +68,17 @@
     var compactSenderWidth = Math.max(150, senderWidth - 30);
     var compactContentIndent = Math.max(72, contentIndent - 48);
     var markDisplay = settings.showSenderMarks ? 'block' : 'none';
-    var paper = settings.transparentBackground ? 'transparent' : PAPER;
-    var muted = settings.transparentBackground ? '#333333' : MUTED;
-    var hairline = settings.transparentBackground ? '#6b6b6b' : HAIRLINE;
-    var dividerColor = settings.transparentBackground ? '#6b6b6b' : DIVIDER;
+    var outer = settings.transparentBackground ? 'transparent' : PAPER;
+    var paper = PAPER;
+    var muted = MUTED;
+    var hairline = HAIRLINE;
+    var dividerColor = DIVIDER;
 
     return [
       ':root{--gvn-gold:' + GOLD + ';--gvn-divider:' + dividerColor + ';--gvn-ink:' + INK + ';--gvn-muted:' + muted + ';--gvn-paper:' + paper + ';--gvn-sidebar-width:' + sidebarWidth + 'px;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] body,',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] .aAU,',
-      'html[data-gvn-active="true"][data-gvn-route="inbox"] .nH{background-color:var(--gvn-paper)!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] .nH{background-color:' + outer + '!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-rail="true"] .bAw:not(:has(.IU)),',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-rail="true"] .aUx:not(:has(.IU)){display:none!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-sidebar-sized="true"] [data-gvn-sidebar-host="true"]{width:var(--gvn-sidebar-width)!important;min-width:var(--gvn-sidebar-width)!important;max-width:var(--gvn-sidebar-width)!important;flex:0 0 var(--gvn-sidebar-width)!important;}',
