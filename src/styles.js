@@ -68,11 +68,13 @@
     var compactSenderWidth = Math.max(150, senderWidth - 30);
     var compactContentIndent = Math.max(72, contentIndent - 48);
     var markDisplay = settings.showSenderMarks ? 'block' : 'none';
-    var outer = settings.transparentBackground ? 'transparent' : PAPER;
-    var paper = PAPER;
-    var muted = MUTED;
-    var hairline = HAIRLINE;
-    var dividerColor = DIVIDER;
+    var themeOn = settings.transparentBackground;
+    var panelClear = themeOn && !settings.readablePanel;
+    var outer = themeOn ? 'transparent' : PAPER;
+    var paper = panelClear ? 'transparent' : PAPER;
+    var muted = panelClear ? '#333333' : MUTED;
+    var hairline = panelClear ? '#6b6b6b' : HAIRLINE;
+    var dividerColor = panelClear ? '#6b6b6b' : DIVIDER;
 
     return [
       ':root{--gvn-gold:' + GOLD + ';--gvn-divider:' + dividerColor + ';--gvn-ink:' + INK + ';--gvn-muted:' + muted + ';--gvn-paper:' + paper + ';--gvn-sidebar-width:' + sidebarWidth + 'px;}',
@@ -199,6 +201,9 @@
       '#gmail-view-next-ui .gvn-masthead-title{position:absolute;top:0;left:50%;display:inline-block;padding-bottom:2px;transform:translateX(-50%);pointer-events:none;white-space:nowrap;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-masthead-title{pointer-events:auto;cursor:ew-resize;outline:0;background:transparent;border-radius:4px;top:auto;bottom:4px;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-masthead-title[data-selected="true"]{background:#f4f0e3;}',
+      '#gmail-view-next-ui .gvn-bg-toggle{position:absolute;left:8px;top:5px;height:22px;padding:0 10px;border:1px solid #000;border-radius:6px;background:#fff;color:#000;font:600 10px/20px Arial,sans-serif;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;pointer-events:auto;}',
+      '#gmail-view-next-ui .gvn-bg-toggle[data-active="true"]{background:#000;color:#fff;}',
+      '#gmail-view-next-ui[data-editing="true"] .gvn-bg-toggle,#gmail-view-next-ui[data-label-editing="true"] .gvn-bg-toggle{display:none!important;}',
       '#gmail-view-next-ui .gvn-edit-button{position:absolute;right:8px;top:5px;height:22px;padding:0 10px;border:1px solid #000;border-radius:6px;background:#fff;color:#000;font:600 10px/20px Arial,sans-serif;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;pointer-events:auto;}',
       '#gmail-view-next-ui .gvn-edit-button:hover,#gmail-view-next-ui[data-editing="true"] .gvn-edit-button{background:#000;color:#fff;}',
       '#gmail-view-next-ui .gvn-label-edit-button{position:absolute;right:112px;top:5px;height:22px;padding:0 10px;border:1px solid #000;border-radius:6px;background:#fff;color:#000;font:600 10px/20px Arial,sans-serif;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;pointer-events:auto;}',

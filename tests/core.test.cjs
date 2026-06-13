@@ -168,6 +168,12 @@ test('uses a transparent background by default so Gmail themes show through', ()
   assert.equal(core.normalizeSettings({ transparentBackground: false }).transparentBackground, false);
 });
 
+test('keeps the white reading panel on by default and lets it toggle', () => {
+  assert.equal(core.DEFAULT_SETTINGS.readablePanel, true);
+  assert.equal(core.normalizeSettings({}).readablePanel, true);
+  assert.equal(core.normalizeSettings({ readablePanel: false }).readablePanel, false);
+});
+
 test('uses the taller default row height', () => {
   assert.equal(core.DEFAULT_SETTINGS.rowHeight, 38);
   assert.equal(core.normalizeSettings({}).rowHeight, 38);

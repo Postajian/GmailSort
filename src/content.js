@@ -731,6 +731,13 @@
     editorResizer.addEventListener('dblclick', resetEditorScale);
     typeEditor.appendChild(editorResizer);
     masthead.appendChild(typeEditor);
+    var bgToggle = document.createElement('button');
+    bgToggle.className = 'gvn-bg-toggle';
+    bgToggle.type = 'button';
+    bgToggle.title = 'Toggle the white reading panel. Off = fully see-through over your Gmail theme.';
+    bgToggle.setAttribute('aria-label', 'Toggle white reading panel');
+    bgToggle.addEventListener('click', toggleBackgroundMode);
+    masthead.appendChild(bgToggle);
     var centerButton = document.createElement('button');
     centerButton.className = 'gvn-center-button';
     centerButton.type = 'button';
@@ -816,7 +823,30 @@
     overlay.appendChild(columns);
     document.body.appendChild(overlay);
     updateTypeEditor();
+    updateBackgroundToggle();
     return overlay;
+  }
+
+  function updateBackgroundToggle() {
+    var overlay = document.getElementById('gmail-view-next-ui');
+    if (!overlay) return;
+    var button = overlay.querySelector('.gvn-bg-toggle');
+    if (!button) return;
+    var on = state.settings.readablePanel !== false;
+    button.textContent = on ? 'Paper: on' : 'Paper: off';
+    if (on) button.setAttribute('data-active', 'true');
+    else button.removeAttribute('data-active');
+  }
+
+  function toggleBackgroundMode() {
+    var next = Object.assign({}, state.settings, {
+      readablePanel: !(state.settings.readablePanel !== false)
+    });
+    state.settings = Core.normalizeSettings(next);
+    installStyle();
+    scheduleRefresh();
+    saveLayoutSetting('readablePanel');
+    updateBackgroundToggle();
   }
 
   function toggleEditing() {
