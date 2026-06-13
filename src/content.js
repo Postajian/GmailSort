@@ -749,15 +749,23 @@
     var labelEditButton = document.createElement('button');
     labelEditButton.className = 'gvn-label-edit-button';
     labelEditButton.type = 'button';
-    labelEditButton.textContent = 'Edit labels';
+    labelEditButton.textContent = 'Labels';
     labelEditButton.addEventListener('click', toggleLabelEditing);
     masthead.appendChild(labelEditButton);
     var editButton = document.createElement('button');
     editButton.className = 'gvn-edit-button';
     editButton.type = 'button';
-    editButton.textContent = 'Edit columns';
+    editButton.textContent = 'Columns';
     editButton.addEventListener('click', toggleEditing);
     masthead.appendChild(editButton);
+    var editMaster = document.createElement('button');
+    editMaster.className = 'gvn-edit-master';
+    editMaster.type = 'button';
+    editMaster.textContent = 'Edit';
+    editMaster.title = 'Edit the inbox — choose Labels or Columns';
+    editMaster.setAttribute('aria-label', 'Open edit menu');
+    editMaster.addEventListener('click', toggleEditMenu);
+    masthead.appendChild(editMaster);
     overlay.appendChild(masthead);
 
     var columns = document.createElement('div');
@@ -849,18 +857,34 @@
     updateBackgroundToggle();
   }
 
+  function closeEditMenu(overlay) {
+    if (!overlay) return;
+    overlay.setAttribute('data-edit-menu', 'false');
+    var master = overlay.querySelector('.gvn-edit-master');
+    if (master) master.textContent = 'Edit';
+  }
+
+  function toggleEditMenu() {
+    var overlay = ensureOverlay();
+    var open = overlay.getAttribute('data-edit-menu') === 'true';
+    overlay.setAttribute('data-edit-menu', String(!open));
+    var master = overlay.querySelector('.gvn-edit-master');
+    if (master) master.textContent = open ? 'Edit' : 'Close';
+  }
+
   function toggleEditing() {
     var nextEditing = !(state.editing && !state.editingLabels);
     state.editing = nextEditing;
     state.editingLabels = false;
     if (!state.editing) state.selectedColumns = { sender: true };
     var overlay = ensureOverlay();
+    closeEditMenu(overlay);
     overlay.setAttribute('data-editing', String(state.editing));
     overlay.setAttribute('data-label-editing', 'false');
     var button = overlay.querySelector('.gvn-edit-button');
-    if (button) button.textContent = state.editing ? 'Done' : 'Edit columns';
+    if (button) button.textContent = state.editing ? 'Done' : 'Columns';
     var labelButton = overlay.querySelector('.gvn-label-edit-button');
-    if (labelButton) labelButton.textContent = 'Edit labels';
+    if (labelButton) labelButton.textContent = 'Labels';
     updateRootFlags();
     scheduleRefresh();
     updateTypeEditor();
@@ -874,12 +898,13 @@
     state.selectedColumns = {};
     if (!nextEditing) state.selectedLabels = {};
     var overlay = ensureOverlay();
+    closeEditMenu(overlay);
     overlay.setAttribute('data-editing', String(state.editing));
     overlay.setAttribute('data-label-editing', String(state.editingLabels));
     var editButton = overlay.querySelector('.gvn-edit-button');
-    if (editButton) editButton.textContent = 'Edit columns';
+    if (editButton) editButton.textContent = 'Columns';
     var labelButton = overlay.querySelector('.gvn-label-edit-button');
-    if (labelButton) labelButton.textContent = state.editingLabels ? 'Done' : 'Edit labels';
+    if (labelButton) labelButton.textContent = state.editingLabels ? 'Done' : 'Labels';
     updateRootFlags();
     scheduleRefresh();
     updateTypeEditor();
