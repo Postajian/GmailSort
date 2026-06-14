@@ -2381,6 +2381,33 @@
       lines.push('--- TABS outerHTML (trimmed) ---');
       lines.push(trimInspectHtml(tabs.outerHTML));
     }
+
+    lines.push('');
+    lines.push('--- SIDEBAR LABELS (how nesting is marked) ---');
+    var labelList = [];
+    try { labelList = Adapter.sidebarLabels(); } catch (error) { /* ignore */ }
+    lines.push('count: ' + labelList.length);
+    labelList.slice(0, 16).forEach(function (it, i) {
+      var e = it.entry;
+      var er = e.getBoundingClientRect();
+      var swr = it.swatch ? it.swatch.getBoundingClientRect() : null;
+      var link = e.closest ? e.closest('a[href]') : null;
+      var lvlEl = e.closest ? e.closest('[aria-level]') : null;
+      lines.push('  [' + i + '] "' + it.name + '"'
+        + ' ' + describeNode(e)
+        + ' role=' + (e.getAttribute('role') || '')
+        + ' aria-level=' + (e.getAttribute('aria-level') || (lvlEl ? lvlEl.getAttribute('aria-level') : '') || '')
+        + ' href=' + (((link && link.getAttribute('href')) || e.getAttribute('href')) || '')
+        + ' entryLeft=' + Math.round(er.left)
+        + ' swatchLeft=' + (swr ? Math.round(swr.left) : '-'));
+    });
+    if (labelList[1] && labelList[1].entry) {
+      var chain = [];
+      var node = labelList[1].entry;
+      while (node && chain.length < 7) { chain.push(describeNode(node)); node = node.parentElement; }
+      lines.push('  label[1] ancestry: ' + chain.join(' < '));
+      lines.push('  label[1] outerHTML: ' + trimInspectHtml(labelList[1].entry.outerHTML).slice(0, 900));
+    }
     return lines.join('\n');
   }
 
