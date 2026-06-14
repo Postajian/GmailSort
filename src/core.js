@@ -405,6 +405,12 @@
     return '?';
   }
 
+  // A label is a "sub-label" if its Gmail name is nested under a parent, i.e.
+  // it contains a "/" (e.g. "Money/PayPal"). Top-level umbrella labels have none.
+  function isSubLabel(name) {
+    return typeof name === 'string' && name.indexOf('/') !== -1;
+  }
+
   return Object.freeze({
     DAY_MS: DAY_MS,
     LAYOUT_VERSION: LAYOUT_VERSION,
@@ -419,6 +425,7 @@
     hashText: hashText,
     stableColor: stableColor,
     labelColor: labelColor,
+    isSubLabel: isSubLabel,
     senderMonogram: senderMonogram
   });
 });

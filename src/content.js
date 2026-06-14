@@ -577,8 +577,15 @@
   function commitTypedValue(node, property) {
     var text = String(node.textContent || '').replace(',', '.').replace(/[^0-9.\-]/g, '');
     var parsed = Number(text);
-    if (!Number.isFinite(parsed) || state.editingLabels) {
+    if (!Number.isFinite(parsed)) {
       updateTypeEditor();
+      return;
+    }
+    if (state.editingLabels) {
+      // In label-edit mode the size box sets an exact px size on the selected
+      // labels (whatever the Main/Subs scope picked).
+      if (property === 'size') setSelectedLabelFontSize(parsed);
+      else updateTypeEditor();
       return;
     }
     var keys = selectedTypography().map(function (item) {
@@ -683,6 +690,24 @@
     selectAll.addEventListener('change', toggleAllColumnSelection);
     typeEditor.appendChild(selectAll);
     [
+      ['main', 'Main', 'Select all main (umbrella / top-level) labels'],
+      ['sub', 'Subs', 'Select all sub-labels (nested ones)']
+    ].forEach(function (item) {
+      var scope = document.createElement('label');
+      scope.className = 'gvn-scope';
+      var check = document.createElement('input');
+      check.type = 'checkbox';
+      check.className = 'gvn-scope-check';
+      check.setAttribute('data-scope', item[0]);
+      check.setAttribute('aria-label', item[2]);
+      check.title = item[2];
+      check.addEventListener('change', toggleLabelScope);
+      check.addEventListener('click', stopCheckboxEvent);
+      scope.appendChild(check);
+      scope.appendChild(document.createTextNode(item[1]));
+      typeEditor.appendChild(scope);
+    });
+    [
       ['Bold', 'bold', 'Toggle bold for selected text'],
       ['Italic', 'italic', 'Toggle italic for selected text']
     ].forEach(function (item) {
@@ -712,13 +737,6 @@
       button.title = item[3];
       button.addEventListener('click', adjustSelectedStyle);
       typeEditor.appendChild(button);
-      if (item[2].charAt(0) === '-') {
-        var styleValue = document.createElement('output');
-        styleValue.className = 'gvn-style-value';
-        styleValue.setAttribute('data-style-value', item[1]);
-        makeValueEditable(styleValue, item[1]);
-        typeEditor.appendChild(styleValue);
-      }
     });
     var editorResizer = document.createElement('div');
     editorResizer.className = 'gvn-editor-resizer';
@@ -981,6 +999,39 @@
     updateTypeEditor();
   }
 
+  // Bulk-select by scope: "main" = umbrella/top-level labels (no "/"), "sub" =
+  // nested labels (contain "/"). Checking adds that whole group to the selection,
+  // unchecking removes it -- so you can style mains, subs, or both together.
+  function toggleLabelScope(event) {
+    event.stopPropagation();
+    var scope = event.currentTarget.getAttribute('data-scope');
+    var on = event.currentTarget.checked;
+    customLabelItems().forEach(function (item) {
+      if (Core.isSubLabel(item.name) !== (scope === 'sub')) return;
+      if (on) state.selectedLabels[item.name] = true;
+      else delete state.selectedLabels[item.name];
+    });
+    updateTypeEditor();
+    scheduleRefresh();
+  }
+
+  function setSelectedLabelFontSize(size) {
+    var names = selectedLabelNames();
+    if (!names.length) {
+      updateTypeEditor();
+      return;
+    }
+    var clamped = Math.min(32, Math.max(10, size));
+    names.forEach(function (name) {
+      var stored = Object.assign({}, state.labelTypography[name]);
+      stored.size = clamped;
+      state.labelTypography[name] = stored;
+    });
+    scheduleLabelTypographySave();
+    scheduleRefresh();
+    updateTypeEditor();
+  }
+
   function adjustSelectedLabelSize(delta) {
     var names = selectedLabelNames();
     if (!names.length) return;
@@ -1180,6 +1231,17 @@
         labelSelectAll.indeterminate =
           labelNames.length > 0 && labelNames.length < allLabelItems.length;
       }
+      overlay.querySelectorAll('.gvn-scope-check').forEach(function (check) {
+        var wantSub = check.getAttribute('data-scope') === 'sub';
+        var group = allLabelItems.filter(function (item) {
+          return Core.isSubLabel(item.name) === wantSub;
+        });
+        var chosen = group.filter(function (item) {
+          return !!state.selectedLabels[item.name];
+        }).length;
+        check.checked = group.length > 0 && chosen === group.length;
+        check.indeterminate = chosen > 0 && chosen < group.length;
+      });
       overlay.querySelectorAll('[data-style-toggle]').forEach(function (button) {
         var property = button.getAttribute('data-style-toggle');
         var active = labelNames.length > 0 && labelNames.every(function (name) {
@@ -2207,27 +2269,25 @@
 
   // Ask the service worker for the best logo, then cache it and repaint. Until it
   // answers we show the plain favicon so something appears immediately.
+  //   dataUrl -> real brand logo / favicon ; none -> coloured letter tile ;
+  //   error/unreachable -> KEEP the plain favicon (don't downgrade to a letter).
   function requestLogo(domain) {
     if (state.logoPending[domain]) return;
     state.logoPending[domain] = true;
-    var fallback = function () {
-      state.logoCache[domain] = monogramCss(domain);
+    var settle = function (value) {
+      state.logoCache[domain] = value;
       delete state.logoPending[domain];
       scheduleRefresh();
     };
     try {
       chrome.runtime.sendMessage({ type: 'gvn-logo', domain: domain }, function (response) {
-        if (chrome.runtime && chrome.runtime.lastError) { fallback(); return; }
-        if (response && response.dataUrl) {
-          state.logoCache[domain] = 'url("' + response.dataUrl + '")';
-        } else {
-          state.logoCache[domain] = monogramCss(domain);
-        }
-        delete state.logoPending[domain];
-        scheduleRefresh();
+        if (chrome.runtime && chrome.runtime.lastError) { settle(faviconCss(domain)); return; }
+        if (response && response.dataUrl) settle('url("' + response.dataUrl + '")');
+        else if (response && response.none) settle(monogramCss(domain));
+        else settle(faviconCss(domain));
       });
     } catch (error) {
-      fallback();
+      settle(faviconCss(domain));
     }
   }
 
