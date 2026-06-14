@@ -24,6 +24,8 @@ test('host permissions cover Gmail plus the logo sources', () => {
   assert.ok(manifest.host_permissions.includes('https://mail.google.com/*'));
   assert.ok(manifest.host_permissions.includes('https://logo.clearbit.com/*'));
   assert.ok(manifest.host_permissions.includes('https://www.google.com/s2/*'));
+  // s2/favicons redirects to gstatic — must be permitted or the fetch CORS-fails
+  assert.ok(manifest.host_permissions.includes('https://*.gstatic.com/*'));
 });
 
 test('content script order keeps dependencies before the orchestrator', () => {
