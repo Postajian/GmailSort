@@ -72,6 +72,15 @@ test('uses the enlarged custom-label default', () => {
   assert.equal(core.DEFAULT_SETTINGS.labelFontSize, 18);
 });
 
+test('classifies nested labels as sub-labels and top-level as main', () => {
+  assert.equal(core.isSubLabel('Money/PayPal'), true);
+  assert.equal(core.isSubLabel('Money/PayPal/Klarna'), true);
+  assert.equal(core.isSubLabel('Money'), false);
+  assert.equal(core.isSubLabel('Newsletters'), false);
+  assert.equal(core.isSubLabel(''), false);
+  assert.equal(core.isSubLabel(undefined), false);
+});
+
 test('fetches real sender logos by default and lets it toggle off', () => {
   assert.equal(core.DEFAULT_SETTINGS.richLogos, true);
   assert.equal(core.normalizeSettings({}).richLogos, true);
