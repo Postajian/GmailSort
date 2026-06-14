@@ -72,6 +72,12 @@ test('uses the enlarged custom-label default', () => {
   assert.equal(core.DEFAULT_SETTINGS.labelFontSize, 18);
 });
 
+test('fetches real sender logos by default and lets it toggle off', () => {
+  assert.equal(core.DEFAULT_SETTINGS.richLogos, true);
+  assert.equal(core.normalizeSettings({}).richLogos, true);
+  assert.equal(core.normalizeSettings({ richLogos: false }).richLogos, false);
+});
+
 test('keeps Gmail category tabs visible by default', () => {
   assert.equal(core.DEFAULT_SETTINGS.hideTabs, false);
   assert.equal(core.normalizeSettings({}).hideTabs, false);

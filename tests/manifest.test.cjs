@@ -12,11 +12,18 @@ test('manifest is MV3 and every declared local file exists', () => {
 
   const files = [
     manifest.options_page,
+    manifest.background && manifest.background.service_worker,
     ...manifest.content_scripts.flatMap((entry) => entry.js || [])
-  ];
+  ].filter(Boolean);
   for (const file of files) {
     assert.equal(fs.existsSync(path.join(root, file)), true, `${file} should exist`);
   }
+});
+
+test('host permissions cover Gmail plus the logo sources', () => {
+  assert.ok(manifest.host_permissions.includes('https://mail.google.com/*'));
+  assert.ok(manifest.host_permissions.includes('https://logo.clearbit.com/*'));
+  assert.ok(manifest.host_permissions.includes('https://www.google.com/s2/*'));
 });
 
 test('content script order keeps dependencies before the orchestrator', () => {
