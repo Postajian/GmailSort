@@ -737,13 +737,6 @@
       button.title = item[3];
       button.addEventListener('click', adjustSelectedStyle);
       typeEditor.appendChild(button);
-      if (item[2].charAt(0) === '-') {
-        var styleValue = document.createElement('output');
-        styleValue.className = 'gvn-style-value';
-        styleValue.setAttribute('data-style-value', item[1]);
-        makeValueEditable(styleValue, item[1]);
-        typeEditor.appendChild(styleValue);
-      }
     });
     var editorResizer = document.createElement('div');
     editorResizer.className = 'gvn-editor-resizer';
