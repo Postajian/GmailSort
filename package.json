@@ -1,11 +1,11 @@
 {
     "name":  "gmail-view-next",
-    "version":  "0.20.6",
+    "version":  "0.20.7",
     "private":  true,
     "description":  "A safer, modular rewrite of the Gmail View browser extension.",
     "scripts":  {
-                    "check":  "node --check src/core.js \u0026\u0026 node --check src/gmail-adapter.js \u0026\u0026 node --check src/styles.js \u0026\u0026 node --check src/content.js \u0026\u0026 node --check options/options.js",
+                    "check":  "node --check src/core.js && node --check src/gmail-adapter.js && node --check src/styles.js && node --check src/content.js && node --check src/background.js && node --check options/options.js",
                     "test":  "node --test tests/*.test.cjs",
-                    "verify":  "npm run check \u0026\u0026 npm test"
+                    "verify":  "npm run check && npm test"
                 }
 }

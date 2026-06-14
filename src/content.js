@@ -74,6 +74,8 @@
     labelTypography: {},
     labelTypographySaveTimer: 0,
     sortingLabels: false,
+    logoCache: {},
+    logoPending: {},
     listeners: []
   };
 
@@ -1719,14 +1721,7 @@
         var at = sender.email.lastIndexOf('@');
         var domain = at >= 0 ? rootDomain(sender.email.slice(at + 1).toLowerCase()) : '';
         parts.contentTrack.setAttribute('data-gvn-logo', 'true');
-        if (domain) {
-          parts.contentTrack.style.setProperty(
-            '--gvn-logo',
-            'url("https://www.google.com/s2/favicons?sz=64&domain=' + domain + '")'
-          );
-        } else {
-          parts.contentTrack.style.removeProperty('--gvn-logo');
-        }
+        applyLogo(parts.contentTrack, domain);
       }
 
       alignAttachments(parts);
@@ -2173,6 +2168,83 @@
         scheduleRefresh();
       });
       state.resizeObserver.observe(table);
+    }
+  }
+
+  // ----- Sender logos: real brand logo -> favicon -> coloured letter --------
+  function faviconCss(domain) {
+    return 'url("https://www.google.com/s2/favicons?sz=64&domain=' + domain + '")';
+  }
+
+  function monogramColor(domain) {
+    var hash = 0;
+    for (var i = 0; i < domain.length; i++) {
+      hash = (hash * 31 + domain.charCodeAt(i)) >>> 0;
+    }
+    return 'hsl(' + (hash % 360) + ',55%,45%)';
+  }
+
+  function monogramCss(domain) {
+    var clean = domain.replace(/^www\./, '');
+    var letter = (clean.charAt(0) || '?').toUpperCase();
+    try {
+      var canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = monogramColor(clean);
+      ctx.fillRect(0, 0, 64, 64);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 38px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(letter, 32, 35);
+      return 'url("' + canvas.toDataURL('image/png') + '")';
+    } catch (error) {
+      return faviconCss(domain);
+    }
+  }
+
+  // Ask the service worker for the best logo, then cache it and repaint. Until it
+  // answers we show the plain favicon so something appears immediately.
+  function requestLogo(domain) {
+    if (state.logoPending[domain]) return;
+    state.logoPending[domain] = true;
+    var fallback = function () {
+      state.logoCache[domain] = monogramCss(domain);
+      delete state.logoPending[domain];
+      scheduleRefresh();
+    };
+    try {
+      chrome.runtime.sendMessage({ type: 'gvn-logo', domain: domain }, function (response) {
+        if (chrome.runtime && chrome.runtime.lastError) { fallback(); return; }
+        if (response && response.dataUrl) {
+          state.logoCache[domain] = 'url("' + response.dataUrl + '")';
+        } else {
+          state.logoCache[domain] = monogramCss(domain);
+        }
+        delete state.logoPending[domain];
+        scheduleRefresh();
+      });
+    } catch (error) {
+      fallback();
+    }
+  }
+
+  function applyLogo(track, domain) {
+    if (!domain) {
+      track.style.removeProperty('--gvn-logo');
+      return;
+    }
+    if (state.settings.richLogos === false) {
+      track.style.setProperty('--gvn-logo', faviconCss(domain));
+      return;
+    }
+    if (state.logoCache[domain]) {
+      track.style.setProperty('--gvn-logo', state.logoCache[domain]);
+    } else {
+      track.style.setProperty('--gvn-logo', faviconCss(domain));
+      requestLogo(domain);
     }
   }
 
