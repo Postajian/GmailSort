@@ -770,6 +770,14 @@
     editMaster.setAttribute('aria-label', 'Open edit menu');
     editMaster.addEventListener('click', toggleEditMenu);
     masthead.appendChild(editMaster);
+    var inspectButton = document.createElement('button');
+    inspectButton.className = 'gvn-inspect-button';
+    inspectButton.type = 'button';
+    inspectButton.textContent = 'Inspect';
+    inspectButton.title = "Copy Gmail's live tab/toolbar HTML to the clipboard (for debugging layout)";
+    inspectButton.setAttribute('aria-label', 'Copy Gmail layout HTML to clipboard');
+    inspectButton.addEventListener('click', copyInspectReport);
+    masthead.appendChild(inspectButton);
     overlay.appendChild(masthead);
 
     var columns = document.createElement('div');
@@ -2166,6 +2174,100 @@
       });
       state.resizeObserver.observe(table);
     }
+  }
+
+  // ----- Inspector: copy Gmail's live layout HTML for debugging -----------
+  function describeNode(el) {
+    if (!el || !el.tagName) return '(none)';
+    var cls = String(el.className || '').trim();
+    return el.tagName.toLowerCase()
+      + (cls ? '.' + cls.split(/\s+/).join('.') : '')
+      + (el.getAttribute && el.getAttribute('role') ? '[role=' + el.getAttribute('role') + ']' : '');
+  }
+
+  function trimInspectHtml(html) {
+    return String(html || '')
+      .replace(/\s(?:style|jsaction|jsname|jslog|jscontroller|jsdata|data-ved)="[^"]*"/g, '')
+      .slice(0, 5000);
+  }
+
+  function buildInspectReport() {
+    var lines = [];
+    var version = '?';
+    try { version = chrome.runtime.getManifest().version; } catch (error) { /* ignore */ }
+    lines.push('=== GmailView Inspector ===');
+    lines.push('version: ' + version + '  hash: ' + location.hash);
+    lines.push('window: ' + window.innerWidth + 'x' + window.innerHeight);
+    lines.push('');
+    lines.push('--- TABS (selector "' + Adapter.SELECTORS.tabs + '") ---');
+    var tabs = document.querySelector(Adapter.SELECTORS.tabs);
+    if (!tabs) {
+      lines.push('NOT FOUND — the tabs selector may be out of date.');
+    } else {
+      var tr = tabs.getBoundingClientRect();
+      lines.push('container: ' + describeNode(tabs)
+        + '  left=' + Math.round(tr.left) + ' width=' + Math.round(tr.width));
+      var tabEls = tabs.querySelectorAll('[role="tab"]');
+      lines.push('role="tab" elements: ' + tabEls.length);
+      Array.prototype.forEach.call(tabEls, function (el, i) {
+        var r = el.getBoundingClientRect();
+        lines.push('  [' + i + '] ' + describeNode(el)
+          + ' aria-label="' + (el.getAttribute('aria-label') || '') + '"'
+          + ' text="' + (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 24) + '"'
+          + ' left=' + Math.round(r.left) + ' w=' + Math.round(r.width));
+      });
+      if (tabEls.length) {
+        var chain = [];
+        var node = tabEls[0];
+        while (node && node !== tabs && chain.length < 8) {
+          chain.push(describeNode(node));
+          node = node.parentElement;
+        }
+        chain.push(describeNode(tabs));
+        lines.push('ancestry (tab -> container): ' + chain.join(' < '));
+      }
+      lines.push('');
+      lines.push('--- TABS outerHTML (trimmed) ---');
+      lines.push(trimInspectHtml(tabs.outerHTML));
+    }
+    return lines.join('\n');
+  }
+
+  function copyToClipboard(text, done) {
+    var fallback = function () {
+      try {
+        var area = document.createElement('textarea');
+        area.value = text;
+        area.style.position = 'fixed';
+        area.style.top = '-1000px';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.focus();
+        area.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(area);
+        done(ok);
+      } catch (error) {
+        done(false);
+      }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  function copyInspectReport(event) {
+    if (event) event.stopPropagation();
+    var button = event && event.currentTarget;
+    var report = buildInspectReport();
+    try { console.log(report); } catch (error) { /* ignore */ }
+    copyToClipboard(report, function (ok) {
+      if (!button) return;
+      button.textContent = ok ? 'Copied!' : 'See console';
+      setTimeout(function () { button.textContent = 'Inspect'; }, 1600);
+    });
   }
 
   function mergeTabsRow() {
