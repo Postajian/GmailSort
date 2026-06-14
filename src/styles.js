@@ -94,9 +94,11 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-tabs="true"] .aKh{display:none!important;}',
       (settings.mergeTabsRow
         ? 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh{position:fixed!important;z-index:999!important;top:var(--gvn-tabs-top,-9999px)!important;left:var(--gvn-tabs-left,0px)!important;width:var(--gvn-tabs-width,auto)!important;height:var(--gvn-tabs-height,auto)!important;margin:0!important;min-width:0!important;background:var(--gvn-paper)!important;}\n'
-          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh>div{width:100%!important;max-width:none!important;height:100%!important;}\n'
-          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh div[role="tablist"]{display:flex!important;width:100%!important;max-width:none!important;height:100%!important;}\n'
-          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh div[role="tab"]{flex:1 1 0!important;min-width:0!important;max-width:none!important;display:flex!important;justify-content:center!important;align-items:center!important;height:100%!important;}\n'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh *{max-width:none!important;}\n'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh>div,html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh>div>div{width:100%!important;height:100%!important;}\n'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh [role="tablist"]{display:flex!important;width:100%!important;height:100%!important;justify-content:space-around!important;align-items:center!important;}\n'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh [role="tablist"]>*{flex:1 1 0!important;min-width:0!important;display:flex!important;justify-content:center!important;align-items:center!important;}\n'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh [role="tab"]{min-width:0!important;}\n'
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh table{width:100%!important;max-width:none!important;table-layout:fixed!important;}\n'
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh td{width:auto!important;min-width:0!important;max-width:none!important;text-align:center!important;}'
         : ''),

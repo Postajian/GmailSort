@@ -2202,12 +2202,25 @@
     var barRect = toolbar.getBoundingClientRect();
     var inboxParts = Adapter.locateInbox();
     var tableRect = inboxParts.table ? inboxParts.table.getBoundingClientRect() : barRect;
-    var width = Math.max(200, Math.round(barRect.width * 0.62));
-    var left = Math.round(tableRect.left + tableRect.width / 2 - width / 2);
-    var minLeft = Math.round(barRect.left + 170);
-    var maxLeft = Math.round(barRect.right - 8 - width);
-    if (left > maxLeft) left = maxLeft;
-    if (left < minLeft) left = minLeft;
+    // Centre the tab strip on the INBOX masthead and spread it as wide as the row
+    // allows EQUALLY on both sides. With three tabs this puts the middle tab dead
+    // centre (right above INBOX) and the outer two spaced evenly out toward the
+    // Subject and Preview columns. The symmetric width keeps the middle tab locked
+    // over INBOX. Reserve room on the left for the select / refresh / overflow
+    // controls and on the right for the message count + nav arrows.
+    // Anchor on the real INBOX element so the strip lines up with where INBOX is
+    // actually drawn (the visible-area centre, which is right of the table's
+    // geometric centre); fall back to the table centre if it isn't placed yet.
+    var inboxTitle = document.querySelector('#gmail-view-next-ui .gvn-masthead-title');
+    var inboxRect = inboxTitle ? inboxTitle.getBoundingClientRect() : null;
+    var center = inboxRect && inboxRect.width > 0
+      ? inboxRect.left + inboxRect.width / 2
+      : tableRect.left + tableRect.width / 2 + Number(state.settings.inboxOffset || 0);
+    var leftLimit = barRect.left + 170;
+    var rightLimit = barRect.right - 180;
+    var half = Math.max(120, Math.min(center - leftLimit, rightLimit - center));
+    var width = Math.round(half * 2);
+    var left = Math.round(center - half);
     root.style.setProperty('--gvn-tabs-top', Math.round(barRect.top) + 'px');
     root.style.setProperty('--gvn-tabs-left', left + 'px');
     root.style.setProperty('--gvn-tabs-width', width + 'px');
