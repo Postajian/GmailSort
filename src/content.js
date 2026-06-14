@@ -770,6 +770,14 @@
     editMaster.setAttribute('aria-label', 'Open edit menu');
     editMaster.addEventListener('click', toggleEditMenu);
     masthead.appendChild(editMaster);
+    var inspectButton = document.createElement('button');
+    inspectButton.className = 'gvn-inspect-button';
+    inspectButton.type = 'button';
+    inspectButton.textContent = 'Inspect';
+    inspectButton.title = "Copy Gmail's live tab/toolbar HTML to the clipboard (for debugging layout)";
+    inspectButton.setAttribute('aria-label', 'Copy Gmail layout HTML to clipboard');
+    inspectButton.addEventListener('click', copyInspectReport);
+    masthead.appendChild(inspectButton);
     overlay.appendChild(masthead);
 
     var columns = document.createElement('div');
@@ -2168,6 +2176,100 @@
     }
   }
 
+  // ----- Inspector: copy Gmail's live layout HTML for debugging -----------
+  function describeNode(el) {
+    if (!el || !el.tagName) return '(none)';
+    var cls = String(el.className || '').trim();
+    return el.tagName.toLowerCase()
+      + (cls ? '.' + cls.split(/\s+/).join('.') : '')
+      + (el.getAttribute && el.getAttribute('role') ? '[role=' + el.getAttribute('role') + ']' : '');
+  }
+
+  function trimInspectHtml(html) {
+    return String(html || '')
+      .replace(/\s(?:style|jsaction|jsname|jslog|jscontroller|jsdata|data-ved)="[^"]*"/g, '')
+      .slice(0, 5000);
+  }
+
+  function buildInspectReport() {
+    var lines = [];
+    var version = '?';
+    try { version = chrome.runtime.getManifest().version; } catch (error) { /* ignore */ }
+    lines.push('=== GmailView Inspector ===');
+    lines.push('version: ' + version + '  hash: ' + location.hash);
+    lines.push('window: ' + window.innerWidth + 'x' + window.innerHeight);
+    lines.push('');
+    lines.push('--- TABS (selector "' + Adapter.SELECTORS.tabs + '") ---');
+    var tabs = document.querySelector(Adapter.SELECTORS.tabs);
+    if (!tabs) {
+      lines.push('NOT FOUND — the tabs selector may be out of date.');
+    } else {
+      var tr = tabs.getBoundingClientRect();
+      lines.push('container: ' + describeNode(tabs)
+        + '  left=' + Math.round(tr.left) + ' width=' + Math.round(tr.width));
+      var tabEls = tabs.querySelectorAll('[role="tab"]');
+      lines.push('role="tab" elements: ' + tabEls.length);
+      Array.prototype.forEach.call(tabEls, function (el, i) {
+        var r = el.getBoundingClientRect();
+        lines.push('  [' + i + '] ' + describeNode(el)
+          + ' aria-label="' + (el.getAttribute('aria-label') || '') + '"'
+          + ' text="' + (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 24) + '"'
+          + ' left=' + Math.round(r.left) + ' w=' + Math.round(r.width));
+      });
+      if (tabEls.length) {
+        var chain = [];
+        var node = tabEls[0];
+        while (node && node !== tabs && chain.length < 8) {
+          chain.push(describeNode(node));
+          node = node.parentElement;
+        }
+        chain.push(describeNode(tabs));
+        lines.push('ancestry (tab -> container): ' + chain.join(' < '));
+      }
+      lines.push('');
+      lines.push('--- TABS outerHTML (trimmed) ---');
+      lines.push(trimInspectHtml(tabs.outerHTML));
+    }
+    return lines.join('\n');
+  }
+
+  function copyToClipboard(text, done) {
+    var fallback = function () {
+      try {
+        var area = document.createElement('textarea');
+        area.value = text;
+        area.style.position = 'fixed';
+        area.style.top = '-1000px';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.focus();
+        area.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(area);
+        done(ok);
+      } catch (error) {
+        done(false);
+      }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  function copyInspectReport(event) {
+    if (event) event.stopPropagation();
+    var button = event && event.currentTarget;
+    var report = buildInspectReport();
+    try { console.log(report); } catch (error) { /* ignore */ }
+    copyToClipboard(report, function (ok) {
+      if (!button) return;
+      button.textContent = ok ? 'Copied!' : 'See console';
+      setTimeout(function () { button.textContent = 'Inspect'; }, 1600);
+    });
+  }
+
   function mergeTabsRow() {
     var root = document.documentElement;
     var clear = function () {
@@ -2202,12 +2304,25 @@
     var barRect = toolbar.getBoundingClientRect();
     var inboxParts = Adapter.locateInbox();
     var tableRect = inboxParts.table ? inboxParts.table.getBoundingClientRect() : barRect;
-    var width = Math.max(200, Math.round(barRect.width * 0.62));
-    var left = Math.round(tableRect.left + tableRect.width / 2 - width / 2);
-    var minLeft = Math.round(barRect.left + 170);
-    var maxLeft = Math.round(barRect.right - 8 - width);
-    if (left > maxLeft) left = maxLeft;
-    if (left < minLeft) left = minLeft;
+    // Centre the tab strip on the INBOX masthead and spread it as wide as the row
+    // allows EQUALLY on both sides. With three tabs this puts the middle tab dead
+    // centre (right above INBOX) and the outer two spaced evenly out toward the
+    // Subject and Preview columns. The symmetric width keeps the middle tab locked
+    // over INBOX. Reserve room on the left for the select / refresh / overflow
+    // controls and on the right for the message count + nav arrows.
+    // Anchor on the real INBOX element so the strip lines up with where INBOX is
+    // actually drawn (the visible-area centre, which is right of the table's
+    // geometric centre); fall back to the table centre if it isn't placed yet.
+    var inboxTitle = document.querySelector('#gmail-view-next-ui .gvn-masthead-title');
+    var inboxRect = inboxTitle ? inboxTitle.getBoundingClientRect() : null;
+    var center = inboxRect && inboxRect.width > 0
+      ? inboxRect.left + inboxRect.width / 2
+      : tableRect.left + tableRect.width / 2 + Number(state.settings.inboxOffset || 0);
+    var leftLimit = barRect.left + 170;
+    var rightLimit = barRect.right - 180;
+    var half = Math.max(120, Math.min(center - leftLimit, rightLimit - center));
+    var width = Math.round(half * 2);
+    var left = Math.round(center - half);
     root.style.setProperty('--gvn-tabs-top', Math.round(barRect.top) + 'px');
     root.style.setProperty('--gvn-tabs-left', left + 'px');
     root.style.setProperty('--gvn-tabs-width', width + 'px');

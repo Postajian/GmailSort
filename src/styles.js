@@ -94,11 +94,12 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-tabs="true"] .aKh{display:none!important;}',
       (settings.mergeTabsRow
         ? 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh{position:fixed!important;z-index:999!important;top:var(--gvn-tabs-top,-9999px)!important;left:var(--gvn-tabs-left,0px)!important;width:var(--gvn-tabs-width,auto)!important;height:var(--gvn-tabs-height,auto)!important;margin:0!important;min-width:0!important;background:var(--gvn-paper)!important;}\n'
-          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh>div{width:100%!important;max-width:none!important;height:100%!important;}\n'
-          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh div[role="tablist"]{display:flex!important;width:100%!important;max-width:none!important;height:100%!important;}\n'
-          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh div[role="tab"]{flex:1 1 0!important;min-width:0!important;max-width:none!important;display:flex!important;justify-content:center!important;align-items:center!important;height:100%!important;}\n'
-          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh table{width:100%!important;max-width:none!important;table-layout:fixed!important;}\n'
-          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh td{width:auto!important;min-width:0!important;max-width:none!important;text-align:center!important;}'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh *{max-width:none!important;}\n'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh>div,html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh table,html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh tbody{width:100%!important;height:100%!important;}\n'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh [role="tablist"]{display:flex!important;width:100%!important;height:100%!important;align-items:stretch!important;}\n'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh [role="tablist"]>td[role="heading"]{flex:1 1 0!important;min-width:0!important;padding:0!important;}\n'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh [role="tablist"]>td:not([role="heading"]){display:none!important;}\n'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh [role="tab"]{width:100%!important;height:100%!important;min-width:0!important;display:flex!important;justify-content:center!important;align-items:center!important;}'
         : ''),
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F{margin-top:66px!important;width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;max-width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;min-width:0!important;table-layout:fixed!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"]:has(#gmail-view-next-ui[data-editing="true"]) table.F{margin-top:' + (78 + editorHeight) + 'px!important;}',
@@ -219,6 +220,9 @@
       '#gmail-view-next-ui .gvn-edit-button:hover,#gmail-view-next-ui[data-editing="true"] .gvn-edit-button{background:#000;color:#fff;}',
       '#gmail-view-next-ui .gvn-label-edit-button{position:absolute;right:112px;top:5px;height:22px;padding:0 10px;border:1px solid #000;border-radius:6px;background:#fff;color:#000;font:600 10px/20px Arial,sans-serif;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;pointer-events:auto;}',
       '#gmail-view-next-ui .gvn-label-edit-button:hover,#gmail-view-next-ui[data-label-editing="true"] .gvn-label-edit-button{background:#000;color:#fff;}',
+      '#gmail-view-next-ui .gvn-inspect-button{position:absolute;right:260px;top:5px;height:22px;padding:0 10px;border:1px solid #000;border-radius:6px;background:#fff;color:#000;font:600 10px/20px Arial,sans-serif;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;pointer-events:auto;}',
+      '#gmail-view-next-ui .gvn-inspect-button:hover{background:#000;color:#fff;}',
+      '#gmail-view-next-ui:not([data-edit-menu="true"]) .gvn-inspect-button{display:none!important;}',
       '#gmail-view-next-ui .gvn-center-button{display:none;position:absolute;right:132px;top:5px;height:22px;padding:0 10px;border:1px solid #000;border-radius:6px;background:#fff;color:#000;font:600 10px/20px Arial,sans-serif;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;pointer-events:auto;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-center-button{display:block;}',
       '#gmail-view-next-ui .gvn-center-button:hover{background:var(--gvn-gold);color:#000;}',

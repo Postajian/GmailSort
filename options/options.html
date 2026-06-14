@@ -67,6 +67,25 @@
         <input type="hidden" name="headerDateX">
       </fieldset>
 
+      <fieldset>
+        <legend>Backup &amp; presets</legend>
+        <p class="hint">Export saves your whole layout to a file you can re-import later. Presets store named looks you can switch between in one click.</p>
+        <div class="row">
+          <button type="button" id="export">Export settings</button>
+          <button type="button" id="import-btn" class="secondary">Import from file</button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden>
+        </div>
+        <div class="row">
+          <input type="text" id="preset-name" placeholder="Preset name (e.g. Newspaper)" maxlength="40">
+          <button type="button" id="save-preset">Save current as preset</button>
+        </div>
+        <div class="row">
+          <select id="preset-list" aria-label="Saved presets"><option value="">&mdash; none saved yet &mdash;</option></select>
+          <button type="button" id="apply-preset" class="secondary">Apply</button>
+          <button type="button" id="delete-preset" class="secondary">Delete</button>
+        </div>
+      </fieldset>
+
       <div class="actions">
         <button type="submit">Save settings</button>
         <button type="button" id="reset" class="secondary">Reset defaults</button>
