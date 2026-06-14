@@ -999,17 +999,35 @@
     updateTypeEditor();
   }
 
-  // Bulk-select by scope: "main" = umbrella/top-level labels (no "/"), "sub" =
-  // nested labels (contain "/"). Checking adds that whole group to the selection,
-  // unchecking removes it -- so you can style mains, subs, or both together.
+  // Classify each visible custom label as main (umbrella/top-level) or sub
+  // (nested). Gmail's data-tooltip is only the leaf name, so "/" alone can't tell
+  // -- but nested labels are always indented further right in the sidebar. We
+  // measure each label's left edge and treat anything indented past the shallowest
+  // ones as a sub-label (also honouring a real "/" in the name, just in case).
+  function labelScopeInfo() {
+    var items = customLabelItems();
+    var lefts = items.map(function (item) {
+      var el = item.swatch || item.entry;
+      var rect = el && el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+      return rect ? Math.round(rect.left) : 0;
+    });
+    var minLeft = lefts.length ? Math.min.apply(Math, lefts) : 0;
+    return items.map(function (item, index) {
+      return { item: item, sub: lefts[index] > minLeft + 6 || Core.isSubLabel(item.name) };
+    });
+  }
+
+  // Bulk-select by scope: "main" = umbrella/top-level labels, "sub" = nested ones.
+  // Checking adds that whole group to the selection, unchecking removes it -- so
+  // you can style mains, subs, or both together.
   function toggleLabelScope(event) {
     event.stopPropagation();
-    var scope = event.currentTarget.getAttribute('data-scope');
+    var wantSub = event.currentTarget.getAttribute('data-scope') === 'sub';
     var on = event.currentTarget.checked;
-    customLabelItems().forEach(function (item) {
-      if (Core.isSubLabel(item.name) !== (scope === 'sub')) return;
-      if (on) state.selectedLabels[item.name] = true;
-      else delete state.selectedLabels[item.name];
+    labelScopeInfo().forEach(function (info) {
+      if (info.sub !== wantSub) return;
+      if (on) state.selectedLabels[info.item.name] = true;
+      else delete state.selectedLabels[info.item.name];
     });
     updateTypeEditor();
     scheduleRefresh();
@@ -1231,13 +1249,14 @@
         labelSelectAll.indeterminate =
           labelNames.length > 0 && labelNames.length < allLabelItems.length;
       }
+      var scopeInfo = labelScopeInfo();
       overlay.querySelectorAll('.gvn-scope-check').forEach(function (check) {
         var wantSub = check.getAttribute('data-scope') === 'sub';
-        var group = allLabelItems.filter(function (item) {
-          return Core.isSubLabel(item.name) === wantSub;
+        var group = scopeInfo.filter(function (info) {
+          return info.sub === wantSub;
         });
-        var chosen = group.filter(function (item) {
-          return !!state.selectedLabels[item.name];
+        var chosen = group.filter(function (info) {
+          return !!state.selectedLabels[info.item.name];
         }).length;
         check.checked = group.length > 0 && chosen === group.length;
         check.indeterminate = chosen > 0 && chosen < group.length;
