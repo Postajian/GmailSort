@@ -41,17 +41,22 @@ function bufferToDataUrl(buffer, type) {
   return 'data:' + (type || 'image/png') + ';base64,' + btoa(binary);
 }
 
+// Returns one of:
+//   { ok: true, buffer, type } - a usable image
+//   { ok: false }              - reached the server but no usable image (e.g. 404)
+//   { error: true }            - could NOT reach it (network / missing permission)
+// The error case matters: the caller keeps the plain favicon instead of giving up.
 function fetchBuffer(url) {
   return fetch(url, { credentials: 'omit' }).then(function (response) {
-    if (!response.ok) return null;
+    if (!response.ok) return { ok: false };
     return response.blob().then(function (blob) {
-      if (!blob || blob.size < 70) return null; // empty / 1px tracker = not a usable icon
+      if (!blob || blob.size < 70) return { ok: false }; // empty / 1px tracker
       return blob.arrayBuffer().then(function (buffer) {
-        return { buffer: buffer, type: blob.type || 'image/png' };
+        return { ok: true, buffer: buffer, type: blob.type || 'image/png' };
       });
     });
   }).catch(function () {
-    return null;
+    return { error: true };
   });
 }
 
@@ -62,7 +67,7 @@ function googleFaviconUrl(domain) {
 function ensureGlobeSignature() {
   if (globeSignature !== null) return Promise.resolve();
   return fetchBuffer(googleFaviconUrl(GLOBE_PROBE_DOMAIN)).then(function (probe) {
-    globeSignature = probe ? bufferSignature(probe.buffer) : '';
+    globeSignature = probe && probe.ok ? bufferSignature(probe.buffer) : '';
   });
 }
 
@@ -72,12 +77,12 @@ function resolveLogo(domain) {
 
   var work = fetchBuffer('https://logo.clearbit.com/' + encodeURIComponent(domain) + '?size=64')
     .then(function (clearbit) {
-      if (clearbit) {
-        return { dataUrl: bufferToDataUrl(clearbit.buffer, clearbit.type) };
-      }
+      if (clearbit.error) return { error: true };
+      if (clearbit.ok) return { dataUrl: bufferToDataUrl(clearbit.buffer, clearbit.type) };
       return ensureGlobeSignature().then(function () {
         return fetchBuffer(googleFaviconUrl(domain)).then(function (favicon) {
-          if (favicon && bufferSignature(favicon.buffer) !== globeSignature) {
+          if (favicon.error) return { error: true };
+          if (favicon.ok && bufferSignature(favicon.buffer) !== globeSignature) {
             return { dataUrl: bufferToDataUrl(favicon.buffer, favicon.type) };
           }
           return { none: true };
@@ -85,10 +90,11 @@ function resolveLogo(domain) {
       });
     })
     .catch(function () {
-      return { none: true };
+      return { error: true };
     })
     .then(function (result) {
-      cache[domain] = result;
+      // Cache real answers; never cache an error so it retries once reachable.
+      if (!result.error) cache[domain] = result;
       delete inFlight[domain];
       return result;
     });
@@ -100,7 +106,7 @@ function resolveLogo(domain) {
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (!message || message.type !== 'gvn-logo' || !message.domain) return false;
   resolveLogo(String(message.domain)).then(sendResponse, function () {
-    sendResponse({ none: true });
+    sendResponse({ error: true });
   });
   return true; // keep the message channel open for the async response
 });

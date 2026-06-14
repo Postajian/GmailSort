@@ -2269,27 +2269,25 @@
 
   // Ask the service worker for the best logo, then cache it and repaint. Until it
   // answers we show the plain favicon so something appears immediately.
+  //   dataUrl -> real brand logo / favicon ; none -> coloured letter tile ;
+  //   error/unreachable -> KEEP the plain favicon (don't downgrade to a letter).
   function requestLogo(domain) {
     if (state.logoPending[domain]) return;
     state.logoPending[domain] = true;
-    var fallback = function () {
-      state.logoCache[domain] = monogramCss(domain);
+    var settle = function (value) {
+      state.logoCache[domain] = value;
       delete state.logoPending[domain];
       scheduleRefresh();
     };
     try {
       chrome.runtime.sendMessage({ type: 'gvn-logo', domain: domain }, function (response) {
-        if (chrome.runtime && chrome.runtime.lastError) { fallback(); return; }
-        if (response && response.dataUrl) {
-          state.logoCache[domain] = 'url("' + response.dataUrl + '")';
-        } else {
-          state.logoCache[domain] = monogramCss(domain);
-        }
-        delete state.logoPending[domain];
-        scheduleRefresh();
+        if (chrome.runtime && chrome.runtime.lastError) { settle(faviconCss(domain)); return; }
+        if (response && response.dataUrl) settle('url("' + response.dataUrl + '")');
+        else if (response && response.none) settle(monogramCss(domain));
+        else settle(faviconCss(domain));
       });
     } catch (error) {
-      fallback();
+      settle(faviconCss(domain));
     }
   }
 
