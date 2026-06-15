@@ -790,14 +790,16 @@
     editMaster.setAttribute('aria-label', 'Open edit menu');
     editMaster.addEventListener('click', toggleEditMenu);
     masthead.appendChild(editMaster);
-    var inspectButton = document.createElement('button');
-    inspectButton.className = 'gvn-inspect-button';
-    inspectButton.type = 'button';
-    inspectButton.textContent = 'Inspect';
-    inspectButton.title = "Copy Gmail's live tab/toolbar HTML to the clipboard (for debugging layout)";
-    inspectButton.setAttribute('aria-label', 'Copy Gmail layout HTML to clipboard');
-    inspectButton.addEventListener('click', copyInspectReport);
-    masthead.appendChild(inspectButton);
+    if (state.settings.debugTools) {
+      var inspectButton = document.createElement('button');
+      inspectButton.className = 'gvn-inspect-button';
+      inspectButton.type = 'button';
+      inspectButton.textContent = 'Inspect';
+      inspectButton.title = "Copy Gmail's live tab/toolbar HTML to the clipboard (for debugging layout)";
+      inspectButton.setAttribute('aria-label', 'Copy Gmail layout HTML to clipboard');
+      inspectButton.addEventListener('click', copyInspectReport);
+      masthead.appendChild(inspectButton);
+    }
     overlay.appendChild(masthead);
 
     var columns = document.createElement('div');

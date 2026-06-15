@@ -13,6 +13,7 @@ test('manifest is MV3 and every declared local file exists', () => {
   const files = [
     manifest.options_page,
     manifest.background && manifest.background.service_worker,
+    ...(manifest.icons ? Object.values(manifest.icons) : []),
     ...manifest.content_scripts.flatMap((entry) => entry.js || [])
   ].filter(Boolean);
   for (const file of files) {
