@@ -110,3 +110,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   });
   return true; // keep the message channel open for the async response
 });
+
+// Clicking the toolbar icon opens the settings page.
+if (chrome.action && chrome.action.onClicked) {
+  chrome.action.onClicked.addListener(function () {
+    if (chrome.runtime.openOptionsPage) chrome.runtime.openOptionsPage();
+  });
+}

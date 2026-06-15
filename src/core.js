@@ -7,6 +7,7 @@
 
   var DAY_MS = 24 * 60 * 60 * 1000;
   var LAYOUT_VERSION = 15;
+  var TRIAL_DAYS = 15;
   var DEFAULT_SETTINGS = Object.freeze({
     enabled: true,
     masthead: 'INBOX',
@@ -15,6 +16,7 @@
     colorLabels: true,
     showSenderMarks: true,
     richLogos: true,
+    debugTools: false,
     unreadEmphasis: true,
     groupUnreadCounts: true,
     mergeTabsRow: true,
@@ -159,6 +161,7 @@
       colorLabels: value.colorLabels !== false,
       showSenderMarks: value.showSenderMarks !== false,
       richLogos: value.richLogos !== false,
+      debugTools: value.debugTools === true,
       unreadEmphasis: value.unreadEmphasis !== false,
       groupUnreadCounts: value.groupUnreadCounts !== false,
       mergeTabsRow: value.mergeTabsRow !== false,
@@ -411,6 +414,18 @@
     return typeof name === 'string' && name.indexOf('/') !== -1;
   }
 
+  // Entitlement state for the paid model: 15-day free trial -> then paid.
+  // Pure + testable. `paid` comes from the payment provider (ExtensionPay) later.
+  function licenseState(installedAt, now, paid) {
+    if (paid) return { state: 'paid', daysLeft: 0 };
+    var start = Number(installedAt);
+    if (!Number.isFinite(start) || start <= 0) start = now; // unknown install = just started
+    var daysUsed = Math.floor((now - start) / DAY_MS);
+    var daysLeft = TRIAL_DAYS - daysUsed;
+    if (daysLeft > 0) return { state: 'trial', daysLeft: daysLeft };
+    return { state: 'expired', daysLeft: 0 };
+  }
+
   return Object.freeze({
     DAY_MS: DAY_MS,
     LAYOUT_VERSION: LAYOUT_VERSION,
@@ -426,6 +441,8 @@
     stableColor: stableColor,
     labelColor: labelColor,
     isSubLabel: isSubLabel,
+    TRIAL_DAYS: TRIAL_DAYS,
+    licenseState: licenseState,
     senderMonogram: senderMonogram
   });
 });

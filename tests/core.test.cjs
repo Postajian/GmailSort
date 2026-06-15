@@ -81,6 +81,19 @@ test('classifies nested labels as sub-labels and top-level as main', () => {
   assert.equal(core.isSubLabel(undefined), false);
 });
 
+test('license: 15-day trial, then expires; paid always unlocks', () => {
+  const DAY = 24 * 60 * 60 * 1000;
+  const now = Date.parse('2026-06-15T12:00:00Z');
+  assert.equal(core.TRIAL_DAYS, 15);
+  assert.equal(core.licenseState(now - 999 * DAY, now, true).state, 'paid');
+  assert.equal(core.licenseState(now, now, false).state, 'trial');
+  assert.equal(core.licenseState(now, now, false).daysLeft, 15);
+  assert.equal(core.licenseState(now - 5 * DAY, now, false).daysLeft, 10);
+  assert.equal(core.licenseState(now - 15 * DAY, now, false).state, 'expired');
+  assert.equal(core.licenseState(now - 30 * DAY, now, false).state, 'expired');
+  assert.equal(core.licenseState(0, now, false).state, 'trial');
+});
+
 test('fetches real sender logos by default and lets it toggle off', () => {
   assert.equal(core.DEFAULT_SETTINGS.richLogos, true);
   assert.equal(core.normalizeSettings({}).richLogos, true);

@@ -351,7 +351,7 @@
 
   function updateRootFlags() {
     var root = document.documentElement;
-    root.setAttribute('data-gvn-active', String(state.settings.enabled));
+    root.setAttribute('data-gvn-active', String(state.settings.enabled && licenseAllows()));
     root.setAttribute('data-gvn-route', Core.routeMode(location.hash));
     root.setAttribute('data-gvn-hide-tabs', String(state.settings.hideTabs));
     root.setAttribute('data-gvn-hide-rail', String(state.settings.hideRail));
@@ -790,14 +790,16 @@
     editMaster.setAttribute('aria-label', 'Open edit menu');
     editMaster.addEventListener('click', toggleEditMenu);
     masthead.appendChild(editMaster);
-    var inspectButton = document.createElement('button');
-    inspectButton.className = 'gvn-inspect-button';
-    inspectButton.type = 'button';
-    inspectButton.textContent = 'Inspect';
-    inspectButton.title = "Copy Gmail's live tab/toolbar HTML to the clipboard (for debugging layout)";
-    inspectButton.setAttribute('aria-label', 'Copy Gmail layout HTML to clipboard');
-    inspectButton.addEventListener('click', copyInspectReport);
-    masthead.appendChild(inspectButton);
+    if (state.settings.debugTools) {
+      var inspectButton = document.createElement('button');
+      inspectButton.className = 'gvn-inspect-button';
+      inspectButton.type = 'button';
+      inspectButton.textContent = 'Inspect';
+      inspectButton.title = "Copy Gmail's live tab/toolbar HTML to the clipboard (for debugging layout)";
+      inspectButton.setAttribute('aria-label', 'Copy Gmail layout HTML to clipboard');
+      inspectButton.addEventListener('click', copyInspectReport);
+      masthead.appendChild(inspectButton);
+    }
     overlay.appendChild(masthead);
 
     var columns = document.createElement('div');
@@ -2575,6 +2577,14 @@
         if (!state.settings.enabled) clearLabelDecorations();
         return;
       }
+      if (!licenseAllows()) {
+        // Trial expired and not paid -> revert to plain Gmail + show upgrade.
+        if (overlay) overlay.style.display = 'none';
+        clearRowDecorations();
+        showUpgradeBanner();
+        return;
+      }
+      hideUpgradeBanner();
 
       var rows = Adapter.findRows(document);
       if (!rows.length) {
@@ -2614,6 +2624,7 @@
     if (state.labelTypographySaveTimer) clearTimeout(state.labelTypographySaveTimer);
     if (state.healthTimer) clearTimeout(state.healthTimer);
     hideHealthWarning();
+    hideUpgradeBanner();
     if (state.observer) state.observer.disconnect();
     if (state.resizeObserver) state.resizeObserver.disconnect();
     state.listeners.forEach(function (remove) { remove(); });
@@ -2651,11 +2662,91 @@
     if (globalDividers) globalDividers.remove();
   }
 
+  // ----- Licensing (15-day trial -> paid). OFF until ExtensionPay is wired. -----
+  // Flip LICENSING.enabled to true AFTER: (1) extpay.js is bundled + the ExtPay
+  // extension id is set, (2) plans + the FRIENDS-LIFE coupon exist. While false,
+  // everything below is inert and the extension behaves as the free version.
+  var LICENSING = {
+    enabled: false,
+    installedAt: 0,
+    paid: false,
+    state: 'trial',
+    daysLeft: Core.TRIAL_DAYS,
+    extpay: null
+  };
+  var INSTALL_KEY = 'gmailViewNextInstalledAt';
+
+  function licenseAllows() {
+    if (!LICENSING.enabled) return true;
+    var s = Core.licenseState(LICENSING.installedAt, Date.now(), LICENSING.paid);
+    LICENSING.state = s.state;
+    LICENSING.daysLeft = s.daysLeft;
+    return s.state !== 'expired';
+  }
+
+  function recordInstallDate() {
+    safeStorageGet('local', INSTALL_KEY, function (stored, error) {
+      if (error) return;
+      var at = stored && Number(stored[INSTALL_KEY]);
+      if (at && Number.isFinite(at)) {
+        LICENSING.installedAt = at;
+      } else {
+        LICENSING.installedAt = Date.now();
+        var payload = {};
+        payload[INSTALL_KEY] = LICENSING.installedAt;
+        safeStorageSet('local', payload, function () {});
+      }
+    });
+  }
+
+  function openPaymentPage() {
+    // Wired to ExtensionPay once the library + id are added.
+    if (LICENSING.extpay && LICENSING.extpay.openPaymentPage) {
+      LICENSING.extpay.openPaymentPage();
+    }
+  }
+
+  function hideUpgradeBanner() {
+    var b = document.getElementById('gmail-view-next-upgrade');
+    if (b) b.remove();
+  }
+
+  function showUpgradeBanner() {
+    if (document.getElementById('gmail-view-next-upgrade')) return;
+    var bar = document.createElement('div');
+    bar.id = 'gmail-view-next-upgrade';
+    bar.setAttribute('style',
+      'position:fixed;z-index:2147483647;top:12px;left:50%;transform:translateX(-50%);'
+      + 'display:flex;align-items:center;gap:12px;max-width:560px;padding:12px 16px;'
+      + 'background:#1a1a1a;color:#f4f0e7;border:1px solid #c9a84c;border-radius:8px;'
+      + 'box-shadow:0 2px 14px rgba(0,0,0,.3);font:13px/1.45 Arial,sans-serif;');
+    var msg = document.createElement('span');
+    msg.textContent = 'Your Gmail View trial has ended. Subscribe ($0.99/mo) or unlock lifetime ($14.99) to keep the newspaper inbox.';
+    var btn = document.createElement('button');
+    btn.textContent = 'Subscribe / Enter code';
+    btn.setAttribute('style',
+      'flex:0 0 auto;border:1px solid #c9a84c;background:#c9a84c;color:#1a1a1a;'
+      + 'border-radius:5px;padding:6px 12px;font:600 12px Arial,sans-serif;cursor:pointer;');
+    btn.addEventListener('click', openPaymentPage);
+    bar.appendChild(msg);
+    bar.appendChild(btn);
+    document.body.appendChild(bar);
+  }
+
+  function initLicensing() {
+    recordInstallDate();
+    if (!LICENSING.enabled) return;
+    // TODO when enabling: create ExtPay('<extpay-extension-id>'), then:
+    //   LICENSING.extpay = extpay; extpay.getUser().then(u => { LICENSING.paid = !!u.paid; scheduleRefresh(); });
+    //   extpay.onPaid.addListener(() => { LICENSING.paid = true; scheduleRefresh(); });
+  }
+
   function start() {
     if (state.destroyed) return;
     installStyle();
     ensureOverlay();
     ensureSidebarResizer();
+    initLicensing();
 
     state.observer = new MutationObserver(function (mutations) {
       if (state.sortingLabels) return;
