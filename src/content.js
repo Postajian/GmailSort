@@ -2788,6 +2788,26 @@
     }
   }
 
+  // Alt+Shift+G toggles the whole redesign on/off. We just flip `enabled` in
+  // sync storage; onStorageChanged re-applies it (and we update locally too,
+  // for instant feedback if storage is slow/unavailable). Ignored while typing.
+  function handleToggleHotkey(event) {
+    if (!state.settings || state.settings.toggleHotkey === false) return;
+    if (!event.altKey || !event.shiftKey || event.ctrlKey || event.metaKey) return;
+    var isG = event.code === 'KeyG' || String(event.key || '').toLowerCase() === 'g';
+    if (!isG) return;
+    var el = document.activeElement;
+    if (el && (el.isContentEditable ||
+      /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName || ''))) return;
+    event.preventDefault();
+    var next = !state.settings.enabled;
+    safeStorageSet('sync', { enabled: next });
+    state.settings.enabled = next;
+    installStyle();
+    updateRootFlags();
+    scheduleRefresh();
+  }
+
   function start() {
     if (state.destroyed) return;
     installStyle();
@@ -2804,6 +2824,7 @@
     });
     state.observer.observe(document.body, { childList: true, subtree: true });
 
+    addListener(window, 'keydown', handleToggleHotkey, true);
     addListener(window, 'hashchange', maybeRollupLabel);
     addListener(window, 'hashchange', scheduleRefresh);
     addListener(window, 'popstate', scheduleRefresh);

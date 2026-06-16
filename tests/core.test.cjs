@@ -114,6 +114,12 @@ test('keeps each individual category tab shown by default and hides per setting'
   });
 });
 
+test('the toggle hotkey is enabled by default and can be turned off', () => {
+  assert.equal(core.DEFAULT_SETTINGS.toggleHotkey, true);
+  assert.equal(core.normalizeSettings({}).toggleHotkey, true);
+  assert.equal(core.normalizeSettings({ toggleHotkey: false }).toggleHotkey, false);
+});
+
 test('density defaults to comfortable and only accepts compact/comfortable', () => {
   assert.equal(core.DEFAULT_SETTINGS.density, 'comfortable');
   assert.equal(core.normalizeSettings({}).density, 'comfortable');
