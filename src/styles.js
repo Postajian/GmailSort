@@ -101,6 +101,10 @@
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh [role="tablist"]>td:not([role="heading"]){display:none!important;}\n'
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh [role="tab"]{width:100%!important;height:100%!important;min-width:0!important;display:flex!important;justify-content:center!important;align-items:center!important;}'
         : ''),
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-tab-promotions="true"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Promotions"]){display:none!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-tab-social="true"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Social"]){display:none!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-tab-updates="true"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Updates"]){display:none!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-tab-forums="true"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Forums"]){display:none!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F{margin-top:66px!important;width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;max-width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;min-width:0!important;table-layout:fixed!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"]:has(#gmail-view-next-ui[data-editing="true"]) table.F{margin-top:' + (78 + editorHeight) + 'px!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F col.yY{width:' + senderWidth + 'px!important;min-width:' + senderWidth + 'px!important;}',

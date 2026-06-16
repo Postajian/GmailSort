@@ -106,6 +106,14 @@ test('keeps Gmail category tabs visible by default', () => {
   assert.equal(core.normalizeSettings({ hideTabs: true }).hideTabs, true);
 });
 
+test('keeps each individual category tab shown by default and hides per setting', () => {
+  ['hideTabPromotions', 'hideTabSocial', 'hideTabUpdates', 'hideTabForums'].forEach((key) => {
+    assert.equal(core.DEFAULT_SETTINGS[key], false, key + ' default');
+    assert.equal(core.normalizeSettings({})[key], false, key + ' normalize default');
+    assert.equal(core.normalizeSettings({ [key]: true })[key], true, key + ' opt-in');
+  });
+});
+
 test('recognizes inbox, thread, and other routes', () => {
   assert.equal(core.routeMode('#inbox'), 'inbox');
   assert.equal(core.routeMode('#inbox/FMfcgzQ123456789'), 'thread');

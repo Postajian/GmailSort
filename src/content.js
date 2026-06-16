@@ -354,6 +354,10 @@
     root.setAttribute('data-gvn-active', String(state.settings.enabled && licenseAllows()));
     root.setAttribute('data-gvn-route', Core.routeMode(location.hash));
     root.setAttribute('data-gvn-hide-tabs', String(state.settings.hideTabs));
+    root.setAttribute('data-gvn-hide-tab-promotions', String(state.settings.hideTabPromotions));
+    root.setAttribute('data-gvn-hide-tab-social', String(state.settings.hideTabSocial));
+    root.setAttribute('data-gvn-hide-tab-updates', String(state.settings.hideTabUpdates));
+    root.setAttribute('data-gvn-hide-tab-forums', String(state.settings.hideTabForums));
     root.setAttribute('data-gvn-hide-rail', String(state.settings.hideRail));
     root.setAttribute('data-gvn-color-labels', String(state.settings.colorLabels));
     root.setAttribute('data-gvn-label-editing', String(state.editingLabels));
@@ -2641,6 +2645,10 @@
     document.documentElement.removeAttribute('data-gvn-active');
     document.documentElement.removeAttribute('data-gvn-route');
     document.documentElement.removeAttribute('data-gvn-hide-tabs');
+    document.documentElement.removeAttribute('data-gvn-hide-tab-promotions');
+    document.documentElement.removeAttribute('data-gvn-hide-tab-social');
+    document.documentElement.removeAttribute('data-gvn-hide-tab-updates');
+    document.documentElement.removeAttribute('data-gvn-hide-tab-forums');
     document.documentElement.removeAttribute('data-gvn-hide-rail');
     document.documentElement.removeAttribute('data-gvn-color-labels');
     document.documentElement.removeAttribute('data-gvn-label-editing');
