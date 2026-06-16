@@ -114,6 +114,12 @@ test('keeps each individual category tab shown by default and hides per setting'
   });
 });
 
+test('focus mode is off by default and opt-in', () => {
+  assert.equal(core.DEFAULT_SETTINGS.focusMode, false);
+  assert.equal(core.normalizeSettings({}).focusMode, false);
+  assert.equal(core.normalizeSettings({ focusMode: true }).focusMode, true);
+});
+
 test('umbrella roll-up is off by default and opt-in', () => {
   assert.equal(core.DEFAULT_SETTINGS.umbrellaRollup, false);
   assert.equal(core.normalizeSettings({}).umbrellaRollup, false);
