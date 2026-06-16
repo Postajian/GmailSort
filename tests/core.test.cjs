@@ -169,6 +169,30 @@ test('builds a roll-up search for a parent and all its sub-labels only', () => {
   assert.equal(core.labelRollupQuery('Mon', ['Mon', 'Money', 'Money/PayPal']), '');
 });
 
+test('orderLabels floats pinned labels to the top in pin order', () => {
+  const entries = [
+    { name: 'A', index: 0, activity: 1, pinIndex: -1 },
+    { name: 'B', index: 1, activity: 5, pinIndex: -1 },
+    { name: 'C', index: 2, activity: 0, pinIndex: 1 },
+    { name: 'D', index: 3, activity: 0, pinIndex: 0 }
+  ];
+  // No activity sort: pinned first (D before C by pinIndex), rest in order.
+  assert.deepEqual(core.orderLabels(entries).map((e) => e.name), ['D', 'C', 'A', 'B']);
+  // With activity: non-pinned sorted by activity desc (B before A).
+  assert.deepEqual(
+    core.orderLabels(entries, { byActivity: true }).map((e) => e.name),
+    ['D', 'C', 'B', 'A']
+  );
+});
+
+test('orderLabels keeps original order when nothing is pinned or active', () => {
+  const entries = [
+    { name: 'A', index: 0, activity: 9, pinIndex: -1 },
+    { name: 'B', index: 1, activity: 2, pinIndex: -1 }
+  ];
+  assert.deepEqual(core.orderLabels(entries).map((e) => e.name), ['A', 'B']);
+});
+
 test('recognizes inbox, thread, and other routes', () => {
   assert.equal(core.routeMode('#inbox'), 'inbox');
   assert.equal(core.routeMode('#inbox/FMfcgzQ123456789'), 'thread');

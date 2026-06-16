@@ -112,6 +112,16 @@
       </fieldset>
 
       <fieldset>
+        <legend>Pinned labels</legend>
+        <p class="hint">Pin favourite custom labels so they float to the top of the sidebar. Type the label&rsquo;s name (the leaf name, e.g. <code>PayPal</code>).</p>
+        <div class="row">
+          <input type="text" id="pin-name" placeholder="label name (PayPal)" maxlength="120">
+          <button type="button" id="pin-add">Pin label</button>
+        </div>
+        <div id="pin-list" class="override-list"></div>
+      </fieldset>
+
+      <fieldset>
         <legend>Sender colours</legend>
         <p class="hint">Pin a colour for a sender&rsquo;s tile &mdash; it overrides the fetched logo with a clean coloured letter. Use the domain, e.g. <code>paypal.com</code>.</p>
         <div class="row">

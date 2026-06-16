@@ -473,6 +473,22 @@
     }).join(' OR ');
   }
 
+  // Order label rows: pinned favourites first (in the order they were pinned),
+  // then the rest either by recent activity (desc) or their original order.
+  // Pure + testable. Each entry: { index, activity, pinIndex } where pinIndex
+  // < 0 means "not pinned". Returns a new sorted array (input is not mutated).
+  function orderLabels(entries, options) {
+    var byActivity = !!(options && options.byActivity);
+    return (entries || []).slice().sort(function (a, b) {
+      var aPinned = a.pinIndex >= 0;
+      var bPinned = b.pinIndex >= 0;
+      if (aPinned !== bPinned) return aPinned ? -1 : 1;
+      if (aPinned && bPinned) return (a.pinIndex - b.pinIndex) || (a.index - b.index);
+      if (byActivity) return (b.activity - a.activity) || (a.index - b.index);
+      return a.index - b.index;
+    });
+  }
+
   // Entitlement state for the paid model: 15-day free trial -> then paid.
   // Pure + testable. `paid` comes from the payment provider (ExtensionPay) later.
   function licenseState(installedAt, now, paid) {
@@ -502,6 +518,7 @@
     isSubLabel: isSubLabel,
     decodeLabelHash: decodeLabelHash,
     labelRollupQuery: labelRollupQuery,
+    orderLabels: orderLabels,
     TRIAL_DAYS: TRIAL_DAYS,
     licenseState: licenseState,
     senderMonogram: senderMonogram

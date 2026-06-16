@@ -9,6 +9,7 @@
   var LABEL_ACTIVITY_KEY = 'gmailViewNextLabelActivity';
   var LABEL_TYPOGRAPHY_KEY = 'gmailViewNextLabelTypography';
   var LOGO_OVERRIDES_KEY = 'gmailViewNextLogoOverrides';
+  var PINNED_LABELS_KEY = 'gmailViewNextPinnedLabels';
   var COLUMN_NAMES = ['sender', 'time-sent', 'logo', 'subject', 'preview', 'date'];
   var COLUMN_LAYOUT_SETTINGS = Object.freeze({
     sender: { header: 'headerSenderX', boundary: 'senderOffset' },
@@ -78,6 +79,7 @@
     logoCache: {},
     logoPending: {},
     logoOverrides: {},
+    pinnedLabels: [],
     listeners: []
   };
 
@@ -333,6 +335,28 @@
         reportApiError('Could not read sender colours.', error);
         if (!error) {
           state.logoOverrides = normalizeOverrides(stored && stored[LOGO_OVERRIDES_KEY]);
+        }
+        resolve();
+      });
+    });
+  }
+
+  function normalizePinned(value) {
+    if (!Array.isArray(value)) return [];
+    var out = [];
+    value.forEach(function (name) {
+      var clean = String(name || '').trim();
+      if (clean && out.indexOf(clean) === -1) out.push(clean);
+    });
+    return out;
+  }
+
+  function readPinnedLabels() {
+    return new Promise(function (resolve) {
+      safeStorageGet('local', PINNED_LABELS_KEY, function (stored, error) {
+        reportApiError('Could not read pinned labels.', error);
+        if (!error) {
+          state.pinnedLabels = normalizePinned(stored && stored[PINNED_LABELS_KEY]);
         }
         resolve();
       });
@@ -1979,8 +2003,20 @@
     if (changed) scheduleLabelActivitySave();
   }
 
-  function sortLabelsByActivity(items) {
-    if (!state.settings.sortLabelsByActivity || state.sortingLabels) return;
+  function pinIndexOf(name) {
+    var pins = state.pinnedLabels || [];
+    var lower = String(name || '').toLowerCase();
+    for (var i = 0; i < pins.length; i++) {
+      if (String(pins[i]).toLowerCase() === lower) return i;
+    }
+    return -1;
+  }
+
+  function applyLabelOrder(items) {
+    if (state.sortingLabels) return;
+    var byActivity = !!state.settings.sortLabelsByActivity;
+    var hasPins = (state.pinnedLabels || []).length > 0;
+    if (!byActivity && !hasPins) return;
     var groups = new Map();
     items.forEach(function (item, index) {
       if (!item.row || !item.row.parentElement) return;
@@ -1992,16 +2028,15 @@
           row: item.row,
           name: item.name,
           index: index,
-          activity: Number(state.labelActivity[item.name]) || 0
+          activity: Number(state.labelActivity[item.name]) || 0,
+          pinIndex: pinIndexOf(item.name)
         });
       }
     });
 
     groups.forEach(function (group, parent) {
       if (group.length < 2) return;
-      var sorted = group.slice().sort(function (left, right) {
-        return right.activity - left.activity || left.index - right.index;
-      });
+      var sorted = Core.orderLabels(group, { byActivity: byActivity });
       var changed = sorted.some(function (item, index) {
         return item.row !== group[index].row;
       });
@@ -2080,7 +2115,7 @@
       item.swatch.style.setProperty('--gvn-label-color', Core.labelColor(item.name));
     });
     updateLabelActivity(items);
-    sortLabelsByActivity(items);
+    applyLabelOrder(items);
     updateLabelCount(items.length);
     if (state.editingLabels) updateTypeEditor();
   }
@@ -2662,6 +2697,10 @@
         state.logoOverrides = normalizeOverrides(changes[LOGO_OVERRIDES_KEY].newValue);
         scheduleRefresh();
       }
+      if (changes[PINNED_LABELS_KEY]) {
+        state.pinnedLabels = normalizePinned(changes[PINNED_LABELS_KEY].newValue);
+        scheduleRefresh();
+      }
       return;
     }
     if (area !== 'sync') return;
@@ -2903,7 +2942,8 @@
     readSettings(),
     readLabelActivity(),
     readLabelTypography(),
-    readLogoOverrides()
+    readLogoOverrides(),
+    readPinnedLabels()
   ]).then(function (values) {
     if (state.destroyed) return;
     state.settings = Core.normalizeSettings(values[0]);

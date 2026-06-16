@@ -375,4 +375,76 @@
       });
     });
   }
+
+  // ----- Pinned labels --------------------------------------------------
+  var PINNED_KEY = 'gmailViewNextPinnedLabels';
+  var pinName = document.getElementById('pin-name');
+  var pinAddBtn = document.getElementById('pin-add');
+  var pinList = document.getElementById('pin-list');
+
+  function loadPinned(callback) {
+    safeLocalGet(PINNED_KEY, function (stored, error) {
+      var list = !error && stored && stored[PINNED_KEY];
+      if (!Array.isArray(list)) list = [];
+      callback(list);
+    });
+  }
+
+  function renderPinned(list) {
+    if (!pinList) return;
+    pinList.innerHTML = '';
+    if (!list.length) {
+      var empty = document.createElement('p');
+      empty.className = 'hint';
+      empty.textContent = 'No pinned labels yet.';
+      pinList.appendChild(empty);
+      return;
+    }
+    list.forEach(function (name) {
+      var rowEl = document.createElement('div');
+      rowEl.className = 'row override-row';
+      var label = document.createElement('span');
+      label.className = 'override-name';
+      label.textContent = name;
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'secondary';
+      del.textContent = 'Unpin';
+      del.addEventListener('click', function () {
+        loadPinned(function (current) {
+          var next = current.filter(function (entry) { return entry !== name; });
+          var payload = {};
+          payload[PINNED_KEY] = next;
+          safeLocalSet(payload, function (error) {
+            if (error) { showStatus('Could not unpin.'); return; }
+            renderPinned(next);
+            showStatus('Unpinned ' + name + '.');
+          });
+        });
+      });
+      rowEl.appendChild(label);
+      rowEl.appendChild(del);
+      pinList.appendChild(rowEl);
+    });
+  }
+
+  if (pinList) loadPinned(renderPinned);
+
+  if (pinAddBtn) {
+    pinAddBtn.addEventListener('click', function () {
+      var name = (pinName.value || '').trim().slice(0, 120);
+      if (!name) { showStatus('Type a label name first.'); return; }
+      loadPinned(function (list) {
+        if (list.indexOf(name) === -1) list.push(name);
+        var payload = {};
+        payload[PINNED_KEY] = list;
+        safeLocalSet(payload, function (error) {
+          if (error) { showStatus('Could not save.'); return; }
+          pinName.value = '';
+          renderPinned(list);
+          showStatus('Pinned ' + name + '.');
+        });
+      });
+    });
+  }
 })();
