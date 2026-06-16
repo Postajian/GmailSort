@@ -130,6 +130,34 @@ a.linkbtn {
   text-decoration: none;
 }
 
+.override-list {
+  margin-top: 8px;
+}
+
+.override-row {
+  align-items: center;
+}
+
+.override-swatch {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #aaa;
+  flex: 0 0 auto;
+}
+
+.override-name {
+  flex: 1 1 auto;
+  font-family: "Courier New", monospace;
+}
+
+#override-color {
+  width: 44px;
+  height: 36px;
+  padding: 2px;
+  flex: 0 0 auto;
+}
+
 #status {
   color: #42733d;
   font-weight: 700;

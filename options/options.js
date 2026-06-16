@@ -290,4 +290,89 @@
       });
     });
   }
+
+  // ----- Sender colour overrides ----------------------------------------
+  var OVERRIDES_KEY = 'gmailViewNextLogoOverrides';
+  var overrideDomain = document.getElementById('override-domain');
+  var overrideColorInput = document.getElementById('override-color');
+  var overrideAddBtn = document.getElementById('override-add');
+  var overrideList = document.getElementById('override-list');
+
+  function cleanDomain(value) {
+    return String(value || '').trim().toLowerCase()
+      .replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '');
+  }
+
+  function loadOverrides(callback) {
+    safeLocalGet(OVERRIDES_KEY, function (stored, error) {
+      var map = !error && stored && stored[OVERRIDES_KEY];
+      if (!map || typeof map !== 'object') map = {};
+      callback(map);
+    });
+  }
+
+  function renderOverrides(map) {
+    if (!overrideList) return;
+    overrideList.innerHTML = '';
+    var domains = Object.keys(map).sort();
+    if (!domains.length) {
+      var empty = document.createElement('p');
+      empty.className = 'hint';
+      empty.textContent = 'No pinned colours yet.';
+      overrideList.appendChild(empty);
+      return;
+    }
+    domains.forEach(function (domain) {
+      var rowEl = document.createElement('div');
+      rowEl.className = 'row override-row';
+      var swatch = document.createElement('span');
+      swatch.className = 'override-swatch';
+      swatch.style.background = map[domain];
+      var label = document.createElement('span');
+      label.className = 'override-name';
+      label.textContent = domain;
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'secondary';
+      del.textContent = 'Remove';
+      del.addEventListener('click', function () {
+        loadOverrides(function (current) {
+          delete current[domain];
+          var payload = {};
+          payload[OVERRIDES_KEY] = current;
+          safeLocalSet(payload, function (error) {
+            if (error) { showStatus('Could not remove.'); return; }
+            renderOverrides(current);
+            showStatus('Removed ' + domain + '.');
+          });
+        });
+      });
+      rowEl.appendChild(swatch);
+      rowEl.appendChild(label);
+      rowEl.appendChild(del);
+      overrideList.appendChild(rowEl);
+    });
+  }
+
+  if (overrideList) loadOverrides(renderOverrides);
+
+  if (overrideAddBtn) {
+    overrideAddBtn.addEventListener('click', function () {
+      var domain = cleanDomain(overrideDomain.value);
+      var color = (overrideColorInput.value || '').trim();
+      if (!domain) { showStatus('Type a sender domain first.'); return; }
+      if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(color)) { showStatus('Pick a colour first.'); return; }
+      loadOverrides(function (map) {
+        map[domain] = color;
+        var payload = {};
+        payload[OVERRIDES_KEY] = map;
+        safeLocalSet(payload, function (error) {
+          if (error) { showStatus('Could not save.'); return; }
+          overrideDomain.value = '';
+          renderOverrides(map);
+          showStatus('Pinned ' + domain + '.');
+        });
+      });
+    });
+  }
 })();

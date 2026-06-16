@@ -8,6 +8,7 @@
   var COMPACT_DATE_COLUMN_WIDTH = 140;
   var LABEL_ACTIVITY_KEY = 'gmailViewNextLabelActivity';
   var LABEL_TYPOGRAPHY_KEY = 'gmailViewNextLabelTypography';
+  var LOGO_OVERRIDES_KEY = 'gmailViewNextLogoOverrides';
   var COLUMN_NAMES = ['sender', 'time-sent', 'logo', 'subject', 'preview', 'date'];
   var COLUMN_LAYOUT_SETTINGS = Object.freeze({
     sender: { header: 'headerSenderX', boundary: 'senderOffset' },
@@ -76,6 +77,7 @@
     sortingLabels: false,
     logoCache: {},
     logoPending: {},
+    logoOverrides: {},
     listeners: []
   };
 
@@ -319,6 +321,18 @@
           state.labelTypography = normalizeLabelTypography(
             stored && stored[LABEL_TYPOGRAPHY_KEY]
           );
+        }
+        resolve();
+      });
+    });
+  }
+
+  function readLogoOverrides() {
+    return new Promise(function (resolve) {
+      safeStorageGet('local', LOGO_OVERRIDES_KEY, function (stored, error) {
+        reportApiError('Could not read sender colours.', error);
+        if (!error) {
+          state.logoOverrides = normalizeOverrides(stored && stored[LOGO_OVERRIDES_KEY]);
         }
         resolve();
       });
@@ -2264,7 +2278,32 @@
     return 'url("https://www.google.com/s2/favicons?sz=64&domain=' + domain + '")';
   }
 
+  // Per-sender colour overrides (gmailViewNextLogoOverrides): a map of
+  // domain -> #hex. Only well-formed hex colours for a cleaned domain are kept.
+  function normalizeOverrides(value) {
+    var out = {};
+    if (!value || typeof value !== 'object') return out;
+    Object.keys(value).forEach(function (key) {
+      var domain = String(key || '').trim().toLowerCase().replace(/^www\./, '');
+      var color = String(value[key] || '').trim();
+      if (domain && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(color)) {
+        out[domain] = color;
+      }
+    });
+    return out;
+  }
+
+  function overrideColor(domain) {
+    if (!domain || !state.logoOverrides) return null;
+    var clean = String(domain).replace(/^www\./, '').toLowerCase();
+    return Object.prototype.hasOwnProperty.call(state.logoOverrides, clean)
+      ? state.logoOverrides[clean]
+      : null;
+  }
+
   function monogramColor(domain) {
+    var pinned = overrideColor(domain);
+    if (pinned) return pinned;
     var hash = 0;
     for (var i = 0; i < domain.length; i++) {
       hash = (hash * 31 + domain.charCodeAt(i)) >>> 0;
@@ -2320,6 +2359,12 @@
   function applyLogo(track, domain) {
     if (!domain) {
       track.style.removeProperty('--gvn-logo');
+      return;
+    }
+    // A pinned sender colour always wins: show a clean letter tile in that
+    // colour instead of any fetched logo.
+    if (overrideColor(domain)) {
+      track.style.setProperty('--gvn-logo', monogramCss(domain));
       return;
     }
     if (state.settings.richLogos === false) {
@@ -2612,6 +2657,13 @@
   }
 
   function onStorageChanged(changes, area) {
+    if (area === 'local') {
+      if (changes[LOGO_OVERRIDES_KEY]) {
+        state.logoOverrides = normalizeOverrides(changes[LOGO_OVERRIDES_KEY].newValue);
+        scheduleRefresh();
+      }
+      return;
+    }
     if (area !== 'sync') return;
     var next = Object.assign({}, state.settings);
     Object.keys(changes).forEach(function (key) {
@@ -2850,7 +2902,8 @@
   Promise.all([
     readSettings(),
     readLabelActivity(),
-    readLabelTypography()
+    readLabelTypography(),
+    readLogoOverrides()
   ]).then(function (values) {
     if (state.destroyed) return;
     state.settings = Core.normalizeSettings(values[0]);

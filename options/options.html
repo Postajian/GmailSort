@@ -112,6 +112,17 @@
       </fieldset>
 
       <fieldset>
+        <legend>Sender colours</legend>
+        <p class="hint">Pin a colour for a sender&rsquo;s tile &mdash; it overrides the fetched logo with a clean coloured letter. Use the domain, e.g. <code>paypal.com</code>.</p>
+        <div class="row">
+          <input type="text" id="override-domain" placeholder="sender domain (paypal.com)" maxlength="120">
+          <input type="color" id="override-color" value="#c9a84c" aria-label="Tile colour">
+          <button type="button" id="override-add">Pin colour</button>
+        </div>
+        <div id="override-list" class="override-list"></div>
+      </fieldset>
+
+      <fieldset>
         <legend>Auto-sort inbox (optional companion)</legend>
         <p class="hint">Automatically label incoming mail with the companion Google Apps Script. It runs inside your own Google account &mdash; GmailView never sees your mail.</p>
         <div class="row">
