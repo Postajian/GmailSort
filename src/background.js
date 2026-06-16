@@ -85,8 +85,13 @@ function hydrateCache() {
       chrome.storage.local.get(LOGO_STORE_KEY, function (data) {
         var saved = data && data[LOGO_STORE_KEY];
         if (saved && typeof saved === 'object') {
+          // Only restore REAL logos. "No logo" results are never persisted, so
+          // those domains keep retrying live each session (clear logos, like
+          // before) instead of being stuck on a letter tile forever.
           Object.keys(saved).forEach(function (domain) {
-            if (!cache[domain]) cache[domain] = saved[domain];
+            if (!cache[domain] && saved[domain] && saved[domain].dataUrl) {
+              cache[domain] = saved[domain];
+            }
           });
         }
         hydrated = true;
@@ -102,17 +107,18 @@ function hydrateCache() {
 function persistCache() {
   persistScheduled = false;
   try {
-    var domains = Object.keys(cache);
+    // Store ONLY real resolved logos, never "no logo" / error placeholders.
+    var domains = Object.keys(cache).filter(function (domain) {
+      return cache[domain] && cache[domain].dataUrl;
+    });
     if (domains.length > MAX_CACHED_LOGOS) {
       // Soft cap: keep the most recently added entries, drop the oldest.
-      var trimmed = {};
-      domains.slice(domains.length - MAX_CACHED_LOGOS).forEach(function (domain) {
-        trimmed[domain] = cache[domain];
-      });
-      cache = trimmed;
+      domains = domains.slice(domains.length - MAX_CACHED_LOGOS);
     }
+    var store = {};
+    domains.forEach(function (domain) { store[domain] = cache[domain]; });
     var payload = {};
-    payload[LOGO_STORE_KEY] = cache;
+    payload[LOGO_STORE_KEY] = store;
     chrome.storage.local.set(payload);
   } catch (e) {
     // Storage unavailable/full: the in-memory cache still works this session.
@@ -150,9 +156,11 @@ function resolveLogo(domain) {
       });
   }).then(function (result) {
     // Cache real answers; never cache an error so it retries once reachable.
+    // Persist only when we found an actual logo, so "no logo" stays a
+    // session-only retry (restored live next session) and never sticks.
     if (!result.error && !cache[domain]) {
       cache[domain] = result;
-      schedulePersist();
+      if (result.dataUrl) schedulePersist();
     }
     delete inFlight[domain];
     return result;
