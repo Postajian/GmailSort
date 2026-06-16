@@ -147,10 +147,10 @@ test('focus mode is off by default and opt-in', () => {
   assert.equal(core.normalizeSettings({ focusMode: true }).focusMode, true);
 });
 
-test('umbrella roll-up is off by default and opt-in', () => {
-  assert.equal(core.DEFAULT_SETTINGS.umbrellaRollup, false);
-  assert.equal(core.normalizeSettings({}).umbrellaRollup, false);
-  assert.equal(core.normalizeSettings({ umbrellaRollup: true }).umbrellaRollup, true);
+test('umbrella roll-up is on by default and can be turned off', () => {
+  assert.equal(core.DEFAULT_SETTINGS.umbrellaRollup, true);
+  assert.equal(core.normalizeSettings({}).umbrellaRollup, true);
+  assert.equal(core.normalizeSettings({ umbrellaRollup: false }).umbrellaRollup, false);
 });
 
 test('decodes the label path from a Gmail hash', () => {
