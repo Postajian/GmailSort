@@ -114,6 +114,13 @@ test('keeps each individual category tab shown by default and hides per setting'
   });
 });
 
+test('density defaults to comfortable and only accepts compact/comfortable', () => {
+  assert.equal(core.DEFAULT_SETTINGS.density, 'comfortable');
+  assert.equal(core.normalizeSettings({}).density, 'comfortable');
+  assert.equal(core.normalizeSettings({ density: 'compact' }).density, 'compact');
+  assert.equal(core.normalizeSettings({ density: 'nonsense' }).density, 'comfortable');
+});
+
 test('focus mode is off by default and opt-in', () => {
   assert.equal(core.DEFAULT_SETTINGS.focusMode, false);
   assert.equal(core.normalizeSettings({}).focusMode, false);

@@ -33,6 +33,7 @@
     labelFontSize: 18,
     sortLabelsByActivity: false,
     rowHeight: 38,
+    density: 'comfortable',
     inboxFontSize: 24,
     inboxBold: true,
     inboxItalic: false,
@@ -185,6 +186,7 @@
       sortLabelsByActivity:
         normalizeBoolean(value.sortLabelsByActivity, DEFAULT_SETTINGS.sortLabelsByActivity),
       rowHeight: clampNumber(value.rowHeight, 32, 72, DEFAULT_SETTINGS.rowHeight),
+      density: value.density === 'compact' ? 'compact' : 'comfortable',
       inboxFontSize: clampNumber(value.inboxFontSize, 8, 48, DEFAULT_SETTINGS.inboxFontSize),
       inboxBold: normalizeBoolean(value.inboxBold, DEFAULT_SETTINGS.inboxBold),
       inboxItalic: normalizeBoolean(value.inboxItalic, DEFAULT_SETTINGS.inboxItalic),

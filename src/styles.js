@@ -15,7 +15,11 @@
   var DATE_WIDTH = 170;
 
   function buildCss(settings) {
-    var rowHeight = Math.round(settings.rowHeight);
+    // Compact density picks a tighter row height without overwriting the
+    // user's custom rowHeight (used for "comfortable").
+    var rowHeight = settings.density === 'compact'
+      ? Math.min(26, Math.round(settings.rowHeight))
+      : Math.round(settings.rowHeight);
     var inboxFontSize = Math.round(settings.inboxFontSize);
     var senderFontSize = Math.round(settings.senderFontSize);
     var groupFontSize = Math.round(settings.groupFontSize);
