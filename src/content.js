@@ -2749,6 +2749,43 @@
     //   extpay.onPaid.addListener(() => { LICENSING.paid = true; scheduleRefresh(); });
   }
 
+  // --- Umbrella-label roll-up (opt-in) -------------------------------------
+  // Collect every custom label's FULL path from the sidebar's real hrefs and
+  // remember them for the session, so a parent still rolls up its sub-labels
+  // even after you collapse it. Fails safe: scraping never throws.
+  function collectLabelPaths() {
+    if (!state.knownLabelPaths) state.knownLabelPaths = {};
+    try {
+      var links = document.querySelectorAll('a[href*="#label/"]');
+      Array.prototype.forEach.call(links, function (link) {
+        var match = String(link.getAttribute('href') || '').match(/#label\/([^?&#]+)/);
+        if (!match) return;
+        var path = Core.decodeLabelHash('#label/' + match[1]);
+        if (path) state.knownLabelPaths[path] = true;
+      });
+    } catch (error) {
+      /* defensive: never let label scraping break navigation */
+    }
+    return Object.keys(state.knownLabelPaths);
+  }
+
+  // When the user opens a parent/umbrella label, redirect to a combined search
+  // that also includes every sub-label. No-op for leaves, non-label hashes, or
+  // when the setting is off. Any failure leaves Gmail navigation untouched.
+  function maybeRollupLabel() {
+    if (!state.settings || !state.settings.umbrellaRollup) return;
+    try {
+      var path = Core.decodeLabelHash(location.hash);
+      if (!path) return;
+      var query = Core.labelRollupQuery(path, collectLabelPaths());
+      if (!query) return;
+      var target = '#search/' + encodeURIComponent(query);
+      if (location.hash !== target) location.hash = target;
+    } catch (error) {
+      /* leave navigation alone on any failure */
+    }
+  }
+
   function start() {
     if (state.destroyed) return;
     installStyle();
@@ -2765,6 +2802,7 @@
     });
     state.observer.observe(document.body, { childList: true, subtree: true });
 
+    addListener(window, 'hashchange', maybeRollupLabel);
     addListener(window, 'hashchange', scheduleRefresh);
     addListener(window, 'popstate', scheduleRefresh);
     addListener(window, 'resize', scheduleRefresh);

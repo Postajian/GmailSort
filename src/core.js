@@ -24,6 +24,7 @@
     hideTabSocial: false,
     hideTabUpdates: false,
     hideTabForums: false,
+    umbrellaRollup: false,
     transparentBackground: true,
     readablePanel: true,
     sidebarWidth: 0,
@@ -173,6 +174,7 @@
       hideTabSocial: value.hideTabSocial === true,
       hideTabUpdates: value.hideTabUpdates === true,
       hideTabForums: value.hideTabForums === true,
+      umbrellaRollup: value.umbrellaRollup === true,
       transparentBackground: value.transparentBackground !== false,
       readablePanel: value.readablePanel !== false,
       sidebarWidth: clampNumber(value.sidebarWidth, 0, 720, DEFAULT_SETTINGS.sidebarWidth),
@@ -422,6 +424,47 @@
     return typeof name === 'string' && name.indexOf('/') !== -1;
   }
 
+  // Decode the label path from a Gmail location hash. Gmail encodes a nested
+  // label's "/" as %2F and may append a "/pN" pagination suffix.
+  //   "#label/Money"            -> "Money"
+  //   "#label/Money%2FPayPal"   -> "Money/PayPal"
+  //   "#label/Money%2FPayPal/p2"-> "Money/PayPal"
+  // Returns "" for any non-label hash (inbox, search, category, thread, ...).
+  function decodeLabelHash(hash) {
+    var h = String(hash || '');
+    var idx = h.indexOf('#label/');
+    if (idx === -1) return '';
+    var rest = h.slice(idx + 7).replace(/\/p\d+$/, '');
+    if (!rest) return '';
+    try {
+      return decodeURIComponent(rest);
+    } catch (e) {
+      return rest;
+    }
+  }
+
+  // Build a Gmail search query that rolls a parent/umbrella label up together
+  // with every descendant sub-label. Returns "" when the label has no children
+  // (a leaf), so the caller leaves normal Gmail navigation alone.
+  //   labelRollupQuery("Money", ["Money","Money/PayPal","Money/Bank","Work"])
+  //     -> 'label:"Money" OR label:"Money/PayPal" OR label:"Money/Bank"'
+  function labelRollupQuery(path, allPaths) {
+    var parent = String(path || '').trim();
+    if (!parent || !Array.isArray(allPaths)) return '';
+    var prefix = parent + '/';
+    var terms = [parent];
+    allPaths.forEach(function (candidate) {
+      var name = String(candidate || '').trim();
+      if (name && name !== parent && name.indexOf(prefix) === 0) {
+        terms.push(name);
+      }
+    });
+    if (terms.length < 2) return ''; // no descendants -> not an umbrella
+    return terms.map(function (name) {
+      return 'label:"' + name.replace(/"/g, '') + '"';
+    }).join(' OR ');
+  }
+
   // Entitlement state for the paid model: 15-day free trial -> then paid.
   // Pure + testable. `paid` comes from the payment provider (ExtensionPay) later.
   function licenseState(installedAt, now, paid) {
@@ -449,6 +492,8 @@
     stableColor: stableColor,
     labelColor: labelColor,
     isSubLabel: isSubLabel,
+    decodeLabelHash: decodeLabelHash,
+    labelRollupQuery: labelRollupQuery,
     TRIAL_DAYS: TRIAL_DAYS,
     licenseState: licenseState,
     senderMonogram: senderMonogram

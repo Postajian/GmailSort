@@ -114,6 +114,35 @@ test('keeps each individual category tab shown by default and hides per setting'
   });
 });
 
+test('umbrella roll-up is off by default and opt-in', () => {
+  assert.equal(core.DEFAULT_SETTINGS.umbrellaRollup, false);
+  assert.equal(core.normalizeSettings({}).umbrellaRollup, false);
+  assert.equal(core.normalizeSettings({ umbrellaRollup: true }).umbrellaRollup, true);
+});
+
+test('decodes the label path from a Gmail hash', () => {
+  assert.equal(core.decodeLabelHash('#label/Money'), 'Money');
+  assert.equal(core.decodeLabelHash('#label/Money%2FPayPal'), 'Money/PayPal');
+  assert.equal(core.decodeLabelHash('#label/Money%2FPayPal/p2'), 'Money/PayPal');
+  assert.equal(core.decodeLabelHash('#label/My%20Label'), 'My Label');
+  assert.equal(core.decodeLabelHash('#inbox'), '');
+  assert.equal(core.decodeLabelHash('#search/foo'), '');
+  assert.equal(core.decodeLabelHash(''), '');
+});
+
+test('builds a roll-up search for a parent and all its sub-labels only', () => {
+  const all = ['Money', 'Money/PayPal', 'Money/Bank', 'Work', 'Work/HR'];
+  assert.equal(
+    core.labelRollupQuery('Money', all),
+    'label:"Money" OR label:"Money/PayPal" OR label:"Money/Bank"'
+  );
+  // A leaf (no descendants) returns "" so normal Gmail navigation is kept.
+  assert.equal(core.labelRollupQuery('Money/PayPal', all), '');
+  assert.equal(core.labelRollupQuery('Work', all), 'label:"Work" OR label:"Work/HR"');
+  // "Money" must not pull in an unrelated label that merely shares a prefix.
+  assert.equal(core.labelRollupQuery('Mon', ['Mon', 'Money', 'Money/PayPal']), '');
+});
+
 test('recognizes inbox, thread, and other routes', () => {
   assert.equal(core.routeMode('#inbox'), 'inbox');
   assert.equal(core.routeMode('#inbox/FMfcgzQ123456789'), 'thread');
