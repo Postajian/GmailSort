@@ -95,6 +95,22 @@
 
     return [
       ':root{--gvn-gold:' + GOLD + ';--gvn-divider:' + dividerColor + ';--gvn-ink:' + ink + ';--gvn-muted:' + muted + ';--gvn-paper:' + paper + ';--gvn-rule:' + ruleColor + ';--gvn-sidebar-width:' + sidebarWidth + 'px;}',
+      // Print / "Save as PDF": recolour to clean black-on-white via the vars
+      // (works even in dark theme) and drop our controls, the rail and tabs.
+      '@media print{'
+        + ':root{--gvn-paper:#fff!important;--gvn-ink:#000!important;--gvn-muted:#444!important;--gvn-rule:#000!important;--gvn-divider:#bbb!important;}'
+        + 'html[data-gvn-active="true"][data-gvn-route="inbox"] .nH{background:#fff!important;}'
+        + 'html[data-gvn-active="true"][data-gvn-route="inbox"] .aKh,'
+        + 'html[data-gvn-active="true"][data-gvn-route="inbox"] .bAw:not(:has(.IU)),'
+        + 'html[data-gvn-active="true"][data-gvn-route="inbox"] .aUx:not(:has(.IU)),'
+        + '#gmail-view-next-ui .gvn-edit-master,'
+        + '#gmail-view-next-ui .gvn-edit-button,'
+        + '#gmail-view-next-ui .gvn-label-edit-button,'
+        + '#gmail-view-next-ui .gvn-inspect-button,'
+        + '#gmail-view-next-ui .gvn-center-button,'
+        + '#gmail-view-next-ui .gvn-bg-toggle,'
+        + '#gmail-view-next-sidebar-resizer{display:none!important;}'
+        + '}',
       '.gvn-label-count{margin-left:6px;font-weight:600;opacity:.7;}',
       '#gmail-view-next-health{position:fixed;z-index:2147483647;top:12px;left:50%;transform:translateX(-50%);max-width:540px;display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff8e1;color:#5f4b00;border:1px solid #e0c200;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.18);font:13px/1.45 Arial,sans-serif;}',
       '#gmail-view-next-health button{flex:0 0 auto;border:1px solid #b58900;background:#fff;color:#5f4b00;border-radius:5px;padding:4px 10px;font:600 12px Arial,sans-serif;cursor:pointer;}',

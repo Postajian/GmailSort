@@ -2899,6 +2899,20 @@
     scheduleRefresh();
   }
 
+  // Alt+Shift+P opens the print dialog (Save as PDF). The @media print rules
+  // make the inbox print as a clean black-on-white newspaper page.
+  function handlePrintHotkey(event) {
+    if (!state.settings || state.settings.toggleHotkey === false) return;
+    if (!event.altKey || !event.shiftKey || event.ctrlKey || event.metaKey) return;
+    var isP = event.code === 'KeyP' || String(event.key || '').toLowerCase() === 'p';
+    if (!isP) return;
+    var el = document.activeElement;
+    if (el && (el.isContentEditable ||
+      /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName || ''))) return;
+    event.preventDefault();
+    try { window.print(); } catch (error) { /* print unavailable */ }
+  }
+
   function start() {
     if (state.destroyed) return;
     installStyle();
@@ -2916,6 +2930,7 @@
     state.observer.observe(document.body, { childList: true, subtree: true });
 
     addListener(window, 'keydown', handleToggleHotkey, true);
+    addListener(window, 'keydown', handlePrintHotkey, true);
     addListener(window, 'hashchange', maybeRollupLabel);
     addListener(window, 'hashchange', scheduleRefresh);
     addListener(window, 'popstate', scheduleRefresh);
