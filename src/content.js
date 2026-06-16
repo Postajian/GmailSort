@@ -397,6 +397,7 @@
     root.setAttribute('data-gvn-hide-tab-updates', String(state.settings.hideTabUpdates));
     root.setAttribute('data-gvn-hide-tab-forums', String(state.settings.hideTabForums));
     root.setAttribute('data-gvn-focus', String(state.settings.focusMode));
+    root.setAttribute('data-gvn-tab-order', state.settings.tabOrder);
     root.setAttribute('data-gvn-hide-rail', String(state.settings.hideRail));
     root.setAttribute('data-gvn-color-labels', String(state.settings.colorLabels));
     root.setAttribute('data-gvn-label-editing', String(state.editingLabels));
@@ -2742,6 +2743,7 @@
     document.documentElement.removeAttribute('data-gvn-hide-tab-updates');
     document.documentElement.removeAttribute('data-gvn-hide-tab-forums');
     document.documentElement.removeAttribute('data-gvn-focus');
+    document.documentElement.removeAttribute('data-gvn-tab-order');
     document.documentElement.removeAttribute('data-gvn-hide-rail');
     document.documentElement.removeAttribute('data-gvn-color-labels');
     document.documentElement.removeAttribute('data-gvn-label-editing');

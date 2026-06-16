@@ -134,6 +134,13 @@ test('theme defaults to light and only accepts light/dark', () => {
   assert.equal(core.normalizeSettings({ theme: 'rainbow' }).theme, 'light');
 });
 
+test('tab order defaults to default and only accepts the two orders', () => {
+  assert.equal(core.DEFAULT_SETTINGS.tabOrder, 'default');
+  assert.equal(core.normalizeSettings({}).tabOrder, 'default');
+  assert.equal(core.normalizeSettings({ tabOrder: 'promotions-first' }).tabOrder, 'promotions-first');
+  assert.equal(core.normalizeSettings({ tabOrder: 'weird' }).tabOrder, 'default');
+});
+
 test('focus mode is off by default and opt-in', () => {
   assert.equal(core.DEFAULT_SETTINGS.focusMode, false);
   assert.equal(core.normalizeSettings({}).focusMode, false);

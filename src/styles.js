@@ -143,6 +143,13 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-tab-updates="true"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Updates"]){display:none!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-tab-forums="true"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Forums"]){display:none!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-focus="true"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Promotions"]),html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-focus="true"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Social"]),html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-focus="true"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Forums"]){display:none!important;}',
+      // Tab order "promotions-first": reorder the flex tab cells (merged tabs)
+      // to Promotions -> Primary -> Social without touching Gmail\'s DOM.
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="promotions-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Promotions"]){order:1!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="promotions-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Primary"]){order:2!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="promotions-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Social"]){order:3!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="promotions-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Updates"]){order:4!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="promotions-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Forums"]){order:5!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F{margin-top:66px!important;width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;max-width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;min-width:0!important;table-layout:fixed!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"]:has(#gmail-view-next-ui[data-editing="true"]) table.F{margin-top:' + (78 + editorHeight) + 'px!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F col.yY{width:' + senderWidth + 'px!important;min-width:' + senderWidth + 'px!important;}',
