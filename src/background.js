@@ -6,17 +6,17 @@
 // back to the content script. It runs here (not in the content script) because the
 // extension's host_permissions let the service worker fetch cross-origin without
 // being blocked by Gmail's page CORS/CSP. The order is:
-//   1. Clearbit  -> the real company brand logo, when one exists
-//   2. Google favicon -> the site's real favicon, skipping Google's default globe
-//   3. {none:true} -> caller draws a clean coloured letter tile (never a globe)
+//   1. Clearbit (128px)      -> the real company brand logo, when one exists
+//   2. DuckDuckGo icons      -> a crisp real site icon (skips its placeholder)
+//   3. Google favicon (128px)-> the site's real favicon (skips the default globe)
+//   4. {none:true}           -> caller draws a clean coloured letter tile
 //
-// Privacy: this sends the sender's *domain* (e.g. "github.com") to Clearbit and
-// Google to look up an icon. It is gated by the richLogos setting in the UI, and
-// results are cached per domain so each domain is looked up at most once.
+// Privacy: this sends the sender's *domain* (e.g. "github.com") to Clearbit,
+// DuckDuckGo, and Google to look up an icon. It is gated by the richLogos
+// setting in the UI, and results are cached per domain.
 
 var cache = {};         // domain -> { dataUrl } | { none: true }
 var inFlight = {};      // domain -> Promise (de-dupe concurrent lookups)
-var globeSignature = null;
 var GLOBE_PROBE_DOMAIN = 'no-such-site-zzqx.invalid';
 var LOGO_STORE_KEY = 'gmailViewNextLogoCache';
 var MAX_CACHED_LOGOS = 600;
@@ -65,13 +65,40 @@ function fetchBuffer(url) {
 }
 
 function googleFaviconUrl(domain) {
-  return 'https://www.google.com/s2/favicons?sz=64&domain=' + encodeURIComponent(domain);
+  return 'https://www.google.com/s2/favicons?sz=128&domain=' + encodeURIComponent(domain);
 }
 
-function ensureGlobeSignature() {
-  if (globeSignature !== null) return Promise.resolve();
-  return fetchBuffer(googleFaviconUrl(GLOBE_PROBE_DOMAIN)).then(function (probe) {
-    globeSignature = probe && probe.ok ? bufferSignature(probe.buffer) : '';
+function ddgIconUrl(domain) {
+  return 'https://icons.duckduckgo.com/ip3/' + encodeURIComponent(domain) + '.ico';
+}
+
+// Each favicon provider returns a generic placeholder (a globe / blank tile)
+// for domains it doesn't know. We probe an invalid domain once to learn that
+// placeholder's signature, then reject any real result that matches it.
+var defaultSignatures = {};
+function ensureDefaultSignature(kind, urlFor) {
+  if (defaultSignatures[kind] !== undefined) {
+    return Promise.resolve(defaultSignatures[kind]);
+  }
+  return fetchBuffer(urlFor(GLOBE_PROBE_DOMAIN)).then(function (probe) {
+    defaultSignatures[kind] = probe && probe.ok ? bufferSignature(probe.buffer) : '';
+    return defaultSignatures[kind];
+  });
+}
+
+// Try one favicon provider: resolve to a data URL only when it returns a real
+// icon that is NOT the provider's generic placeholder. Otherwise resolve null
+// so the caller falls through to the next source.
+function tryFaviconSource(kind, urlFor, domain) {
+  return ensureDefaultSignature(kind, urlFor).then(function (placeholder) {
+    return fetchBuffer(urlFor(domain)).then(function (result) {
+      if (result.ok && bufferSignature(result.buffer) !== placeholder) {
+        return { dataUrl: bufferToDataUrl(result.buffer, result.type) };
+      }
+      return null;
+    });
+  }).catch(function () {
+    return null;
   });
 }
 
@@ -137,17 +164,16 @@ function resolveLogo(domain) {
 
   var work = hydrateCache().then(function () {
     if (cache[domain]) return cache[domain]; // restored from a previous session
-    return fetchBuffer('https://logo.clearbit.com/' + encodeURIComponent(domain) + '?size=64')
+    // 1) Clearbit: the real brand logo, highest quality when it exists.
+    return fetchBuffer('https://logo.clearbit.com/' + encodeURIComponent(domain) + '?size=128')
       .then(function (clearbit) {
-        if (clearbit.error) return { error: true };
         if (clearbit.ok) return { dataUrl: bufferToDataUrl(clearbit.buffer, clearbit.type) };
-        return ensureGlobeSignature().then(function () {
-          return fetchBuffer(googleFaviconUrl(domain)).then(function (favicon) {
-            if (favicon.error) return { error: true };
-            if (favicon.ok && bufferSignature(favicon.buffer) !== globeSignature) {
-              return { dataUrl: bufferToDataUrl(favicon.buffer, favicon.type) };
-            }
-            return { none: true };
+        // 2) DuckDuckGo icons: usually a crisp real site icon.
+        return tryFaviconSource('ddg', ddgIconUrl, domain).then(function (ddg) {
+          if (ddg) return ddg;
+          // 3) Google favicon (128px): last real-icon source before a letter.
+          return tryFaviconSource('google', googleFaviconUrl, domain).then(function (google) {
+            return google || { none: true };
           });
         });
       })

@@ -1,7 +1,7 @@
 {
     "manifest_version":  3,
     "name":  "Gmail View Next",
-    "version":  "0.20.21",
+    "version":  "0.20.22",
     "description":  "A resilient, newspaper-inspired Gmail inbox view with configurable layout and local sender marks.",
     "permissions":  [
                         "storage"
@@ -10,7 +10,8 @@
                              "https://mail.google.com/*",
                              "https://logo.clearbit.com/*",
                              "https://www.google.com/s2/*",
-                             "https://*.gstatic.com/*"
+                             "https://*.gstatic.com/*",
+                             "https://icons.duckduckgo.com/*"
                          ],
     "background":  {
                        "service_worker":  "src/background.js"
