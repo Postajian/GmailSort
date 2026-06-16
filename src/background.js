@@ -18,6 +18,10 @@ var cache = {};         // domain -> { dataUrl } | { none: true }
 var inFlight = {};      // domain -> Promise (de-dupe concurrent lookups)
 var globeSignature = null;
 var GLOBE_PROBE_DOMAIN = 'no-such-site-zzqx.invalid';
+var LOGO_STORE_KEY = 'gmailViewNextLogoCache';
+var MAX_CACHED_LOGOS = 600;
+var hydrated = false;
+var persistScheduled = false;
 
 function bufferSignature(buffer) {
   var bytes = new Uint8Array(buffer);
@@ -71,33 +75,88 @@ function ensureGlobeSignature() {
   });
 }
 
+// Persist resolved logos so they survive service-worker restarts and browser
+// reloads. Without this, MV3 recycles the worker after ~30s idle and every
+// sender domain is re-fetched from the network on the next inbox load.
+function hydrateCache() {
+  if (hydrated) return Promise.resolve();
+  return new Promise(function (resolve) {
+    try {
+      chrome.storage.local.get(LOGO_STORE_KEY, function (data) {
+        var saved = data && data[LOGO_STORE_KEY];
+        if (saved && typeof saved === 'object') {
+          Object.keys(saved).forEach(function (domain) {
+            if (!cache[domain]) cache[domain] = saved[domain];
+          });
+        }
+        hydrated = true;
+        resolve();
+      });
+    } catch (e) {
+      hydrated = true;
+      resolve();
+    }
+  });
+}
+
+function persistCache() {
+  persistScheduled = false;
+  try {
+    var domains = Object.keys(cache);
+    if (domains.length > MAX_CACHED_LOGOS) {
+      // Soft cap: keep the most recently added entries, drop the oldest.
+      var trimmed = {};
+      domains.slice(domains.length - MAX_CACHED_LOGOS).forEach(function (domain) {
+        trimmed[domain] = cache[domain];
+      });
+      cache = trimmed;
+    }
+    var payload = {};
+    payload[LOGO_STORE_KEY] = cache;
+    chrome.storage.local.set(payload);
+  } catch (e) {
+    // Storage unavailable/full: the in-memory cache still works this session.
+  }
+}
+
+function schedulePersist() {
+  if (persistScheduled) return;
+  persistScheduled = true;
+  setTimeout(persistCache, 800);
+}
+
 function resolveLogo(domain) {
   if (cache[domain]) return Promise.resolve(cache[domain]);
   if (inFlight[domain]) return inFlight[domain];
 
-  var work = fetchBuffer('https://logo.clearbit.com/' + encodeURIComponent(domain) + '?size=64')
-    .then(function (clearbit) {
-      if (clearbit.error) return { error: true };
-      if (clearbit.ok) return { dataUrl: bufferToDataUrl(clearbit.buffer, clearbit.type) };
-      return ensureGlobeSignature().then(function () {
-        return fetchBuffer(googleFaviconUrl(domain)).then(function (favicon) {
-          if (favicon.error) return { error: true };
-          if (favicon.ok && bufferSignature(favicon.buffer) !== globeSignature) {
-            return { dataUrl: bufferToDataUrl(favicon.buffer, favicon.type) };
-          }
-          return { none: true };
+  var work = hydrateCache().then(function () {
+    if (cache[domain]) return cache[domain]; // restored from a previous session
+    return fetchBuffer('https://logo.clearbit.com/' + encodeURIComponent(domain) + '?size=64')
+      .then(function (clearbit) {
+        if (clearbit.error) return { error: true };
+        if (clearbit.ok) return { dataUrl: bufferToDataUrl(clearbit.buffer, clearbit.type) };
+        return ensureGlobeSignature().then(function () {
+          return fetchBuffer(googleFaviconUrl(domain)).then(function (favicon) {
+            if (favicon.error) return { error: true };
+            if (favicon.ok && bufferSignature(favicon.buffer) !== globeSignature) {
+              return { dataUrl: bufferToDataUrl(favicon.buffer, favicon.type) };
+            }
+            return { none: true };
+          });
         });
+      })
+      .catch(function () {
+        return { error: true };
       });
-    })
-    .catch(function () {
-      return { error: true };
-    })
-    .then(function (result) {
-      // Cache real answers; never cache an error so it retries once reachable.
-      if (!result.error) cache[domain] = result;
-      delete inFlight[domain];
-      return result;
-    });
+  }).then(function (result) {
+    // Cache real answers; never cache an error so it retries once reachable.
+    if (!result.error && !cache[domain]) {
+      cache[domain] = result;
+      schedulePersist();
+    }
+    delete inFlight[domain];
+    return result;
+  });
 
   inFlight[domain] = work;
   return work;
@@ -117,3 +176,6 @@ if (chrome.action && chrome.action.onClicked) {
     if (chrome.runtime.openOptionsPage) chrome.runtime.openOptionsPage();
   });
 }
+
+// Warm the cache from previous sessions as soon as the worker spins up.
+hydrateCache();
