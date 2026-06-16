@@ -92,9 +92,13 @@
       dividerColor = 'rgba(236,228,210,0.16)';
       ruleColor = '#d9cfb8';
     }
+    // The fixed top strips (masthead, column headers, tabs) always need a SOLID
+    // backing so scrolled rows can't show through them — even in transparent
+    // mode, where the message area itself stays see-through.
+    var band = (paper === 'transparent') ? PAPER : paper;
 
     return [
-      ':root{--gvn-gold:' + GOLD + ';--gvn-divider:' + dividerColor + ';--gvn-ink:' + ink + ';--gvn-muted:' + muted + ';--gvn-paper:' + paper + ';--gvn-rule:' + ruleColor + ';--gvn-sidebar-width:' + sidebarWidth + 'px;}',
+      ':root{--gvn-gold:' + GOLD + ';--gvn-divider:' + dividerColor + ';--gvn-ink:' + ink + ';--gvn-muted:' + muted + ';--gvn-paper:' + paper + ';--gvn-band:' + band + ';--gvn-rule:' + ruleColor + ';--gvn-sidebar-width:' + sidebarWidth + 'px;}',
       // Print / "Save as PDF": recolour to clean black-on-white via the vars
       // (works even in dark theme) and drop our controls, the rail and tabs.
       '@media print{'
@@ -118,7 +122,7 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"] body,',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] .aAU,',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] .nH{background-color:' + outer + '!important;}',
-      'html[data-gvn-active="true"][data-gvn-route="inbox"] .G-atb{background-color:var(--gvn-paper)!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] .G-atb{background-color:var(--gvn-band)!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-rail="true"] .bAw:not(:has(.IU)),',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-rail="true"] .aUx:not(:has(.IU)){display:none!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-sidebar-sized="true"] [data-gvn-sidebar-host="true"]{width:var(--gvn-sidebar-width)!important;min-width:var(--gvn-sidebar-width)!important;max-width:var(--gvn-sidebar-width)!important;flex:0 0 var(--gvn-sidebar-width)!important;}',
@@ -126,7 +130,7 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F{position:relative!important;z-index:0!important;isolation:isolate!important;background-color:var(--gvn-paper)!important;overflow:visible!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-hide-tabs="true"] .aKh{display:none!important;}',
       (settings.mergeTabsRow
-        ? 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh{position:fixed!important;z-index:999!important;top:var(--gvn-tabs-top,-9999px)!important;left:var(--gvn-tabs-left,0px)!important;width:var(--gvn-tabs-width,auto)!important;height:var(--gvn-tabs-height,auto)!important;margin:0!important;min-width:0!important;background:var(--gvn-paper)!important;}\n'
+        ? 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh{position:fixed!important;z-index:999!important;top:var(--gvn-tabs-top,-9999px)!important;left:var(--gvn-tabs-left,0px)!important;width:var(--gvn-tabs-width,auto)!important;height:var(--gvn-tabs-height,auto)!important;margin:0!important;min-width:0!important;background:var(--gvn-band)!important;}\n'
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh *{max-width:none!important;}\n'
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh>div,html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh table,html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh tbody{width:100%!important;height:100%!important;}\n'
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"]:not([data-gvn-hide-tabs="true"]) .aKh [role="tablist"]{display:flex!important;width:100%!important;height:100%!important;align-items:stretch!important;}\n'
@@ -240,7 +244,7 @@
       '#gmail-view-next-sidebar-resizer:hover::before,#gmail-view-next-sidebar-resizer:focus::before,#gmail-view-next-sidebar-resizer[data-active="true"]::before{width:4px;left:5px;opacity:1;}',
       '#gmail-view-next-sidebar-resizer:hover::after,#gmail-view-next-sidebar-resizer:focus::after,#gmail-view-next-sidebar-resizer[data-active="true"]::after{background:#d8d8d8;}',
       '#gmail-view-next-ui{position:fixed;z-index:2;isolation:isolate;display:none;pointer-events:none;box-sizing:border-box;color:var(--gvn-ink);}',
-      '#gmail-view-next-ui .gvn-masthead{position:relative;z-index:2;height:34px;border-bottom:2px solid var(--gvn-rule);background:var(--gvn-paper);box-sizing:border-box;text-align:center;font-family:' + FONT + ';font-size:' + inboxFontSize + 'px;font-weight:' + (settings.inboxBold ? 900 : 400) + ';font-style:' + (settings.inboxItalic ? 'italic' : 'normal') + ';letter-spacing:' + settings.inboxLetterSpacing + 'px;word-spacing:' + settings.inboxWordSpacing + 'px;line-height:30px;text-transform:uppercase;}',
+      '#gmail-view-next-ui .gvn-masthead{position:relative;z-index:2;height:34px;border-bottom:2px solid var(--gvn-rule);background:var(--gvn-band);box-sizing:border-box;text-align:center;font-family:' + FONT + ';font-size:' + inboxFontSize + 'px;font-weight:' + (settings.inboxBold ? 900 : 400) + ';font-style:' + (settings.inboxItalic ? 'italic' : 'normal') + ';letter-spacing:' + settings.inboxLetterSpacing + 'px;word-spacing:' + settings.inboxWordSpacing + 'px;line-height:30px;text-transform:uppercase;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-masthead{height:' + editorMastheadHeight + 'px;}',
       '#gmail-view-next-ui .gvn-masthead-title{position:absolute;top:0;left:50%;display:inline-block;padding-bottom:2px;transform:translateX(-50%);pointer-events:none;white-space:nowrap;}',
       '#gmail-view-next-ui[data-editing="true"] .gvn-masthead-title{pointer-events:auto;cursor:ew-resize;outline:0;background:transparent;border-radius:4px;top:auto;bottom:4px;}',
@@ -287,7 +291,7 @@
       '#gmail-view-next-ui[data-label-editing="true"] .gvn-edit-button,#gmail-view-next-ui[data-label-editing="true"] .gvn-center-button{display:none!important;}',
       '#gmail-view-next-ui[data-label-editing="true"] .gvn-label-edit-button{display:block;right:8px;top:' + editorTop + 'px;height:' + editorHeight + 'px;padding:0 ' + editorSidePadding + 'px;font:800 ' + editorActionFont + 'px/' + editorLineHeight + 'px Arial,sans-serif;}',
       '#gmail-view-next-ui[data-label-editing="true"] [data-style-adjust]{display:none;}',
-      '#gmail-view-next-ui .gvn-columns{position:relative;z-index:2;height:26px;border-bottom:2px solid var(--gvn-rule);background:var(--gvn-paper);box-sizing:border-box;overflow:hidden;}',
+      '#gmail-view-next-ui .gvn-columns{position:relative;z-index:2;height:26px;border-bottom:2px solid var(--gvn-rule);background:var(--gvn-band);box-sizing:border-box;overflow:hidden;}',
       '#gmail-view-next-ui .gvn-columns span{position:absolute;top:3px;font-family:' + FONT + ';font-size:16px;font-weight:1000;line-height:18px;color:var(--gvn-ink);letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;}',
       '#gmail-view-next-ui .gvn-column-label[data-column="sender"]{font-weight:' + (settings.senderBold ? 1000 : 400) + ';font-style:' + (settings.senderItalic ? 'italic' : 'normal') + ';letter-spacing:' + settings.senderLetterSpacing + 'px;word-spacing:' + settings.senderWordSpacing + 'px;}',
       '#gmail-view-next-ui .gvn-column-label[data-column="time-sent"]{font-weight:' + (settings.groupBold ? 1000 : 400) + ';font-style:' + (settings.groupItalic ? 'italic' : 'normal') + ';letter-spacing:' + settings.groupLetterSpacing + 'px;word-spacing:' + settings.groupWordSpacing + 'px;}',
