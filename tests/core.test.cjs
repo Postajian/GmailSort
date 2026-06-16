@@ -127,6 +127,13 @@ test('density defaults to comfortable and only accepts compact/comfortable', () 
   assert.equal(core.normalizeSettings({ density: 'nonsense' }).density, 'comfortable');
 });
 
+test('theme defaults to light and only accepts light/dark', () => {
+  assert.equal(core.DEFAULT_SETTINGS.theme, 'light');
+  assert.equal(core.normalizeSettings({}).theme, 'light');
+  assert.equal(core.normalizeSettings({ theme: 'dark' }).theme, 'dark');
+  assert.equal(core.normalizeSettings({ theme: 'rainbow' }).theme, 'light');
+});
+
 test('focus mode is off by default and opt-in', () => {
   assert.equal(core.DEFAULT_SETTINGS.focusMode, false);
   assert.equal(core.normalizeSettings({}).focusMode, false);
