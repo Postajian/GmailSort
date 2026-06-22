@@ -25,7 +25,7 @@
     hideTabUpdates: false,
     hideTabForums: false,
     focusMode: false,
-    tabOrder: 'default',
+    tabOrder: 'promotions-first',
     toggleHotkey: true,
     umbrellaRollup: true,
     transparentBackground: true,
@@ -180,7 +180,9 @@
       hideTabUpdates: value.hideTabUpdates === true,
       hideTabForums: value.hideTabForums === true,
       focusMode: value.focusMode === true,
-      tabOrder: value.tabOrder === 'promotions-first' ? 'promotions-first' : 'default',
+      tabOrder: (value.tabOrder === 'default' || value.tabOrder === 'promotions-first')
+        ? value.tabOrder
+        : DEFAULT_SETTINGS.tabOrder,
       toggleHotkey: value.toggleHotkey !== false,
       umbrellaRollup: value.umbrellaRollup !== false,
       transparentBackground: value.transparentBackground !== false,
