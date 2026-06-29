@@ -1,0 +1,31 @@
+# GmailView (GmailSort) Extension — Project Instructions
+
+The **GmailView** Chrome extension (repo `Postajian/GmailSort`). The user calls it "GmailView".
+Newspaper-style, editable Gmail workflow. Part of the **G9** umbrella.
+
+## Wiki Knowledge Base (shared G9 memory)
+
+Path: `C:\Users\exoni\Desktop\Gmail Sort\03_Obsidian_Vault`
+
+When you need G9 / cross-project context not already here:
+
+1. Read `wiki/hot.md` first (recent context).
+2. If not enough, read `wiki/index.md`, then the `[[GmailView]]` entity page.
+3. For deep history, read `G9_GMAILVIEW_FEATURE_BATCH_v0.20.33.md` and `G9_GMAILVIEW_STORE_LAUNCH.md`.
+
+Do NOT read the vault for narrow coding tasks unrelated to G9 cross-project context.
+
+## Hard rules
+
+1. **No reload mid-edit** — this extension loads from a junction → live working dir. Only signal
+   "reload" AFTER commit + `npm run verify` (23 tests). A half-saved file crashes the content script.
+2. **Agent commits locally; the USER runs `git push`.**
+3. **Warning Insurance** — every critical/editable part gets guardrails (validation, clamping,
+   confirm-destructive, preview, backups, tests).
+4. **Store vs main:** store-submitted = v0.20.17 (pending review); `main` is ahead (v0.20.33+).
+   Features reach users only as a store update after approval.
+
+## Documentation protocol ("Update G9")
+
+After each work block, append a one-line entry to the top of the vault's `wiki/log.md` and update
+the GmailView feature/handoff notes. Do NOT hand-curate the HQ-owned `G9_PROGRESS_LOG.md`.
