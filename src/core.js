@@ -186,7 +186,9 @@
       hideTabUpdates: value.hideTabUpdates === true,
       hideTabForums: value.hideTabForums === true,
       focusMode: value.focusMode === true,
-      tabOrder: (value.tabOrder === 'default' || value.tabOrder === 'promotions-first')
+      tabOrder: (value.tabOrder === 'default' ||
+        value.tabOrder === 'promotions-first' ||
+        value.tabOrder === 'social-first')
         ? value.tabOrder
         : DEFAULT_SETTINGS.tabOrder,
       toggleHotkey: value.toggleHotkey !== false,

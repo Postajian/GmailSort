@@ -188,6 +188,12 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="promotions-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Social"]){order:3!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="promotions-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Updates"]){order:4!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="promotions-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Forums"]){order:5!important;}',
+      // Tab order "social-first": Social -> Primary -> Promotions.
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="social-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Social"]){order:1!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="social-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Primary"]){order:2!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="social-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Promotions"]){order:3!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="social-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Updates"]){order:4!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="social-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Forums"]){order:5!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F{margin-top:66px!important;width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;max-width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;min-width:0!important;table-layout:fixed!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"]:has(#gmail-view-next-ui[data-editing="true"]) table.F{margin-top:' + (78 + editorHeight) + 'px!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F col.yY{width:' + senderWidth + 'px!important;min-width:' + senderWidth + 'px!important;}',

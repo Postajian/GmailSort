@@ -199,10 +199,11 @@ test('senderRuleFor matches cleaned domains and returns empty otherwise', () => 
   assert.equal(core.senderRuleFor(null, 'paypal.com'), '');
 });
 
-test('tab order defaults to promotions-first and only accepts the two orders', () => {
+test('tab order defaults to promotions-first and accepts the three orders', () => {
   assert.equal(core.DEFAULT_SETTINGS.tabOrder, 'promotions-first');
   assert.equal(core.normalizeSettings({}).tabOrder, 'promotions-first');
   assert.equal(core.normalizeSettings({ tabOrder: 'default' }).tabOrder, 'default');
+  assert.equal(core.normalizeSettings({ tabOrder: 'social-first' }).tabOrder, 'social-first');
   assert.equal(core.normalizeSettings({ tabOrder: 'weird' }).tabOrder, 'promotions-first');
 });
 
