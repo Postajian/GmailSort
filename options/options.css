@@ -10,9 +10,9 @@ body {
 }
 
 main {
-  width: calc(100% - 64px);
-  max-width: 3400px;
-  margin: 40px auto;
+  width: calc(100% - 32px);
+  max-width: none;
+  margin: 28px auto;
 }
 
 header {
@@ -40,15 +40,15 @@ header > p:last-child {
 
 form {
   display: block;
-  column-width: 440px;
-  column-gap: 20px;
+  column-width: 340px;
+  column-gap: 18px;
 }
 
 fieldset {
   display: grid;
   gap: 14px;
-  padding: 20px;
-  margin: 0 0 20px;
+  padding: 18px;
+  margin: 0 0 18px;
   border: 1px solid #c9b77f;
   background: #fff;
   break-inside: avoid;
@@ -56,6 +56,25 @@ fieldset {
 
 .actions {
   column-span: all;
+}
+
+/* The Layout box has the most controls. Span the full width and grid its
+   inputs so it stays short instead of forcing a tall, scroll-heavy column. */
+#gvn-layout {
+  column-span: all;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  align-content: start;
+  gap: 10px 24px;
+}
+
+#gvn-layout > legend,
+#gvn-layout > .hint {
+  grid-column: 1 / -1;
+}
+
+#gvn-layout label:not(.check) {
+  grid-template-columns: 1fr 84px;
+  gap: 10px;
 }
 
 legend {
