@@ -93,13 +93,20 @@ fieldset {
   grid-column: 1 / -1;
 }
 
+/* Align each row into a grid (right-aligned label + fixed input) so all the
+   input boxes line up in straight vertical columns instead of centred pairs. */
 #gvn-layout label:not(.check) {
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr 96px;
+  align-items: center;
+  justify-content: stretch;
+  gap: 10px;
+  text-align: right;
 }
 
 #gvn-layout label:not(.check) > input,
 #gvn-layout label:not(.check) > select {
-  width: 84px;
+  width: 96px;
 }
 
 #gvn-layout input[type="number"],
