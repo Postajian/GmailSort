@@ -65,24 +65,21 @@ fieldset {
   border-top: 2px solid #c9b77f;
 }
 
-/* The Layout box has the most controls. Span the full width and grid its
-   inputs so it stays short instead of forcing a tall, scroll-heavy column. */
+/* The Layout box has the most controls. Keep it in the normal column flow
+   (right after Auto-sort) but compact, so it sits up with the other boxes
+   instead of becoming a full-width band you have to scroll down to. */
 #gvn-layout {
-  column-span: all;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  align-content: start;
-  gap: 10px 24px;
-}
-
-#gvn-layout > legend,
-#gvn-layout > .hint,
-#gvn-layout > .row {
-  grid-column: 1 / -1;
+  gap: 8px;
 }
 
 #gvn-layout label:not(.check) {
-  grid-template-columns: 1fr 84px;
-  gap: 10px;
+  grid-template-columns: 1fr 76px;
+  gap: 8px;
+}
+
+#gvn-layout input[type="number"],
+#gvn-layout input[type="text"] {
+  padding: 6px 8px;
 }
 
 legend {
