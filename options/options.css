@@ -56,6 +56,13 @@ fieldset {
 
 .actions {
   column-span: all;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin-top: 10px;
+  padding: 12px 4px;
+  background: #f4f0e7;
+  border-top: 2px solid #c9b77f;
 }
 
 /* The Layout box has the most controls. Span the full width and grid its
