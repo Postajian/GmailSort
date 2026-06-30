@@ -59,10 +59,11 @@ fieldset {
   border: 1px solid #c9b77f;
   background: #fff;
   align-content: start;
-  /* Stop long unbreakable text (e.g. the shortcut line) from blowing a grid
-     item wider than its column and overlapping the next box. */
+  /* Stop a grid item from blowing wider than its column and overlapping the
+     next box. min-width:0 is the real fix; break-word only splits a word when
+     it genuinely can't fit (won't mangle "Alt+Shift+G" or "Zen mode"). */
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .actions {
