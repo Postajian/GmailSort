@@ -18,6 +18,7 @@ main {
   width: calc(100% - 32px);
   max-width: none;
   margin: 28px auto;
+  text-align: center;
 }
 
 header {
@@ -93,8 +94,12 @@ fieldset {
 }
 
 #gvn-layout label:not(.check) {
-  grid-template-columns: 1fr 76px;
   gap: 8px;
+}
+
+#gvn-layout label:not(.check) > input,
+#gvn-layout label:not(.check) > select {
+  width: 84px;
 }
 
 #gvn-layout input[type="number"],
@@ -105,13 +110,22 @@ fieldset {
 legend {
   padding: 0 8px;
   font: 700 20px "Times New Roman", serif;
+  text-align: center;
+  width: 100%;
 }
 
 label:not(.check) {
-  display: grid;
-  grid-template-columns: 1fr 180px;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 20px;
+  justify-content: center;
+  gap: 12px;
+}
+
+label:not(.check) > input,
+label:not(.check) > select {
+  flex: 0 0 auto;
+  width: 160px;
 }
 
 input[type="text"],
@@ -125,13 +139,16 @@ input[type="number"] {
 .check {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
+  text-align: left;
 }
 
 .row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 10px;
 }
 
@@ -157,6 +174,7 @@ input[type="number"] {
 .actions {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
 }
 
