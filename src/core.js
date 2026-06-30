@@ -19,6 +19,9 @@
     debugTools: false,
     unreadEmphasis: true,
     groupUnreadCounts: true,
+    showDigest: false,
+    showStats: false,
+    groupByDomain: false,
     mergeTabsRow: true,
     hideTabPromotions: false,
     hideTabSocial: false,
@@ -174,6 +177,9 @@
       debugTools: value.debugTools === true,
       unreadEmphasis: value.unreadEmphasis !== false,
       groupUnreadCounts: value.groupUnreadCounts !== false,
+      showDigest: value.showDigest === true,
+      showStats: value.showStats === true,
+      groupByDomain: value.groupByDomain === true,
       mergeTabsRow: value.mergeTabsRow !== false,
       hideTabPromotions: value.hideTabPromotions === true,
       hideTabSocial: value.hideTabSocial === true,
@@ -479,6 +485,71 @@
     }).join(' OR ');
   }
 
+  // ----- Inbox summary (front-page digest + stats panel) --------------------
+  // Aggregate the visible inbox rows into counts the panel can render. Pure +
+  // testable: each record is { name, email, domain, unread, group }. Returns
+  // totals, the busiest senders (by message count), and per-period volume in
+  // the encounter order (rows arrive already date-sorted by Gmail).
+  function summarizeInbox(records, options) {
+    var topLimit = clampNumber(options && options.topLimit, 1, 50, 5);
+    var list = Array.isArray(records) ? records : [];
+    var total = 0;
+    var unread = 0;
+    var senderMap = {};
+    var senderOrder = [];
+    var groupMap = {};
+    var groupOrder = [];
+
+    list.forEach(function (record) {
+      if (!record) return;
+      total += 1;
+      var isUnread = !!record.unread;
+      if (isUnread) unread += 1;
+
+      var key = String(
+        record.domain || record.email || record.name || 'unknown'
+      ).toLowerCase();
+      if (!senderMap[key]) {
+        senderMap[key] = {
+          key: key,
+          label: String(record.name || record.domain || record.email || 'unknown'),
+          domain: String(record.domain || ''),
+          count: 0,
+          unread: 0
+        };
+        senderOrder.push(key);
+      }
+      senderMap[key].count += 1;
+      if (isUnread) senderMap[key].unread += 1;
+
+      var group = String(record.group || 'OLDER');
+      if (!groupMap[group]) {
+        groupMap[group] = { name: group, count: 0, unread: 0 };
+        groupOrder.push(group);
+      }
+      groupMap[group].count += 1;
+      if (isUnread) groupMap[group].unread += 1;
+    });
+
+    var topSenders = senderOrder
+      .map(function (key) { return senderMap[key]; })
+      .sort(function (a, b) {
+        return (b.count - a.count) || (b.unread - a.unread) ||
+          a.label.localeCompare(b.label);
+      })
+      .slice(0, topLimit);
+
+    var groups = groupOrder.map(function (name) { return groupMap[name]; });
+
+    return {
+      total: total,
+      unread: unread,
+      senderCount: senderOrder.length,
+      topSenders: topSenders,
+      groups: groups
+    };
+  }
+
   // ----- Smart sender rules -------------------------------------------------
   // A map of sender domain -> rule. Rules tag a sender's rows so the inbox can
   // emphasise (vip), dim (mute) or hide them. Pure + testable; the content
@@ -557,6 +628,7 @@
     SENDER_RULES: SENDER_RULES,
     normalizeSenderRules: normalizeSenderRules,
     senderRuleFor: senderRuleFor,
+    summarizeInbox: summarizeInbox,
     orderLabels: orderLabels,
     TRIAL_DAYS: TRIAL_DAYS,
     licenseState: licenseState,

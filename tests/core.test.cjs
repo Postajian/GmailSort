@@ -136,6 +136,44 @@ test('theme defaults to light and accepts the four preset palettes', () => {
   assert.equal(core.normalizeSettings({ theme: 'rainbow' }).theme, 'light');
 });
 
+test('front-page and group-by-domain toggles default off and accept booleans', () => {
+  assert.equal(core.DEFAULT_SETTINGS.showDigest, false);
+  assert.equal(core.DEFAULT_SETTINGS.showStats, false);
+  assert.equal(core.DEFAULT_SETTINGS.groupByDomain, false);
+  const on = core.normalizeSettings({ showDigest: true, showStats: true, groupByDomain: true });
+  assert.equal(on.showDigest, true);
+  assert.equal(on.showStats, true);
+  assert.equal(on.groupByDomain, true);
+  assert.equal(core.normalizeSettings({ showDigest: 'yes' }).showDigest, false);
+});
+
+test('summarizeInbox totals, ranks busiest senders, and buckets by period', () => {
+  const records = [
+    { name: 'PayPal', domain: 'paypal.com', unread: true, group: 'LAST 24 HOURS' },
+    { name: 'PayPal', domain: 'paypal.com', unread: false, group: 'LAST 24 HOURS' },
+    { name: 'PayPal', domain: 'paypal.com', unread: false, group: 'LAST 7 DAYS' },
+    { name: 'LinkedIn', domain: 'linkedin.com', unread: true, group: 'LAST 24 HOURS' },
+    { name: 'Bank', domain: 'bank.com', unread: false, group: 'LAST 7 DAYS' }
+  ];
+  const summary = core.summarizeInbox(records, { topLimit: 2 });
+  assert.equal(summary.total, 5);
+  assert.equal(summary.unread, 2);
+  assert.equal(summary.senderCount, 3);
+  assert.equal(summary.topSenders.length, 2);
+  assert.equal(summary.topSenders[0].domain, 'paypal.com');
+  assert.equal(summary.topSenders[0].count, 3);
+  assert.equal(summary.groups.length, 2);
+  assert.equal(summary.groups[0].name, 'LAST 24 HOURS');
+  assert.equal(summary.groups[0].count, 3);
+});
+
+test('summarizeInbox is safe on empty or missing input', () => {
+  const empty = core.summarizeInbox([], {});
+  assert.equal(empty.total, 0);
+  assert.equal(empty.topSenders.length, 0);
+  assert.equal(core.summarizeInbox(null).total, 0);
+});
+
 test('normalizeSenderRules keeps only valid rules for cleaned domains', () => {
   const rules = core.normalizeSenderRules({
     'WWW.PayPal.com': 'vip',

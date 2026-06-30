@@ -82,6 +82,7 @@
     logoOverrides: {},
     senderRules: {},
     pinnedLabels: [],
+    inboxRecords: [],
     listeners: []
   };
 
@@ -1797,6 +1798,10 @@
     document.querySelectorAll('[data-gvn-rule]').forEach(function (node) {
       node.removeAttribute('data-gvn-rule');
     });
+    document.querySelectorAll('[data-gvn-domain]').forEach(function (node) {
+      node.removeAttribute('data-gvn-domain');
+      node.style.removeProperty('--gvn-domain-color');
+    });
     document.querySelectorAll('tr.zA .brd').forEach(function (node) {
       node.style.removeProperty('--gvn-attachment-shift');
     });
@@ -1807,6 +1812,7 @@
     if (globalDividers) globalDividers.remove();
     var dividers = document.getElementById('gmail-view-next-dividers');
     if (dividers) dividers.remove();
+    removeFrontPage();
   }
 
   function clearLabelDecorations() {
@@ -1827,9 +1833,169 @@
     state.labelHeader = null;
   }
 
+  var FRONTPAGE_ID = 'gmail-view-next-frontpage';
+
+  function removeFrontPage() {
+    var existing = document.getElementById(FRONTPAGE_ID);
+    if (existing) existing.remove();
+  }
+
+  function fpStat(label, value) {
+    var box = document.createElement('div');
+    box.className = 'gvn-fp-stat';
+    var num = document.createElement('span');
+    num.className = 'gvn-fp-stat-num';
+    num.textContent = String(value);
+    var cap = document.createElement('span');
+    cap.className = 'gvn-fp-stat-cap';
+    cap.textContent = label;
+    box.appendChild(num);
+    box.appendChild(cap);
+    return box;
+  }
+
+  function fpBarRow(label, count, unread, max) {
+    var line = document.createElement('div');
+    line.className = 'gvn-fp-bar-row';
+    var name = document.createElement('span');
+    name.className = 'gvn-fp-bar-label';
+    name.textContent = label;
+    name.title = label;
+    var track = document.createElement('span');
+    track.className = 'gvn-fp-bar-track';
+    var fill = document.createElement('span');
+    fill.className = 'gvn-fp-bar-fill';
+    var pct = max > 0 ? Math.round((count / max) * 100) : 0;
+    fill.style.width = Math.max(2, pct) + '%';
+    track.appendChild(fill);
+    var value = document.createElement('span');
+    value.className = 'gvn-fp-bar-value';
+    value.textContent = unread > 0 ? count + ' (' + unread + ' new)' : String(count);
+    line.appendChild(name);
+    line.appendChild(track);
+    line.appendChild(value);
+    return line;
+  }
+
+  function fpSection(title) {
+    var section = document.createElement('div');
+    section.className = 'gvn-fp-section';
+    var heading = document.createElement('div');
+    heading.className = 'gvn-fp-heading';
+    heading.textContent = title;
+    section.appendChild(heading);
+    return section;
+  }
+
+  // Front-page briefing + stats: an opt-in newspaper "front page" rendered in
+  // normal flow directly above the inbox table. Re-ensured each refresh so it
+  // survives Gmail re-rendering; removed cleanly when both toggles are off.
+  function renderFrontPage() {
+    var wantDigest = state.settings.showDigest;
+    var wantStats = state.settings.showStats;
+    if (!wantDigest && !wantStats) {
+      removeFrontPage();
+      return;
+    }
+    var table = Adapter.locateInbox().table;
+    if (!table || !table.parentElement) {
+      removeFrontPage();
+      return;
+    }
+
+    var summary = Core.summarizeInbox(state.inboxRecords, { topLimit: 5 });
+    if (!summary.total) {
+      removeFrontPage();
+      return;
+    }
+
+    // A content signature keeps the rebuild idempotent: refresh() runs on a
+    // MutationObserver loop, so re-appending nodes every frame would re-trigger
+    // the observer forever. We only repaint when the numbers actually change.
+    var signature = [
+      wantDigest ? 'd' : '', wantStats ? 's' : '',
+      summary.total, summary.unread, summary.senderCount,
+      summary.topSenders.map(function (s) { return s.key + ':' + s.count + ':' + s.unread; }).join(','),
+      summary.groups.map(function (g) { return g.name + ':' + g.count + ':' + g.unread; }).join(',')
+    ].join('|');
+
+    var panel = document.getElementById(FRONTPAGE_ID);
+    if (!panel) {
+      panel = document.createElement('section');
+      panel.id = FRONTPAGE_ID;
+      panel.setAttribute('aria-label', 'Inbox front page');
+    }
+    if (panel.nextSibling !== table) {
+      table.parentElement.insertBefore(panel, table);
+    }
+    if (panel.getAttribute('data-gvn-sig') === signature) return;
+    panel.setAttribute('data-gvn-sig', signature);
+    panel.textContent = '';
+
+    if (wantDigest) {
+      var digest = document.createElement('div');
+      digest.className = 'gvn-fp-digest';
+      var stats = document.createElement('div');
+      stats.className = 'gvn-fp-stats';
+      stats.appendChild(fpStat('in view', summary.total));
+      stats.appendChild(fpStat('unread', summary.unread));
+      stats.appendChild(fpStat('senders', summary.senderCount));
+      digest.appendChild(stats);
+
+      if (summary.topSenders.length) {
+        var lead = document.createElement('div');
+        lead.className = 'gvn-fp-lead';
+        var leadLabel = document.createElement('span');
+        leadLabel.className = 'gvn-fp-lead-label';
+        leadLabel.textContent = 'Top of the pile';
+        lead.appendChild(leadLabel);
+        summary.topSenders.slice(0, 4).forEach(function (sender) {
+          var chip = document.createElement('span');
+          chip.className = 'gvn-fp-chip';
+          chip.textContent = sender.label + ' · ' + sender.count;
+          chip.title = sender.label + ' — ' + sender.count + ' messages, '
+            + sender.unread + ' unread';
+          lead.appendChild(chip);
+        });
+        digest.appendChild(lead);
+      }
+      panel.appendChild(digest);
+    }
+
+    if (wantStats) {
+      var grid = document.createElement('div');
+      grid.className = 'gvn-fp-grid';
+
+      var sendersSection = fpSection('Busiest senders');
+      var maxSender = summary.topSenders.reduce(function (m, s) {
+        return Math.max(m, s.count);
+      }, 0);
+      summary.topSenders.forEach(function (sender) {
+        sendersSection.appendChild(
+          fpBarRow(sender.label, sender.count, sender.unread, maxSender)
+        );
+      });
+      grid.appendChild(sendersSection);
+
+      var periodSection = fpSection('Activity by period');
+      var maxGroup = summary.groups.reduce(function (m, g) {
+        return Math.max(m, g.count);
+      }, 0);
+      summary.groups.slice(0, 6).forEach(function (group) {
+        periodSection.appendChild(
+          fpBarRow(group.name, group.count, group.unread, maxGroup)
+        );
+      });
+      grid.appendChild(periodSection);
+
+      panel.appendChild(grid);
+    }
+  }
+
   function decorateRows(rows) {
     var now = new Date();
     var previousGroup = null;
+    var records = [];
     var partsList = rows.map(function (row) {
       return Adapter.rowParts(row);
     });
@@ -1872,8 +2038,33 @@
       if (rule) row.setAttribute('data-gvn-rule', rule);
       else row.removeAttribute('data-gvn-rule');
 
+      // Group-by-company: a stable colour bar on the sender column keyed to the
+      // domain, so mail from the same company shares a colour and clusters
+      // visually without reordering Gmail's rows.
+      if (state.settings.groupByDomain && domain) {
+        row.setAttribute('data-gvn-domain', 'true');
+        row.style.setProperty('--gvn-domain-color', Core.stableColor(domain));
+      } else {
+        row.removeAttribute('data-gvn-domain');
+        row.style.removeProperty('--gvn-domain-color');
+      }
+
+      // Hidden senders are excluded from the briefing/stats so the numbers
+      // match what the user actually sees in the list.
+      if (rule !== 'hide') {
+        records.push({
+          name: sender.name,
+          email: sender.email,
+          domain: domain,
+          unread: row.matches(Adapter.SELECTORS.unreadRow),
+          group: group
+        });
+      }
+
       alignAttachments(parts);
     });
+
+    state.inboxRecords = records;
   }
 
   function ensureGlobalDividers() {
@@ -2700,6 +2891,7 @@
       }
 
       decorateRows(rows);
+      renderFrontPage();
       positionOverlay(rows[0]);
       positionGlobalDividers(rows[0]);
       watchTable();
