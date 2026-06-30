@@ -56,6 +56,16 @@ fieldset {
   align-content: start;
 }
 
+/* A little extra breathing room after the first (Behavior) box. */
+form > fieldset:first-of-type {
+  margin-right: 12px;
+}
+
+/* A touch more breathing room to the right of the first (Behavior) box. */
+form > fieldset:first-of-type {
+  margin-right: 12px;
+}
+
 .actions {
   grid-column: 1 / -1;
   position: sticky;
