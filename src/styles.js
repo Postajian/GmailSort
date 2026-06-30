@@ -136,6 +136,13 @@
         + '#gmail-view-next-sidebar-resizer{display:none!important;}'
         + '}',
       '.gvn-label-count{margin-left:6px;font-weight:600;opacity:.7;}',
+      // Sharp 90-degree corners across every GmailView UI element (user preference).
+      '#gmail-view-next-ui,#gmail-view-next-ui *{border-radius:0!important;}',
+      '#gmail-view-next-frontpage,#gmail-view-next-frontpage *{border-radius:0!important;}',
+      '#gmail-view-next-health,#gmail-view-next-health *{border-radius:0!important;}',
+      '#gmail-view-next-sidebar-resizer,#gmail-view-next-sidebar-resizer::after{border-radius:0!important;}',
+      '.gvn-label-check{border-radius:0!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA .xT::before{border-radius:0!important;}',
       // Front-page briefing + stats panel (opt-in, in normal flow above the list)
       '#gmail-view-next-frontpage{display:block;box-sizing:border-box;margin:0 0 6px;padding:12px 16px;background:var(--gvn-band);border:2px solid var(--gvn-rule);border-radius:2px;color:var(--gvn-ink);font-family:' + FONT + ';}',
       '#gmail-view-next-frontpage *{box-sizing:border-box;}',

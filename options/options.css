@@ -9,6 +9,11 @@ body {
   margin: 0;
 }
 
+/* Sharp 90-degree corners everywhere in the settings page (user preference). */
+* {
+  border-radius: 0 !important;
+}
+
 main {
   width: calc(100% - 32px);
   max-width: none;
