@@ -67,11 +67,19 @@ fieldset {
   border-top: 2px solid #c9b77f;
 }
 
-/* The Layout box has the most controls. Keep it in the normal column flow
-   (right after Auto-sort) but compact, so it sits up with the other boxes
-   instead of becoming a full-width band you have to scroll down to. */
+/* The Layout box has the most controls. Make it a double-width card and split
+   its controls into two 50/50 columns so it stays short and tidy. */
 #gvn-layout {
-  gap: 8px;
+  grid-column: span 2;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+  align-content: start;
+}
+
+#gvn-layout > legend,
+#gvn-layout > .hint,
+#gvn-layout > .row {
+  grid-column: 1 / -1;
 }
 
 #gvn-layout label:not(.check) {
