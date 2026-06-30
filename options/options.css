@@ -136,12 +136,16 @@ input[type="number"] {
   border: 1px solid #aaa;
 }
 
+/* Block + centered so the label text (and inline <strong> shortcuts) flow as
+   normal text instead of each word becoming a separate flex item. */
 .check {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  text-align: left;
+  display: block;
+  text-align: center;
+}
+
+.check > input {
+  margin-right: 8px;
+  vertical-align: middle;
 }
 
 .row {
