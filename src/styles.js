@@ -154,6 +154,34 @@
       '#gmail-view-next-frontpage .gvn-fp-bar-track{flex:1 1 auto;height:8px;background:var(--gvn-divider);border-radius:2px;overflow:hidden;}',
       '#gmail-view-next-frontpage .gvn-fp-bar-fill{display:block;height:100%;background:var(--gvn-gold);}',
       '#gmail-view-next-frontpage .gvn-fp-bar-value{flex:0 0 auto;color:var(--gvn-muted);font-variant-numeric:tabular-nums;white-space:nowrap;}',
+      // Quick-filter bar (chips at the top of the front page)
+      '#gmail-view-next-frontpage .gvn-fp-filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px;padding:0 0 10px;border-bottom:1px solid var(--gvn-divider);}',
+      '#gmail-view-next-frontpage .gvn-fp-filters-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gvn-muted);margin-right:2px;}',
+      '#gmail-view-next-frontpage .gvn-fp-filter{font-family:' + FONT + ';font-size:13px;font-weight:700;padding:4px 12px;background:var(--gvn-band);color:var(--gvn-ink);border:1px solid var(--gvn-rule);border-radius:2px;cursor:pointer;}',
+      '#gmail-view-next-frontpage .gvn-fp-filter:hover{background:var(--gvn-gold);color:#1a1a1a;}',
+      // Clickable digest chips + sender rows
+      '#gmail-view-next-frontpage .gvn-fp-chip{cursor:pointer;}',
+      '#gmail-view-next-frontpage .gvn-fp-chip:hover{background:var(--gvn-gold);color:#1a1a1a;border-color:var(--gvn-gold);}',
+      '#gmail-view-next-frontpage .gvn-fp-bar-label{cursor:pointer;}',
+      '#gmail-view-next-frontpage .gvn-fp-bar-row:hover .gvn-fp-bar-label{color:var(--gvn-gold);text-decoration:underline;}',
+      // Bulk sender actions (per busiest-sender row)
+      '#gmail-view-next-frontpage .gvn-fp-acts{display:inline-flex;gap:4px;margin-left:8px;}',
+      '#gmail-view-next-frontpage .gvn-fp-act{font-family:' + FONT + ';font-size:10px;font-weight:700;line-height:1;padding:3px 6px;background:var(--gvn-band);color:var(--gvn-muted);border:1px solid var(--gvn-divider);border-radius:2px;cursor:pointer;text-transform:uppercase;letter-spacing:.04em;}',
+      '#gmail-view-next-frontpage .gvn-fp-act:hover{color:#1a1a1a;background:var(--gvn-gold);border-color:var(--gvn-gold);}',
+      // Domain colour legend
+      '#gmail-view-next-frontpage .gvn-fp-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;padding-top:10px;border-top:1px solid var(--gvn-divider);}',
+      '#gmail-view-next-frontpage .gvn-fp-legend-item{display:inline-flex;align-items:center;gap:6px;font-size:12px;}',
+      '#gmail-view-next-frontpage .gvn-fp-legend-swatch{width:12px;height:12px;border-radius:2px;flex:0 0 auto;}',
+      // Zen mode: strip the sidebar, app rail and category tabs for a clean column.
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-zen="true"] [data-gvn-sidebar-host="true"]{display:none!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-zen="true"] .aKh{display:none!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-zen="true"] .bAw:not(:has(.IU)),html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-zen="true"] .aUx:not(:has(.IU)){display:none!important;}',
+      // Sci-fi accent pass: subtle gold glow on the panels, bars and masthead.
+      '@keyframes gvnScifiPulse{0%,100%{box-shadow:0 0 0 1px var(--gvn-gold),0 0 10px rgba(201,168,76,.18);}50%{box-shadow:0 0 0 1px var(--gvn-gold),0 0 22px rgba(201,168,76,.45);}}',
+      'html[data-gvn-scifi="true"] #gmail-view-next-frontpage{animation:gvnScifiPulse 4s ease-in-out infinite;}',
+      'html[data-gvn-scifi="true"] #gmail-view-next-frontpage .gvn-fp-bar-fill{background:var(--gvn-gold);box-shadow:0 0 8px rgba(201,168,76,.65);}',
+      'html[data-gvn-scifi="true"] #gmail-view-next-frontpage .gvn-fp-stat-num{text-shadow:0 0 10px rgba(201,168,76,.6);color:var(--gvn-gold);}',
+      'html[data-gvn-scifi="true"][data-gvn-active="true"][data-gvn-route="inbox"] #gmail-view-next-ui .gvn-masthead{text-shadow:0 0 10px rgba(201,168,76,.55);}',
       '#gmail-view-next-health{position:fixed;z-index:2147483647;top:12px;left:50%;transform:translateX(-50%);max-width:540px;display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff8e1;color:#5f4b00;border:1px solid #e0c200;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.18);font:13px/1.45 Arial,sans-serif;}',
       '#gmail-view-next-health button{flex:0 0 auto;border:1px solid #b58900;background:#fff;color:#5f4b00;border-radius:5px;padding:4px 10px;font:600 12px Arial,sans-serif;cursor:pointer;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA:hover td.bq4 .T-I{opacity:1!important;visibility:visible!important;}',

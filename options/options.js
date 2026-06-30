@@ -523,4 +523,155 @@
       });
     });
   }
+
+  // ----- Density presets ------------------------------------------------
+  var DENSITY_PRESETS = {
+    compact: { density: 'compact', rowHeight: 32 },
+    comfortable: { density: 'comfortable', rowHeight: 38 },
+    newspaper: {
+      density: 'comfortable', rowHeight: 46, senderFontSize: 15,
+      subjectFontSize: 15, previewFontSize: 15, groupFontSize: 16, inboxBold: true
+    }
+  };
+  Array.prototype.forEach.call(
+    document.querySelectorAll('[data-density-preset]'),
+    function (btn) {
+      btn.addEventListener('click', function () {
+        var bundle = DENSITY_PRESETS[btn.getAttribute('data-density-preset')];
+        if (!bundle) return;
+        var merged = Core.normalizeSettings(Object.assign({}, formValues(), bundle));
+        setForm(merged);
+        safeSyncSet(merged, function (error) {
+          showStatus(error ? 'Could not apply.' : 'Applied density preset.');
+        });
+      });
+    }
+  );
+
+  // ----- Full backup (settings + local rules/colours/pins/presets) ------
+  var LOCAL_BACKUP_KEYS = [
+    'gmailViewNextSenderRules',
+    'gmailViewNextLogoOverrides',
+    'gmailViewNextPinnedLabels',
+    'gmailViewNextPresets',
+    'gmailViewNextLabelTypography'
+  ];
+  var exportAllBtn = document.getElementById('export-all');
+  var importAllBtn = document.getElementById('import-all-btn');
+  var importAllFile = document.getElementById('import-all-file');
+
+  function downloadJson(obj, suffix) {
+    var blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    var stamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    link.href = url;
+    link.download = 'gmailview-' + suffix + '-' + stamp + '.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  // Keep only well-formed local data so a hand-edited file can't poison storage.
+  function sanitizeLocalBackup(local) {
+    var clean = {};
+    var src = (local && typeof local === 'object') ? local : {};
+
+    clean.gmailViewNextSenderRules =
+      Core.normalizeSenderRules(src.gmailViewNextSenderRules);
+
+    var colours = {};
+    var rawColours = src.gmailViewNextLogoOverrides;
+    if (rawColours && typeof rawColours === 'object') {
+      Object.keys(rawColours).forEach(function (domain) {
+        var value = String(rawColours[domain] || '').trim();
+        if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)) {
+          colours[String(domain).toLowerCase()] = value;
+        }
+      });
+    }
+    clean.gmailViewNextLogoOverrides = colours;
+
+    clean.gmailViewNextPinnedLabels = Array.isArray(src.gmailViewNextPinnedLabels)
+      ? src.gmailViewNextPinnedLabels.map(String).filter(Boolean).slice(0, 500)
+      : [];
+
+    var presets = {};
+    var rawPresets = src.gmailViewNextPresets;
+    if (rawPresets && typeof rawPresets === 'object') {
+      Object.keys(rawPresets).slice(0, 200).forEach(function (name) {
+        presets[String(name).slice(0, 40)] = Core.normalizeSettings(rawPresets[name]);
+      });
+    }
+    clean.gmailViewNextPresets = presets;
+
+    clean.gmailViewNextLabelTypography =
+      (src.gmailViewNextLabelTypography && typeof src.gmailViewNextLabelTypography === 'object')
+        ? src.gmailViewNextLabelTypography
+        : {};
+
+    return clean;
+  }
+
+  if (exportAllBtn) {
+    exportAllBtn.addEventListener('click', function () {
+      safeLocalGet(LOCAL_BACKUP_KEYS, function (localData, error) {
+        downloadJson({
+          type: 'gmail-view-next-backup',
+          version: Core.LAYOUT_VERSION,
+          savedAt: new Date().toISOString(),
+          settings: formValues(),
+          local: (!error && localData) ? localData : {}
+        }, 'backup');
+        showStatus('Exported everything.');
+      });
+    });
+  }
+
+  if (importAllBtn && importAllFile) {
+    importAllBtn.addEventListener('click', function () { importAllFile.click(); });
+    importAllFile.addEventListener('change', function () {
+      var file = importAllFile.files && importAllFile.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        var parsed;
+        try {
+          parsed = JSON.parse(String(reader.result));
+        } catch (parseError) {
+          showStatus('Invalid file — not valid JSON.');
+          importAllFile.value = '';
+          return;
+        }
+        if (!parsed || typeof parsed !== 'object' || !parsed.settings) {
+          showStatus('Invalid file — no backup found.');
+          importAllFile.value = '';
+          return;
+        }
+        if (!window.confirm('Replace your settings AND your rules, colours, pinned labels and presets with this backup?')) {
+          importAllFile.value = '';
+          return;
+        }
+        var cleanSettings = Core.normalizeSettings(parsed.settings);
+        var cleanLocal = sanitizeLocalBackup(parsed.local);
+        setForm(cleanSettings);
+        safeSyncSet(cleanSettings, function (syncError) {
+          safeLocalSet(cleanLocal, function (localError) {
+            if (typeof renderRules === 'function') renderRules(cleanLocal.gmailViewNextSenderRules);
+            if (typeof renderOverrides === 'function') renderOverrides(cleanLocal.gmailViewNextLogoOverrides);
+            if (typeof renderPinned === 'function') renderPinned(cleanLocal.gmailViewNextPinnedLabels);
+            if (typeof refreshPresets === 'function') refreshPresets();
+            showStatus((syncError || localError) ? 'Imported with some errors.' : 'Imported everything.');
+          });
+        });
+        importAllFile.value = '';
+      };
+      reader.onerror = function () {
+        showStatus('Could not read the file.');
+        importAllFile.value = '';
+      };
+      reader.readAsText(file);
+    });
+  }
 })();

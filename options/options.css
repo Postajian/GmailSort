@@ -68,7 +68,8 @@ fieldset {
 }
 
 #gvn-layout > legend,
-#gvn-layout > .hint {
+#gvn-layout > .hint,
+#gvn-layout > .row {
   grid-column: 1 / -1;
 }
 

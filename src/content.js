@@ -412,6 +412,8 @@
     root.setAttribute('data-gvn-hide-tab-updates', String(state.settings.hideTabUpdates));
     root.setAttribute('data-gvn-hide-tab-forums', String(state.settings.hideTabForums));
     root.setAttribute('data-gvn-focus', String(state.settings.focusMode));
+    root.setAttribute('data-gvn-zen', String(state.settings.zenMode));
+    root.setAttribute('data-gvn-scifi', String(state.settings.sciFiAccents));
     root.setAttribute('data-gvn-tab-order', state.settings.tabOrder);
     root.setAttribute('data-gvn-hide-rail', String(state.settings.hideRail));
     root.setAttribute('data-gvn-color-labels', String(state.settings.colorLabels));
@@ -1834,10 +1836,70 @@
   }
 
   var FRONTPAGE_ID = 'gmail-view-next-frontpage';
+  var QUICK_FILTERS = [
+    { key: 'unread', label: 'Unread', query: 'is:unread in:inbox' },
+    { key: 'attach', label: 'Attachments', query: 'has:attachment in:inbox' },
+    { key: 'today', label: 'Today', query: 'newer_than:1d in:inbox' },
+    { key: 'all', label: 'All mail', query: '' }
+  ];
 
   function removeFrontPage() {
     var existing = document.getElementById(FRONTPAGE_ID);
     if (existing) existing.remove();
+  }
+
+  // Apply a sender rule (vip/mute/hide) for a whole domain in one click — the
+  // "bulk sender action": it tags every message from that sender. Clicking the
+  // same rule again clears it. Reuses the same store the Options editor writes.
+  function applySenderRuleQuick(domain, rule) {
+    var clean = String(domain || '').trim().toLowerCase();
+    if (!clean || !Core.SENDER_RULES[rule]) return;
+    var next = Object.assign({}, state.senderRules);
+    if (next[clean] === rule) delete next[clean];
+    else next[clean] = rule;
+    state.senderRules = Core.normalizeSenderRules(next);
+    var payload = {};
+    payload[SENDER_RULES_KEY] = state.senderRules;
+    safeStorageSet('local', payload, function (error) {
+      reportApiError('Could not save sender rule.', error);
+    });
+    scheduleRefresh();
+  }
+
+  function onFrontPageClick(event) {
+    var act = event.target.closest('[data-gvn-rule-domain]');
+    if (act) {
+      applySenderRuleQuick(
+        act.getAttribute('data-gvn-rule-domain'),
+        act.getAttribute('data-gvn-rule-set')
+      );
+      return;
+    }
+    var nav = event.target.closest('[data-gvn-search]');
+    if (nav) {
+      var hash = nav.getAttribute('data-gvn-search');
+      if (hash && location.hash !== hash) location.hash = hash;
+    }
+  }
+
+  function fpFilterButton(label, query) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'gvn-fp-filter';
+    btn.textContent = label;
+    btn.setAttribute('data-gvn-search', Core.gmailSearchHash(query));
+    return btn;
+  }
+
+  function fpRuleButton(domain, rule, label) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'gvn-fp-act';
+    btn.textContent = label;
+    btn.title = label + ' all mail from ' + domain;
+    btn.setAttribute('data-gvn-rule-domain', domain);
+    btn.setAttribute('data-gvn-rule-set', rule);
+    return btn;
   }
 
   function fpStat(label, value) {
@@ -1893,7 +1955,9 @@
   function renderFrontPage() {
     var wantDigest = state.settings.showDigest;
     var wantStats = state.settings.showStats;
-    if (!wantDigest && !wantStats) {
+    var wantFilters = state.settings.showQuickFilters;
+    var wantLegend = state.settings.groupByDomain;
+    if (!wantDigest && !wantStats && !wantFilters) {
       removeFrontPage();
       return;
     }
@@ -1913,7 +1977,8 @@
     // MutationObserver loop, so re-appending nodes every frame would re-trigger
     // the observer forever. We only repaint when the numbers actually change.
     var signature = [
-      wantDigest ? 'd' : '', wantStats ? 's' : '',
+      wantDigest ? 'd' : '', wantStats ? 's' : '', wantFilters ? 'q' : '',
+      wantLegend ? 'g' : '', Core.vipDomainsQuery(state.senderRules) ? 'v' : '',
       summary.total, summary.unread, summary.senderCount,
       summary.topSenders.map(function (s) { return s.key + ':' + s.count + ':' + s.unread; }).join(','),
       summary.groups.map(function (g) { return g.name + ':' + g.count + ':' + g.unread; }).join(',')
@@ -1924,6 +1989,7 @@
       panel = document.createElement('section');
       panel.id = FRONTPAGE_ID;
       panel.setAttribute('aria-label', 'Inbox front page');
+      panel.addEventListener('click', onFrontPageClick);
     }
     if (panel.nextSibling !== table) {
       table.parentElement.insertBefore(panel, table);
@@ -1931,6 +1997,21 @@
     if (panel.getAttribute('data-gvn-sig') === signature) return;
     panel.setAttribute('data-gvn-sig', signature);
     panel.textContent = '';
+
+    if (wantFilters) {
+      var filters = document.createElement('div');
+      filters.className = 'gvn-fp-filters';
+      var filtersLabel = document.createElement('span');
+      filtersLabel.className = 'gvn-fp-filters-label';
+      filtersLabel.textContent = 'Jump to';
+      filters.appendChild(filtersLabel);
+      var vipQuery = Core.vipDomainsQuery(state.senderRules);
+      if (vipQuery) filters.appendChild(fpFilterButton('VIPs', vipQuery));
+      QUICK_FILTERS.forEach(function (filter) {
+        filters.appendChild(fpFilterButton(filter.label, filter.query));
+      });
+      panel.appendChild(filters);
+    }
 
     if (wantDigest) {
       var digest = document.createElement('div');
@@ -1953,8 +2034,13 @@
           var chip = document.createElement('span');
           chip.className = 'gvn-fp-chip';
           chip.textContent = sender.label + ' · ' + sender.count;
-          chip.title = sender.label + ' — ' + sender.count + ' messages, '
-            + sender.unread + ' unread';
+          chip.title = sender.domain
+            ? 'Show all mail from ' + sender.label
+            : sender.label + ' — ' + sender.count + ' messages, ' + sender.unread + ' unread';
+          if (sender.domain) {
+            chip.setAttribute('data-gvn-search',
+              Core.gmailSearchHash('from:' + sender.domain + ' in:inbox'));
+          }
           lead.appendChild(chip);
         });
         digest.appendChild(lead);
@@ -1971,9 +2057,21 @@
         return Math.max(m, s.count);
       }, 0);
       summary.topSenders.forEach(function (sender) {
-        sendersSection.appendChild(
-          fpBarRow(sender.label, sender.count, sender.unread, maxSender)
-        );
+        var row = fpBarRow(sender.label, sender.count, sender.unread, maxSender);
+        if (sender.domain) {
+          var nameEl = row.querySelector('.gvn-fp-bar-label');
+          if (nameEl) {
+            nameEl.setAttribute('data-gvn-search',
+              Core.gmailSearchHash('from:' + sender.domain + ' in:inbox'));
+          }
+          var acts = document.createElement('span');
+          acts.className = 'gvn-fp-acts';
+          acts.appendChild(fpRuleButton(sender.domain, 'vip', 'VIP'));
+          acts.appendChild(fpRuleButton(sender.domain, 'mute', 'Mute'));
+          acts.appendChild(fpRuleButton(sender.domain, 'hide', 'Hide'));
+          row.appendChild(acts);
+        }
+        sendersSection.appendChild(row);
       });
       grid.appendChild(sendersSection);
 
@@ -1989,6 +2087,29 @@
       grid.appendChild(periodSection);
 
       panel.appendChild(grid);
+    }
+
+    if (wantLegend && summary.topSenders.length) {
+      var legend = document.createElement('div');
+      legend.className = 'gvn-fp-legend';
+      var legendLabel = document.createElement('span');
+      legendLabel.className = 'gvn-fp-filters-label';
+      legendLabel.textContent = 'Company colours';
+      legend.appendChild(legendLabel);
+      summary.topSenders.forEach(function (sender) {
+        if (!sender.domain) return;
+        var item = document.createElement('span');
+        item.className = 'gvn-fp-legend-item';
+        var swatch = document.createElement('span');
+        swatch.className = 'gvn-fp-legend-swatch';
+        swatch.style.background = Core.stableColor(sender.domain);
+        var nameEl = document.createElement('span');
+        nameEl.textContent = sender.domain;
+        item.appendChild(swatch);
+        item.appendChild(nameEl);
+        legend.appendChild(item);
+      });
+      panel.appendChild(legend);
     }
   }
 
@@ -2960,6 +3081,8 @@
     document.documentElement.removeAttribute('data-gvn-hide-tab-updates');
     document.documentElement.removeAttribute('data-gvn-hide-tab-forums');
     document.documentElement.removeAttribute('data-gvn-focus');
+    document.documentElement.removeAttribute('data-gvn-zen');
+    document.documentElement.removeAttribute('data-gvn-scifi');
     document.documentElement.removeAttribute('data-gvn-tab-order');
     document.documentElement.removeAttribute('data-gvn-hide-rail');
     document.documentElement.removeAttribute('data-gvn-color-labels');
@@ -3118,6 +3241,24 @@
     scheduleRefresh();
   }
 
+  // Alt+Shift+Z toggles Zen mode (hide sidebar, rail, tabs for a clean reading
+  // column). Flips `zenMode` in sync storage and applies it instantly.
+  function handleZenHotkey(event) {
+    if (!state.settings || state.settings.toggleHotkey === false) return;
+    if (!event.altKey || !event.shiftKey || event.ctrlKey || event.metaKey) return;
+    var isZ = event.code === 'KeyZ' || String(event.key || '').toLowerCase() === 'z';
+    if (!isZ) return;
+    var el = document.activeElement;
+    if (el && (el.isContentEditable ||
+      /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName || ''))) return;
+    event.preventDefault();
+    var next = !state.settings.zenMode;
+    safeStorageSet('sync', { zenMode: next });
+    state.settings.zenMode = next;
+    updateRootFlags();
+    scheduleRefresh();
+  }
+
   // Alt+Shift+P opens the print dialog (Save as PDF). The @media print rules
   // make the inbox print as a clean black-on-white newspaper page.
   function handlePrintHotkey(event) {
@@ -3149,6 +3290,7 @@
     state.observer.observe(document.body, { childList: true, subtree: true });
 
     addListener(window, 'keydown', handleToggleHotkey, true);
+    addListener(window, 'keydown', handleZenHotkey, true);
     addListener(window, 'keydown', handlePrintHotkey, true);
     addListener(window, 'hashchange', maybeRollupLabel);
     addListener(window, 'hashchange', scheduleRefresh);

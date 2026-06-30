@@ -147,6 +147,30 @@ test('front-page and group-by-domain toggles default off and accept booleans', (
   assert.equal(core.normalizeSettings({ showDigest: 'yes' }).showDigest, false);
 });
 
+test('quick filters, zen mode and sci-fi accents default off and accept booleans', () => {
+  assert.equal(core.DEFAULT_SETTINGS.showQuickFilters, false);
+  assert.equal(core.DEFAULT_SETTINGS.zenMode, false);
+  assert.equal(core.DEFAULT_SETTINGS.sciFiAccents, false);
+  const on = core.normalizeSettings({ showQuickFilters: true, zenMode: true, sciFiAccents: true });
+  assert.equal(on.showQuickFilters, true);
+  assert.equal(on.zenMode, true);
+  assert.equal(on.sciFiAccents, true);
+  assert.equal(core.normalizeSettings({ zenMode: 1 }).zenMode, false);
+});
+
+test('gmailSearchHash encodes queries and falls back to inbox', () => {
+  assert.equal(core.gmailSearchHash('is:unread in:inbox'), '#search/' + encodeURIComponent('is:unread in:inbox'));
+  assert.equal(core.gmailSearchHash('  '), '#inbox');
+  assert.equal(core.gmailSearchHash(''), '#inbox');
+});
+
+test('vipDomainsQuery builds an OR query from VIP-tagged domains only', () => {
+  const rules = core.normalizeSenderRules({ 'paypal.com': 'vip', 'bank.com': 'vip', 'spam.io': 'hide' });
+  assert.equal(core.vipDomainsQuery(rules), 'from:(paypal.com OR bank.com) in:inbox');
+  assert.equal(core.vipDomainsQuery(core.normalizeSenderRules({ 'x.com': 'mute' })), '');
+  assert.equal(core.vipDomainsQuery({}), '');
+});
+
 test('summarizeInbox totals, ranks busiest senders, and buckets by period', () => {
   const records = [
     { name: 'PayPal', domain: 'paypal.com', unread: true, group: 'LAST 24 HOURS' },

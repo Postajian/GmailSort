@@ -21,7 +21,10 @@
     groupUnreadCounts: true,
     showDigest: false,
     showStats: false,
+    showQuickFilters: false,
     groupByDomain: false,
+    zenMode: false,
+    sciFiAccents: false,
     mergeTabsRow: true,
     hideTabPromotions: false,
     hideTabSocial: false,
@@ -179,7 +182,10 @@
       groupUnreadCounts: value.groupUnreadCounts !== false,
       showDigest: value.showDigest === true,
       showStats: value.showStats === true,
+      showQuickFilters: value.showQuickFilters === true,
       groupByDomain: value.groupByDomain === true,
+      zenMode: value.zenMode === true,
+      sciFiAccents: value.sciFiAccents === true,
       mergeTabsRow: value.mergeTabsRow !== false,
       hideTabPromotions: value.hideTabPromotions === true,
       hideTabSocial: value.hideTabSocial === true,
@@ -582,6 +588,24 @@
     return Object.prototype.hasOwnProperty.call(rules, clean) ? rules[clean] : '';
   }
 
+  // Build a Gmail location hash from a search query. Empty query -> plain inbox.
+  // Used by clickable digest chips and the quick-filter bar.
+  function gmailSearchHash(query) {
+    var q = String(query || '').trim();
+    return q ? '#search/' + encodeURIComponent(q) : '#inbox';
+  }
+
+  // A Gmail query that matches every VIP-tagged sender domain, e.g.
+  //   'from:(paypal.com OR bank.com) in:inbox'
+  // Returns '' when no senders are tagged VIP.
+  function vipDomainsQuery(rules) {
+    var domains = Object.keys(rules || {}).filter(function (domain) {
+      return rules[domain] === 'vip';
+    });
+    if (!domains.length) return '';
+    return 'from:(' + domains.join(' OR ') + ') in:inbox';
+  }
+
   // Order label rows: pinned favourites first (in the order they were pinned),
   // then the rest either by recent activity (desc) or their original order.
   // Pure + testable. Each entry: { index, activity, pinIndex } where pinIndex
@@ -630,6 +654,8 @@
     SENDER_RULES: SENDER_RULES,
     normalizeSenderRules: normalizeSenderRules,
     senderRuleFor: senderRuleFor,
+    gmailSearchHash: gmailSearchHash,
+    vipDomainsQuery: vipDomainsQuery,
     summarizeInbox: summarizeInbox,
     orderLabels: orderLabels,
     TRIAL_DAYS: TRIAL_DAYS,

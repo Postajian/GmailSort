@@ -18,7 +18,7 @@
       <fieldset>
         <legend>Behavior</legend>
         <label class="check"><input type="checkbox" name="enabled"> Enable the redesigned inbox</label>
-        <label class="check"><input type="checkbox" name="toggleHotkey"> Enable keyboard shortcuts &mdash; <strong>Alt+Shift+G</strong> toggle redesign, <strong>Alt+Shift+P</strong> save inbox as PDF</label>
+        <label class="check"><input type="checkbox" name="toggleHotkey"> Enable keyboard shortcuts &mdash; <strong>Alt+Shift+G</strong> toggle redesign, <strong>Alt+Shift+Z</strong> Zen mode, <strong>Alt+Shift+P</strong> save inbox as PDF</label>
         <label class="check"><input type="checkbox" name="hideTabs"> Hide Gmail category tabs</label>
         <label class="check"><input type="checkbox" name="hideRail"> Hide the right-side app rail</label>
         <label class="check"><input type="checkbox" name="colorLabels"> Color uncolored custom labels</label>
@@ -45,6 +45,8 @@
         <label class="check"><input type="checkbox" name="readablePanel"> White reading panel (off = newspaper fully see-through)</label>
         <label class="check"><input type="checkbox" name="mergeTabsRow"> Merge category tabs into the toolbar row</label>
         <label class="check"><input type="checkbox" name="focusMode"> <strong>Focus mode</strong> &mdash; hide Promotions, Social &amp; Forums in one click</label>
+        <label class="check"><input type="checkbox" name="zenMode"> <strong>Zen mode</strong> &mdash; hide the sidebar, app rail &amp; tabs for a clean reading column (<strong>Alt+Shift+Z</strong>)</label>
+        <label class="check"><input type="checkbox" name="sciFiAccents"> <strong>Sci-fi accents</strong> &mdash; subtle gold glow on the front page, bars &amp; masthead</label>
         <label>Tab order
           <select name="tabOrder">
             <option value="default">Default (Primary &middot; Promotions &middot; Social)</option>
@@ -65,9 +67,10 @@
       <fieldset>
         <legend>Front page &amp; insights</legend>
         <p class="hint">An optional newspaper &ldquo;front page&rdquo; above the inbox. It reads only the messages currently loaded in your list &mdash; nothing leaves your browser.</p>
-        <label class="check"><input type="checkbox" name="showDigest"> <strong>Front-page digest</strong> &mdash; a briefing strip with totals and the top senders in view</label>
-        <label class="check"><input type="checkbox" name="showStats"> <strong>Inbox stats panel</strong> &mdash; bar charts of the busiest senders and activity by period</label>
-        <label class="check"><input type="checkbox" name="groupByDomain"> <strong>Group senders by company</strong> &mdash; tag rows from the same domain so you can spot a sender&rsquo;s cluster at a glance</label>
+        <label class="check"><input type="checkbox" name="showDigest"> <strong>Front-page digest</strong> &mdash; a briefing strip with totals and the top senders in view (click a sender to filter)</label>
+        <label class="check"><input type="checkbox" name="showStats"> <strong>Inbox stats panel</strong> &mdash; bar charts of the busiest senders and activity by period, each with one-click VIP / Mute / Hide</label>
+        <label class="check"><input type="checkbox" name="showQuickFilters"> <strong>Quick filter bar</strong> &mdash; one-tap Unread / Attachments / Today / VIPs / All mail</label>
+        <label class="check"><input type="checkbox" name="groupByDomain"> <strong>Group senders by company</strong> &mdash; tag rows from the same domain (adds a colour legend to the front page)</label>
       </fieldset>
 
 
@@ -78,6 +81,12 @@
           <button type="button" id="export">Export settings</button>
           <button type="button" id="import-btn" class="secondary">Import from file</button>
           <input type="file" id="import-file" accept="application/json,.json" hidden>
+        </div>
+        <p class="hint" style="margin:6px 0 0;">Full backup also includes your sender rules, sender colours, pinned labels and saved presets.</p>
+        <div class="row">
+          <button type="button" id="export-all">Export everything</button>
+          <button type="button" id="import-all-btn" class="secondary">Import everything</button>
+          <input type="file" id="import-all-file" accept="application/json,.json" hidden>
         </div>
         <div class="row">
           <input type="text" id="preset-name" placeholder="Preset name (e.g. Newspaper)" maxlength="40">
@@ -149,6 +158,12 @@
           </select>
         </label>
         <p class="hint" style="margin:2px 0 6px;">Compact tightens the rows; Comfortable uses your custom Row height below.</p>
+        <div class="row" id="density-presets">
+          <span class="hint" style="flex:1 1 100%; margin:0 0 2px;">One-click density presets:</span>
+          <button type="button" class="secondary" data-density-preset="compact">Compact</button>
+          <button type="button" class="secondary" data-density-preset="comfortable">Comfortable</button>
+          <button type="button" class="secondary" data-density-preset="newspaper">Newspaper</button>
+        </div>
         <label>Group line gap &mdash; top <input type="number" name="groupLineGapTop" min="2" max="40" step="1"></label>
         <label>Group line gap &mdash; bottom <input type="number" name="groupLineGapBottom" min="2" max="40" step="1"></label>
         <label>Masthead text <input type="text" name="masthead" maxlength="24"></label>
@@ -178,7 +193,7 @@
         <input type="hidden" name="headerSubjectX">
         <input type="hidden" name="headerPreviewX">
         <input type="hidden" name="headerDateX">
-      </fieldset>
+      </fieldset>
       <div class="actions">
         <button type="submit">Save settings</button>
         <button type="button" id="reset" class="secondary">Reset defaults</button>
