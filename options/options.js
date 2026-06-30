@@ -376,6 +376,82 @@
     });
   }
 
+  // ----- Smart sender rules ---------------------------------------------
+  var SENDER_RULES_KEY = 'gmailViewNextSenderRules';
+  var RULE_LABELS = { vip: 'VIP', mute: 'Mute', hide: 'Hide' };
+  var ruleDomain = document.getElementById('rule-domain');
+  var ruleType = document.getElementById('rule-type');
+  var ruleAddBtn = document.getElementById('rule-add');
+  var ruleList = document.getElementById('rule-list');
+
+  function loadRules(callback) {
+    safeLocalGet(SENDER_RULES_KEY, function (stored, error) {
+      var map = !error && stored && stored[SENDER_RULES_KEY];
+      callback(Core.normalizeSenderRules(map));
+    });
+  }
+
+  function renderRules(map) {
+    if (!ruleList) return;
+    ruleList.innerHTML = '';
+    var domains = Object.keys(map).sort();
+    if (!domains.length) {
+      var empty = document.createElement('p');
+      empty.className = 'hint';
+      empty.textContent = 'No sender rules yet.';
+      ruleList.appendChild(empty);
+      return;
+    }
+    domains.forEach(function (domain) {
+      var rowEl = document.createElement('div');
+      rowEl.className = 'row override-row';
+      var tag = document.createElement('span');
+      tag.className = 'override-name';
+      tag.textContent = (RULE_LABELS[map[domain]] || map[domain]) + ' · ' + domain;
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'secondary';
+      del.textContent = 'Remove';
+      del.addEventListener('click', function () {
+        loadRules(function (current) {
+          delete current[domain];
+          var payload = {};
+          payload[SENDER_RULES_KEY] = current;
+          safeLocalSet(payload, function (error) {
+            if (error) { showStatus('Could not remove.'); return; }
+            renderRules(current);
+            showStatus('Removed rule for ' + domain + '.');
+          });
+        });
+      });
+      rowEl.appendChild(tag);
+      rowEl.appendChild(del);
+      ruleList.appendChild(rowEl);
+    });
+  }
+
+  if (ruleList) loadRules(renderRules);
+
+  if (ruleAddBtn) {
+    ruleAddBtn.addEventListener('click', function () {
+      var domain = cleanDomain(ruleDomain.value);
+      var rule = (ruleType.value || '').trim().toLowerCase();
+      if (!domain) { showStatus('Type a sender domain first.'); return; }
+      if (!Core.SENDER_RULES[rule]) { showStatus('Pick a rule first.'); return; }
+      loadRules(function (map) {
+        map[domain] = rule;
+        var payload = {};
+        payload[SENDER_RULES_KEY] = map;
+        safeLocalSet(payload, function (error) {
+          if (error) { showStatus('Could not save.'); return; }
+          ruleDomain.value = '';
+          renderRules(map);
+          showStatus('Added ' + (RULE_LABELS[rule] || rule) + ' rule for ' + domain + '.');
+        });
+      });
+    });
+  }
+
   // ----- Pinned labels --------------------------------------------------
   var PINNED_KEY = 'gmailViewNextPinnedLabels';
   var pinName = document.getElementById('pin-name');

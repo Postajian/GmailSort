@@ -194,7 +194,9 @@
         normalizeBoolean(value.sortLabelsByActivity, DEFAULT_SETTINGS.sortLabelsByActivity),
       rowHeight: clampNumber(value.rowHeight, 32, 72, DEFAULT_SETTINGS.rowHeight),
       density: value.density === 'compact' ? 'compact' : 'comfortable',
-      theme: value.theme === 'dark' ? 'dark' : 'light',
+      theme: (value.theme === 'dark' || value.theme === 'sepia' || value.theme === 'contrast')
+        ? value.theme
+        : 'light',
       inboxFontSize: clampNumber(value.inboxFontSize, 8, 48, DEFAULT_SETTINGS.inboxFontSize),
       inboxBold: normalizeBoolean(value.inboxBold, DEFAULT_SETTINGS.inboxBold),
       inboxItalic: normalizeBoolean(value.inboxItalic, DEFAULT_SETTINGS.inboxItalic),
@@ -477,6 +479,36 @@
     }).join(' OR ');
   }
 
+  // ----- Smart sender rules -------------------------------------------------
+  // A map of sender domain -> rule. Rules tag a sender's rows so the inbox can
+  // emphasise (vip), dim (mute) or hide them. Pure + testable; the content
+  // script only applies a data attribute, so a bad value can never break a row.
+  var SENDER_RULES = Object.freeze({ vip: true, mute: true, hide: true });
+
+  function cleanRuleDomain(value) {
+    return String(value || '').trim().toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/\/.*$/, '');
+  }
+
+  function normalizeSenderRules(value) {
+    var out = {};
+    if (!value || typeof value !== 'object') return out;
+    Object.keys(value).slice(0, 2000).forEach(function (key) {
+      var domain = cleanRuleDomain(key);
+      var rule = String(value[key] || '').trim().toLowerCase();
+      if (domain && SENDER_RULES[rule]) out[domain] = rule;
+    });
+    return out;
+  }
+
+  function senderRuleFor(rules, domain) {
+    if (!rules || !domain) return '';
+    var clean = cleanRuleDomain(domain);
+    return Object.prototype.hasOwnProperty.call(rules, clean) ? rules[clean] : '';
+  }
+
   // Order label rows: pinned favourites first (in the order they were pinned),
   // then the rest either by recent activity (desc) or their original order.
   // Pure + testable. Each entry: { index, activity, pinIndex } where pinIndex
@@ -522,6 +554,9 @@
     isSubLabel: isSubLabel,
     decodeLabelHash: decodeLabelHash,
     labelRollupQuery: labelRollupQuery,
+    SENDER_RULES: SENDER_RULES,
+    normalizeSenderRules: normalizeSenderRules,
+    senderRuleFor: senderRuleFor,
     orderLabels: orderLabels,
     TRIAL_DAYS: TRIAL_DAYS,
     licenseState: licenseState,

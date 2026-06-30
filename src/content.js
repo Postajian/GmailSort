@@ -10,6 +10,7 @@
   var LABEL_TYPOGRAPHY_KEY = 'gmailViewNextLabelTypography';
   var LOGO_OVERRIDES_KEY = 'gmailViewNextLogoOverrides';
   var PINNED_LABELS_KEY = 'gmailViewNextPinnedLabels';
+  var SENDER_RULES_KEY = 'gmailViewNextSenderRules';
   var COLUMN_NAMES = ['sender', 'time-sent', 'logo', 'subject', 'preview', 'date'];
   var COLUMN_LAYOUT_SETTINGS = Object.freeze({
     sender: { header: 'headerSenderX', boundary: 'senderOffset' },
@@ -79,6 +80,7 @@
     logoCache: {},
     logoPending: {},
     logoOverrides: {},
+    senderRules: {},
     pinnedLabels: [],
     listeners: []
   };
@@ -335,6 +337,18 @@
         reportApiError('Could not read sender colours.', error);
         if (!error) {
           state.logoOverrides = normalizeOverrides(stored && stored[LOGO_OVERRIDES_KEY]);
+        }
+        resolve();
+      });
+    });
+  }
+
+  function readSenderRules() {
+    return new Promise(function (resolve) {
+      safeStorageGet('local', SENDER_RULES_KEY, function (stored, error) {
+        reportApiError('Could not read sender rules.', error);
+        if (!error) {
+          state.senderRules = Core.normalizeSenderRules(stored && stored[SENDER_RULES_KEY]);
         }
         resolve();
       });
@@ -1780,6 +1794,9 @@
       node.removeAttribute('data-gvn-logo');
       node.style.removeProperty('--gvn-logo');
     });
+    document.querySelectorAll('[data-gvn-rule]').forEach(function (node) {
+      node.removeAttribute('data-gvn-rule');
+    });
     document.querySelectorAll('tr.zA .brd').forEach(function (node) {
       node.style.removeProperty('--gvn-attachment-shift');
     });
@@ -1843,13 +1860,17 @@
         previousGroup = group;
       }
 
+      var sender = Adapter.senderData(parts);
+      var at = sender.email.lastIndexOf('@');
+      var domain = at >= 0 ? rootDomain(sender.email.slice(at + 1).toLowerCase()) : '';
       if (parts.contentTrack) {
-        var sender = Adapter.senderData(parts);
-        var at = sender.email.lastIndexOf('@');
-        var domain = at >= 0 ? rootDomain(sender.email.slice(at + 1).toLowerCase()) : '';
         parts.contentTrack.setAttribute('data-gvn-logo', 'true');
         applyLogo(parts.contentTrack, domain);
       }
+
+      var rule = Core.senderRuleFor(state.senderRules, domain);
+      if (rule) row.setAttribute('data-gvn-rule', rule);
+      else row.removeAttribute('data-gvn-rule');
 
       alignAttachments(parts);
     });
@@ -2702,6 +2723,10 @@
         state.pinnedLabels = normalizePinned(changes[PINNED_LABELS_KEY].newValue);
         scheduleRefresh();
       }
+      if (changes[SENDER_RULES_KEY]) {
+        state.senderRules = Core.normalizeSenderRules(changes[SENDER_RULES_KEY].newValue);
+        scheduleRefresh();
+      }
       return;
     }
     if (area !== 'sync') return;
@@ -2960,7 +2985,8 @@
     readLabelActivity(),
     readLabelTypography(),
     readLogoOverrides(),
-    readPinnedLabels()
+    readPinnedLabels(),
+    readSenderRules()
   ]).then(function (values) {
     if (state.destroyed) return;
     state.settings = Core.normalizeSettings(values[0]);

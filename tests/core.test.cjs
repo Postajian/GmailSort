@@ -127,11 +127,38 @@ test('density defaults to comfortable and only accepts compact/comfortable', () 
   assert.equal(core.normalizeSettings({ density: 'nonsense' }).density, 'comfortable');
 });
 
-test('theme defaults to light and only accepts light/dark', () => {
+test('theme defaults to light and accepts the four preset palettes', () => {
   assert.equal(core.DEFAULT_SETTINGS.theme, 'light');
   assert.equal(core.normalizeSettings({}).theme, 'light');
   assert.equal(core.normalizeSettings({ theme: 'dark' }).theme, 'dark');
+  assert.equal(core.normalizeSettings({ theme: 'sepia' }).theme, 'sepia');
+  assert.equal(core.normalizeSettings({ theme: 'contrast' }).theme, 'contrast');
   assert.equal(core.normalizeSettings({ theme: 'rainbow' }).theme, 'light');
+});
+
+test('normalizeSenderRules keeps only valid rules for cleaned domains', () => {
+  const rules = core.normalizeSenderRules({
+    'WWW.PayPal.com': 'vip',
+    'https://news.com/path': 'mute',
+    'spam.io': 'hide',
+    'bad.com': 'nonsense',
+    'empty.com': '',
+    '': 'vip'
+  });
+  assert.deepEqual(rules, {
+    'paypal.com': 'vip',
+    'news.com': 'mute',
+    'spam.io': 'hide'
+  });
+});
+
+test('senderRuleFor matches cleaned domains and returns empty otherwise', () => {
+  const rules = core.normalizeSenderRules({ 'paypal.com': 'vip' });
+  assert.equal(core.senderRuleFor(rules, 'www.paypal.com'), 'vip');
+  assert.equal(core.senderRuleFor(rules, 'PAYPAL.COM'), 'vip');
+  assert.equal(core.senderRuleFor(rules, 'other.com'), '');
+  assert.equal(core.senderRuleFor(rules, ''), '');
+  assert.equal(core.senderRuleFor(null, 'paypal.com'), '');
 });
 
 test('tab order defaults to promotions-first and only accepts the two orders', () => {

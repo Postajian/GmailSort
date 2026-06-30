@@ -91,6 +91,26 @@
       hairline = 'rgba(236,228,210,0.18)';
       dividerColor = 'rgba(236,228,210,0.16)';
       ruleColor = '#d9cfb8';
+    } else if (settings.theme === 'sepia') {
+      // Aged-paper edition: warm cream stock with sienna ink. Opaque so the
+      // tone is consistent over any Gmail background.
+      outer = '#efe3cc';
+      paper = '#f7efe0';
+      ink = '#43321f';
+      muted = '#8a755a';
+      hairline = 'rgba(67,50,31,0.18)';
+      dividerColor = 'rgba(67,50,31,0.14)';
+      ruleColor = '#7a5c3a';
+    } else if (settings.theme === 'contrast') {
+      // High-contrast edition: pure black on pure white with heavy rules for
+      // maximum legibility. Opaque on purpose.
+      outer = '#ffffff';
+      paper = '#ffffff';
+      ink = '#000000';
+      muted = '#1f1f1f';
+      hairline = '#000000';
+      dividerColor = '#000000';
+      ruleColor = '#000000';
     }
     // The fixed top strips (masthead, column headers, tabs) always need a SOLID
     // backing so scrolled rows can't show through them — even in transparent
@@ -203,6 +223,14 @@
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE td.yX .yW::before{content:"";display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;background:' + GOLD + ';vertical-align:1px;}\n'
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE>td:first-child{background-image:linear-gradient(' + GOLD + ',' + GOLD + ')!important;background-repeat:no-repeat!important;background-size:3px 100%!important;background-position:0 0!important;}'
         : ''),
+      // Smart sender rules: hide removes the row, mute dims it and drops its
+      // "new" emphasis, vip pins a persistent gold edge + bold sender.
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="hide"]{display:none!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="mute"]{opacity:.5!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="mute"]>td:first-child{background-image:none!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="mute"] td.yX .yW::before{display:none!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="vip"]>td:first-child{background-image:linear-gradient(' + GOLD + ',' + GOLD + ')!important;background-repeat:no-repeat!important;background-size:4px 100%!important;background-position:0 0!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="vip"] span[email]{font-weight:700!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA .xT{position:relative!important;z-index:4!important;display:flex!important;align-items:center!important;width:100%!important;min-width:0!important;height:' + rowHeight + 'px!important;min-height:' + rowHeight + 'px!important;overflow:visible!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA .xT::before{content:"";position:relative!important;z-index:20!important;display:' + markDisplay + ';flex:0 0 22px!important;width:22px!important;height:22px!important;margin-left:4px!important;margin-right:30px!important;transform:translateX(' + logoShift + 'px) scale(' + logoScale + ')!important;transform-origin:center!important;background-image:var(--gvn-logo,none);background-color:var(--gvn-paper)!important;background-position:center;background-size:contain;background-repeat:no-repeat;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.12)!important;pointer-events:none!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA .xT .yi{display:none!important;}',

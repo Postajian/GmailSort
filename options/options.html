@@ -32,13 +32,15 @@
 
       <fieldset>
         <legend>Appearance</legend>
-        <label>Theme
+        <label>Theme preset
           <select name="theme">
             <option value="light">Light (classic newspaper)</option>
             <option value="dark">Dark (evening edition)</option>
+            <option value="sepia">Sepia (aged paper)</option>
+            <option value="contrast">High contrast (black on white)</option>
           </select>
         </label>
-        <p class="hint" style="margin:2px 0 6px;">Dark uses an opaque warm-dark paper; turn off &ldquo;Transparent background&rdquo; below for the cleanest look.</p>
+        <p class="hint" style="margin:2px 0 6px;">Dark, Sepia and High contrast use an opaque paper tone, so they read the same over any Gmail theme. Light follows your &ldquo;Transparent background&rdquo; choice below.</p>
         <label class="check"><input type="checkbox" name="transparentBackground"> Transparent background &mdash; show your Gmail theme</label>
         <label class="check"><input type="checkbox" name="readablePanel"> White reading panel (off = newspaper fully see-through)</label>
         <label class="check"><input type="checkbox" name="mergeTabsRow"> Merge category tabs into the toolbar row</label>
@@ -137,6 +139,21 @@
           <button type="button" id="override-add">Pin colour</button>
         </div>
         <div id="override-list" class="override-list"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Sender rules</legend>
+        <p class="hint">Tag a sender by domain to change how its mail looks in the inbox: <strong>VIP</strong> pins a gold edge and bold name, <strong>Mute</strong> dims it and drops the &ldquo;new&rdquo; emphasis, <strong>Hide</strong> removes it from the list. All reversible &mdash; remove the rule to undo. Use the domain, e.g. <code>newsletters.com</code>.</p>
+        <div class="row">
+          <input type="text" id="rule-domain" placeholder="sender domain (newsletters.com)" maxlength="120">
+          <select id="rule-type" aria-label="Rule">
+            <option value="vip">VIP (emphasize)</option>
+            <option value="mute">Mute (dim)</option>
+            <option value="hide">Hide (remove)</option>
+          </select>
+          <button type="button" id="rule-add">Add rule</button>
+        </div>
+        <div id="rule-list" class="override-list"></div>
       </fieldset>
 
       <fieldset>
