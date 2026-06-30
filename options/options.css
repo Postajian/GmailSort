@@ -59,16 +59,10 @@ fieldset {
   border: 1px solid #c9b77f;
   background: #fff;
   align-content: start;
-}
-
-/* A little extra breathing room after the first (Behavior) box. */
-form > fieldset:first-of-type {
-  margin-right: 12px;
-}
-
-/* A touch more breathing room to the right of the first (Behavior) box. */
-form > fieldset:first-of-type {
-  margin-right: 12px;
+  /* Stop long unbreakable text (e.g. the shortcut line) from blowing a grid
+     item wider than its column and overlapping the next box. */
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .actions {
