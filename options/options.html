@@ -70,45 +70,6 @@
         <label class="check"><input type="checkbox" name="groupByDomain"> <strong>Group senders by company</strong> &mdash; tag rows from the same domain so you can spot a sender&rsquo;s cluster at a glance</label>
       </fieldset>
 
-      <fieldset id="gvn-layout">
-        <legend>Layout</legend>
-        <label>Density
-          <select name="density">
-            <option value="comfortable">Comfortable</option>
-            <option value="compact">Compact</option>
-          </select>
-        </label>
-        <p class="hint" style="margin:2px 0 6px;">Compact tightens the rows; Comfortable uses your custom Row height below.</p>
-        <label>Group line gap &mdash; top <input type="number" name="groupLineGapTop" min="2" max="40" step="1"></label>
-        <label>Group line gap &mdash; bottom <input type="number" name="groupLineGapBottom" min="2" max="40" step="1"></label>
-        <label>Masthead text <input type="text" name="masthead" maxlength="24"></label>
-        <label>Sidebar width (0 = automatic) <input type="number" name="sidebarWidth" min="0" max="720" step="4"></label>
-        <label>Edit ribbon scale <input type="number" name="editorScale" min="0.45" max="1.25" step="0.05"></label>
-        <label>Custom-label font <input type="number" name="labelFontSize" min="10" max="32" step="1"></label>
-        <label>Row height <input type="number" name="rowHeight" min="32" max="72" step="1"></label>
-        <label>Sender font <input type="number" name="senderFontSize" min="8" max="40" step="1"></label>
-        <label>Date-group font <input type="number" name="groupFontSize" min="8" max="40" step="1"></label>
-        <label>Logo size <input type="number" name="logoSize" min="10" max="50" step="1"></label>
-        <label>Subject font <input type="number" name="subjectFontSize" min="8" max="40" step="1"></label>
-        <label>Preview font <input type="number" name="previewFontSize" min="8" max="40" step="1"></label>
-        <label>Date font <input type="number" name="dateFontSize" min="8" max="40" step="1"></label>
-        <label>Sender width <input type="number" name="senderWidth" min="160" max="360" step="4"></label>
-        <label>Logo position <input type="number" name="contentIndent" min="80" max="240" step="4"></label>
-        <label>Sender offset <input type="number" name="senderOffset" min="-10000" max="10000" step="4"></label>
-        <label>Date-group label offset <input type="number" name="timeSentOffset" min="-10000" max="10000" step="4"></label>
-        <label>Logo offset <input type="number" name="logoOffset" min="-10000" max="10000" step="4"></label>
-        <label>Subject start gap <input type="number" name="subjectGap" min="-10000" max="10000" step="4"></label>
-        <label>Subject width <input type="number" name="subjectWidth" min="280" max="720" step="10"></label>
-        <label>Preview offset <input type="number" name="previewOffset" min="-10000" max="10000" step="4"></label>
-        <label>Date offset <input type="number" name="dateOffset" min="-10000" max="10000" step="4"></label>
-        <label>Right inset <input type="number" name="rightInset" min="0" max="240" step="4"></label>
-        <input type="hidden" name="headerSenderX">
-        <input type="hidden" name="headerTimeSentX">
-        <input type="hidden" name="headerLogoX">
-        <input type="hidden" name="headerSubjectX">
-        <input type="hidden" name="headerPreviewX">
-        <input type="hidden" name="headerDateX">
-      </fieldset>
 
       <fieldset>
         <legend>Backup &amp; presets</legend>
@@ -179,6 +140,45 @@
         </ol>
       </fieldset>
 
+      <fieldset id="gvn-layout">
+        <legend>Layout</legend>
+        <label>Density
+          <select name="density">
+            <option value="comfortable">Comfortable</option>
+            <option value="compact">Compact</option>
+          </select>
+        </label>
+        <p class="hint" style="margin:2px 0 6px;">Compact tightens the rows; Comfortable uses your custom Row height below.</p>
+        <label>Group line gap &mdash; top <input type="number" name="groupLineGapTop" min="2" max="40" step="1"></label>
+        <label>Group line gap &mdash; bottom <input type="number" name="groupLineGapBottom" min="2" max="40" step="1"></label>
+        <label>Masthead text <input type="text" name="masthead" maxlength="24"></label>
+        <label>Sidebar width (0 = automatic) <input type="number" name="sidebarWidth" min="0" max="720" step="4"></label>
+        <label>Edit ribbon scale <input type="number" name="editorScale" min="0.45" max="1.25" step="0.05"></label>
+        <label>Custom-label font <input type="number" name="labelFontSize" min="10" max="32" step="1"></label>
+        <label>Row height <input type="number" name="rowHeight" min="32" max="72" step="1"></label>
+        <label>Sender font <input type="number" name="senderFontSize" min="8" max="40" step="1"></label>
+        <label>Date-group font <input type="number" name="groupFontSize" min="8" max="40" step="1"></label>
+        <label>Logo size <input type="number" name="logoSize" min="10" max="50" step="1"></label>
+        <label>Subject font <input type="number" name="subjectFontSize" min="8" max="40" step="1"></label>
+        <label>Preview font <input type="number" name="previewFontSize" min="8" max="40" step="1"></label>
+        <label>Date font <input type="number" name="dateFontSize" min="8" max="40" step="1"></label>
+        <label>Sender width <input type="number" name="senderWidth" min="160" max="360" step="4"></label>
+        <label>Logo position <input type="number" name="contentIndent" min="80" max="240" step="4"></label>
+        <label>Sender offset <input type="number" name="senderOffset" min="-10000" max="10000" step="4"></label>
+        <label>Date-group label offset <input type="number" name="timeSentOffset" min="-10000" max="10000" step="4"></label>
+        <label>Logo offset <input type="number" name="logoOffset" min="-10000" max="10000" step="4"></label>
+        <label>Subject start gap <input type="number" name="subjectGap" min="-10000" max="10000" step="4"></label>
+        <label>Subject width <input type="number" name="subjectWidth" min="280" max="720" step="10"></label>
+        <label>Preview offset <input type="number" name="previewOffset" min="-10000" max="10000" step="4"></label>
+        <label>Date offset <input type="number" name="dateOffset" min="-10000" max="10000" step="4"></label>
+        <label>Right inset <input type="number" name="rightInset" min="0" max="240" step="4"></label>
+        <input type="hidden" name="headerSenderX">
+        <input type="hidden" name="headerTimeSentX">
+        <input type="hidden" name="headerLogoX">
+        <input type="hidden" name="headerSubjectX">
+        <input type="hidden" name="headerPreviewX">
+        <input type="hidden" name="headerDateX">
+      </fieldset>
       <div class="actions">
         <button type="submit">Save settings</button>
         <button type="button" id="reset" class="secondary">Reset defaults</button>
