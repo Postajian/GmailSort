@@ -306,7 +306,10 @@
 
   function routeMode(hash) {
     var route = String(hash || '').toLowerCase();
-    if (!route || route.indexOf('#inbox') === 0) {
+    // Decorate the same newspaper list layout on both the Inbox and All Mail.
+    // A trailing 12+ char token is an open thread; a short token (e.g. "p2") is
+    // pagination, which stays a list view.
+    if (!route || route.indexOf('#inbox') === 0 || route.indexOf('#all') === 0) {
       var parts = route.split('/');
       var last = parts[parts.length - 1];
       if (parts.length > 1 && /^[a-z0-9_-]{12,}$/i.test(last)) return 'thread';

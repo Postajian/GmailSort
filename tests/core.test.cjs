@@ -290,9 +290,12 @@ test('orderLabels keeps original order when nothing is pinned or active', () => 
   assert.deepEqual(core.orderLabels(entries).map((e) => e.name), ['A', 'B']);
 });
 
-test('recognizes inbox, thread, and other routes', () => {
+test('recognizes inbox, all mail, thread, and other routes', () => {
   assert.equal(core.routeMode('#inbox'), 'inbox');
   assert.equal(core.routeMode('#inbox/FMfcgzQ123456789'), 'thread');
+  assert.equal(core.routeMode('#all'), 'inbox');
+  assert.equal(core.routeMode('#all/p2'), 'inbox');
+  assert.equal(core.routeMode('#all/FMfcgzQ123456789'), 'thread');
   assert.equal(core.routeMode('#sent'), 'other');
 });
 
