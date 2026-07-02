@@ -860,6 +860,14 @@
     bgToggle.setAttribute('aria-label', 'Toggle white reading panel');
     bgToggle.addEventListener('click', toggleBackgroundMode);
     masthead.appendChild(bgToggle);
+    var quickButton = document.createElement('button');
+    quickButton.className = 'gvn-quick-button';
+    quickButton.type = 'button';
+    quickButton.textContent = '⚙';
+    quickButton.title = 'Quick settings — tabs, theme and more';
+    quickButton.setAttribute('aria-label', 'Open quick settings');
+    quickButton.addEventListener('click', toggleQuickPanel);
+    masthead.appendChild(quickButton);
     var centerButton = document.createElement('button');
     centerButton.className = 'gvn-center-button';
     centerButton.type = 'button';
@@ -987,6 +995,129 @@
     scheduleRefresh();
     saveLayoutSetting('readablePanel');
     updateBackgroundToggle();
+  }
+
+  // ----- In-Gmail quick settings popover --------------------------------
+  var QUICK_TOGGLES = [
+    { key: 'mergeTabsRow', label: 'Merge category tabs' },
+    { key: 'hideTabPromotions', label: 'Hide Promotions tab' },
+    { key: 'hideTabSocial', label: 'Hide Social tab' },
+    { key: 'hideTabUpdates', label: 'Hide Updates tab' },
+    { key: 'hideTabForums', label: 'Hide Forums tab' },
+    { key: 'focusMode', label: 'Focus mode (hide Promotions/Social/Forums)' }
+  ];
+  var THEME_CYCLE = ['light', 'dark', 'sepia', 'contrast'];
+  var THEME_LABELS = { light: 'Light', dark: 'Dark', sepia: 'Sepia', contrast: 'Contrast' };
+  var TAB_ORDER_CYCLE = ['default', 'promotions-first', 'social-first'];
+  var TAB_ORDER_LABELS = {
+    'default': 'Primary first',
+    'promotions-first': 'Promotions first',
+    'social-first': 'Social first'
+  };
+
+  // Apply a setting from the in-Gmail popover: write to sync storage (so it
+  // sticks and other tabs update) and apply it locally right away.
+  function setQuickSetting(key, value) {
+    var patch = {};
+    patch[key] = value;
+    safeStorageSet('sync', patch);
+    var next = Object.assign({}, state.settings);
+    next[key] = value;
+    state.settings = Core.normalizeSettings(next);
+    installStyle();
+    updateRootFlags();
+    scheduleRefresh();
+  }
+
+  function quickCycleButton(labelPrefix, cycle, labels, key) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'gvn-quick-cycle';
+    var render = function () {
+      var value = state.settings[key];
+      btn.textContent = labelPrefix + ': ' + (labels[value] || value);
+    };
+    render();
+    btn.addEventListener('click', function () {
+      var idx = cycle.indexOf(state.settings[key]);
+      var nextValue = cycle[(idx + 1) % cycle.length];
+      setQuickSetting(key, nextValue);
+      render();
+    });
+    return btn;
+  }
+
+  function buildQuickPanel(panel) {
+    panel.textContent = '';
+    var head = document.createElement('div');
+    head.className = 'gvn-quick-head';
+    head.textContent = 'Quick settings';
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'gvn-quick-close';
+    close.textContent = '×';
+    close.setAttribute('aria-label', 'Close');
+    close.addEventListener('click', function () { panel.style.display = 'none'; });
+    head.appendChild(close);
+    panel.appendChild(head);
+
+    var body = document.createElement('div');
+    body.className = 'gvn-quick-body';
+    body.appendChild(quickCycleButton('Theme', THEME_CYCLE, THEME_LABELS, 'theme'));
+    body.appendChild(quickCycleButton('Tab order', TAB_ORDER_CYCLE, TAB_ORDER_LABELS, 'tabOrder'));
+
+    QUICK_TOGGLES.forEach(function (item) {
+      var row = document.createElement('label');
+      row.className = 'gvn-quick-row';
+      var box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = state.settings[item.key] === true;
+      box.addEventListener('change', function () {
+        setQuickSetting(item.key, box.checked);
+      });
+      var text = document.createElement('span');
+      text.textContent = item.label;
+      row.appendChild(box);
+      row.appendChild(text);
+      body.appendChild(row);
+    });
+
+    var more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'gvn-quick-more';
+    more.textContent = 'All settings →';
+    more.addEventListener('click', function () {
+      try {
+        window.open(chrome.runtime.getURL('options/options.html'), '_blank');
+      } catch (error) {
+        reportApiError('Could not open settings.', error);
+      }
+    });
+    body.appendChild(more);
+    panel.appendChild(body);
+  }
+
+  function toggleQuickPanel() {
+    var panel = document.getElementById('gmail-view-next-quick');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'gmail-view-next-quick';
+      panel.setAttribute('role', 'dialog');
+      panel.setAttribute('aria-label', 'Quick settings');
+      document.body.appendChild(panel);
+    }
+    if (panel.style.display === 'block') {
+      panel.style.display = 'none';
+      return;
+    }
+    buildQuickPanel(panel);
+    panel.style.display = 'block';
+    var button = document.querySelector('.gvn-quick-button');
+    if (button) {
+      var rect = button.getBoundingClientRect();
+      panel.style.top = Math.round(rect.bottom + 6) + 'px';
+      panel.style.left = Math.round(Math.max(8, rect.left - 6)) + 'px';
+    }
   }
 
   function closeEditMenu(overlay) {
@@ -3288,6 +3419,8 @@
     var globalDividers = document.getElementById('gmail-view-next-global-dividers');
     var helpOverlay = document.getElementById('gmail-view-next-help-overlay');
     if (helpOverlay) helpOverlay.remove();
+    var quickPanel = document.getElementById('gmail-view-next-quick');
+    if (quickPanel) quickPanel.remove();
     if (style) style.remove();
     if (overlay) overlay.remove();
     if (sidebarHandle) sidebarHandle.remove();
