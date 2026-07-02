@@ -1871,6 +1871,7 @@
     var dividers = document.getElementById('gmail-view-next-dividers');
     if (dividers) dividers.remove();
     removeFrontPage();
+    hideStickyGroup();
   }
 
   function clearLabelDecorations() {
@@ -1911,6 +1912,59 @@
   function removeFrontPage() {
     var existing = document.getElementById(FRONTPAGE_ID);
     if (existing) existing.remove();
+  }
+
+  var STICKY_GROUP_ID = 'gmail-view-next-sticky-group';
+
+  function ensureStickyGroup() {
+    var el = document.getElementById(STICKY_GROUP_ID);
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = STICKY_GROUP_ID;
+    el.setAttribute('aria-hidden', 'true');
+    el.style.display = 'none';
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function hideStickyGroup() {
+    var el = document.getElementById(STICKY_GROUP_ID);
+    if (el) el.style.display = 'none';
+  }
+
+  // Sticky group header: a floating label showing the date group at the top of
+  // the scrolled list. It's our own fixed element — it never touches Gmail's
+  // rows — so it can't interfere with clicking or selecting mail.
+  function updateStickyGroup(rows) {
+    var el = ensureStickyGroup();
+    var overlay = document.getElementById('gmail-view-next-ui');
+    if (
+      !state.settings.stickyGroupHeaders ||
+      !rows || !rows.length ||
+      !overlay || overlay.style.display === 'none'
+    ) {
+      el.style.display = 'none';
+      return;
+    }
+    var table = Adapter.locateInbox().table;
+    if (!table) { el.style.display = 'none'; return; }
+    var overlayRect = overlay.getBoundingClientRect();
+    var tableRect = table.getBoundingClientRect();
+    var viewportTop = overlayRect.bottom;
+    var current = '';
+    for (var i = 0; i < rows.length; i++) {
+      var group = rows[i].getAttribute('data-gvn-group');
+      if (!group) continue;
+      var top = rows[i].getBoundingClientRect().top;
+      if (top - 26 <= viewportTop) current = group;
+      else break;
+    }
+    if (!current) { el.style.display = 'none'; return; }
+    el.textContent = current;
+    el.style.left = Math.round(tableRect.left) + 'px';
+    el.style.top = Math.round(viewportTop) + 'px';
+    el.style.width = Math.round(tableRect.width) + 'px';
+    el.style.display = 'block';
   }
 
   // Apply a sender rule (vip/mute/hide) for a whole domain in one click — the
@@ -3194,6 +3248,7 @@
       renderFrontPage();
       positionOverlay(rows[0]);
       positionGlobalDividers(rows[0]);
+      updateStickyGroup(rows);
       watchTable();
     } catch (error) {
       logError('Refresh failed.', error);
@@ -3288,6 +3343,8 @@
     var globalDividers = document.getElementById('gmail-view-next-global-dividers');
     var helpOverlay = document.getElementById('gmail-view-next-help-overlay');
     if (helpOverlay) helpOverlay.remove();
+    var stickyGroup = document.getElementById('gmail-view-next-sticky-group');
+    if (stickyGroup) stickyGroup.remove();
     if (style) style.remove();
     if (overlay) overlay.remove();
     if (sidebarHandle) sidebarHandle.remove();
