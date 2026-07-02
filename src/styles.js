@@ -116,9 +116,15 @@
     // backing so scrolled rows can't show through them — even in transparent
     // mode, where the message area itself stays see-through.
     var band = (paper === 'transparent') ? PAPER : paper;
+    // User-chosen accent (defaults to the newspaper gold) drives --gvn-gold.
+    var accent = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(settings.accentColor || ''))
+      ? settings.accentColor
+      : GOLD;
+    // Optional reading-width cap: centre the list on very wide screens.
+    var listMaxWidth = Math.round(Number(settings.listMaxWidth) || 0);
 
     return [
-      ':root{--gvn-gold:' + GOLD + ';--gvn-divider:' + dividerColor + ';--gvn-ink:' + ink + ';--gvn-muted:' + muted + ';--gvn-paper:' + paper + ';--gvn-band:' + band + ';--gvn-rule:' + ruleColor + ';--gvn-sidebar-width:' + sidebarWidth + 'px;}',
+      ':root{--gvn-gold:' + accent + ';--gvn-divider:' + dividerColor + ';--gvn-ink:' + ink + ';--gvn-muted:' + muted + ';--gvn-paper:' + paper + ';--gvn-band:' + band + ';--gvn-rule:' + ruleColor + ';--gvn-sidebar-width:' + sidebarWidth + 'px;}',
       // Print / "Save as PDF": recolour to clean black-on-white via the vars
       // (works even in dark theme) and drop our controls, the rail and tabs.
       '@media print{'
@@ -230,6 +236,9 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="social-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Updates"]){order:4!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-tab-order="social-first"] .aKh td[role="heading"]:has([role="tab"][aria-label^="Forums"]){order:5!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F{margin-top:66px!important;width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;max-width:var(--gvn-table-width,calc(100% - ' + rightInset + 'px))!important;min-width:0!important;table-layout:fixed!important;}',
+      (listMaxWidth > 0
+        ? 'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F{max-width:' + listMaxWidth + 'px!important;margin-left:auto!important;margin-right:auto!important;}'
+        : ''),
       'html[data-gvn-active="true"][data-gvn-route="inbox"]:has(#gmail-view-next-ui[data-editing="true"]) table.F{margin-top:' + (78 + editorHeight) + 'px!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] table.F col.yY{width:' + senderWidth + 'px!important;min-width:' + senderWidth + 'px!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] td.yX{width:' + senderWidth + 'px!important;min-width:' + senderWidth + 'px!important;}',
@@ -279,8 +288,8 @@
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE span[email]{font-weight:700!important;}\n'
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE .bog{font-weight:700!important;}\n'
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.yO .bog{font-weight:400!important;}\n'
-          + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE td.yX .yW::before{content:"";display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;background:' + GOLD + ';vertical-align:1px;}\n'
-          + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE>td:first-child{background-image:linear-gradient(' + GOLD + ',' + GOLD + ')!important;background-repeat:no-repeat!important;background-size:3px 100%!important;background-position:0 0!important;}'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE td.yX .yW::before{content:"";display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;background:var(--gvn-gold);vertical-align:1px;}\n'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE>td:first-child{background-image:linear-gradient(var(--gvn-gold),var(--gvn-gold))!important;background-repeat:no-repeat!important;background-size:3px 100%!important;background-position:0 0!important;}'
         : ''),
       // Smart sender rules: hide removes the row, mute dims it and drops its
       // "new" emphasis, vip pins a persistent gold edge + bold sender.
@@ -288,12 +297,17 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="mute"]{opacity:.5!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="mute"]>td:first-child{background-image:none!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="mute"] td.yX .yW::before{display:none!important;}',
-      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="vip"]>td:first-child{background-image:linear-gradient(' + GOLD + ',' + GOLD + ')!important;background-repeat:no-repeat!important;background-size:4px 100%!important;background-position:0 0!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="vip"]>td:first-child{background-image:linear-gradient(var(--gvn-gold),var(--gvn-gold))!important;background-repeat:no-repeat!important;background-size:4px 100%!important;background-position:0 0!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="vip"] span[email]{font-weight:700!important;}',
       // Group-by-company: colour bar on the right of the sender column.
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-domain="true"] td.yX{box-shadow:inset -3px 0 0 var(--gvn-domain-color,transparent)!important;}',
       // Attachment marker: a small paperclip after the sender name.
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-attach="true"] span[email]::after{content:"\\01F4CE";font-size:11px;opacity:.55;margin-left:5px;}',
+      // Sender frequency: a small "×N" before a repeat sender's name.
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] [data-gvn-freq]::before{content:"\\00D7" attr(data-gvn-freq) "\\00A0";font-weight:700;color:var(--gvn-gold);}',
+      // Highlight rules: tint the row + a colour bar on the left edge.
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-highlight="true"] td{background-color:var(--gvn-highlight-bg,transparent)!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-highlight="true"]>td:first-child{box-shadow:inset 4px 0 0 var(--gvn-highlight,transparent)!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA .xT{position:relative!important;z-index:4!important;display:flex!important;align-items:center!important;width:100%!important;min-width:0!important;height:' + rowHeight + 'px!important;min-height:' + rowHeight + 'px!important;overflow:visible!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA .xT::before{content:"";position:relative!important;z-index:20!important;display:' + markDisplay + ';flex:0 0 22px!important;width:22px!important;height:22px!important;margin-left:4px!important;margin-right:30px!important;transform:translateX(' + logoShift + 'px) scale(' + logoScale + ')!important;transform-origin:center!important;background-image:var(--gvn-logo,none);background-color:var(--gvn-paper)!important;background-position:center;background-size:contain;background-repeat:no-repeat;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.12)!important;pointer-events:none!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA .xT .yi{display:none!important;}',

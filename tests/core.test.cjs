@@ -147,6 +147,38 @@ test('front-page and group-by-domain toggles default off and accept booleans', (
   assert.equal(core.normalizeSettings({ showDigest: 'yes' }).showDigest, false);
 });
 
+test('accent colour validates hex and reading width clamps', () => {
+  assert.equal(core.DEFAULT_SETTINGS.accentColor, '#c9a84c');
+  assert.equal(core.normalizeSettings({ accentColor: '#0af' }).accentColor, '#0af');
+  assert.equal(core.normalizeSettings({ accentColor: 'blue' }).accentColor, '#c9a84c');
+  assert.equal(core.normalizeSettings({ listMaxWidth: 99999 }).listMaxWidth, 5000);
+  assert.equal(core.normalizeSettings({ listMaxWidth: -10 }).listMaxWidth, 0);
+});
+
+test('relativeDate gives short labels and blanks out old dates', () => {
+  const now = new Date('2026-07-02T12:00:00Z');
+  assert.equal(core.relativeDate(new Date('2026-07-02T11:59:40Z'), now), 'now');
+  assert.equal(core.relativeDate(new Date('2026-07-02T11:30:00Z'), now), '30m');
+  assert.equal(core.relativeDate(new Date('2026-07-02T09:00:00Z'), now), '3h');
+  assert.equal(core.relativeDate(new Date('2026-07-01T12:00:00Z'), now), 'Yesterday');
+  assert.equal(core.relativeDate(new Date('2026-06-29T12:00:00Z'), now), '3d');
+  assert.equal(core.relativeDate(new Date('2026-05-01T12:00:00Z'), now), '');
+});
+
+test('highlight rules keep valid entries and match text', () => {
+  const rules = core.normalizeHighlightRules([
+    { term: 'Invoice', color: '#ff0000' },
+    { term: 'boss', color: '#0a0' },
+    { term: 'nope', color: 'red' },
+    { term: '', color: '#000' }
+  ]);
+  assert.equal(rules.length, 2);
+  assert.equal(rules[0].term, 'invoice');
+  assert.equal(core.highlightColor(rules, 'Your INVOICE is ready'), '#ff0000');
+  assert.equal(core.highlightColor(rules, 'note from Boss'), '#0a0');
+  assert.equal(core.highlightColor(rules, 'nothing here'), '');
+});
+
 test('normalizeSavedViews keeps only named searches and caps fields', () => {
   const views = core.normalizeSavedViews([
     { name: 'Work unread', query: 'is:unread label:Work' },

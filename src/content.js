@@ -12,6 +12,7 @@
   var PINNED_LABELS_KEY = 'gmailViewNextPinnedLabels';
   var SENDER_RULES_KEY = 'gmailViewNextSenderRules';
   var SAVED_VIEWS_KEY = 'gmailViewNextSavedViews';
+  var HIGHLIGHT_RULES_KEY = 'gmailViewNextHighlightRules';
   var COLUMN_NAMES = ['sender', 'time-sent', 'logo', 'subject', 'preview', 'date'];
   var COLUMN_LAYOUT_SETTINGS = Object.freeze({
     sender: { header: 'headerSenderX', boundary: 'senderOffset' },
@@ -83,6 +84,7 @@
     logoOverrides: {},
     senderRules: {},
     savedViews: [],
+    highlightRules: [],
     pinnedLabels: [],
     inboxRecords: [],
     listeners: []
@@ -368,6 +370,27 @@
         resolve();
       });
     });
+  }
+
+  function readHighlightRules() {
+    return new Promise(function (resolve) {
+      safeStorageGet('local', HIGHLIGHT_RULES_KEY, function (stored, error) {
+        reportApiError('Could not read highlight rules.', error);
+        if (!error) {
+          state.highlightRules = Core.normalizeHighlightRules(stored && stored[HIGHLIGHT_RULES_KEY]);
+        }
+        resolve();
+      });
+    });
+  }
+
+  function hexToRgba(hex, alpha) {
+    var h = String(hex || '').replace('#', '');
+    if (h.length === 3) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
+    var r = parseInt(h.slice(0, 2), 16);
+    var g = parseInt(h.slice(2, 4), 16);
+    var b = parseInt(h.slice(4, 6), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
   }
 
   function normalizePinned(value) {
@@ -1821,9 +1844,21 @@
     document.querySelectorAll('[data-gvn-attach]').forEach(function (node) {
       node.removeAttribute('data-gvn-attach');
     });
+    document.querySelectorAll('[data-gvn-highlight]').forEach(function (node) {
+      node.removeAttribute('data-gvn-highlight');
+      node.style.removeProperty('--gvn-highlight');
+      node.style.removeProperty('--gvn-highlight-bg');
+    });
     document.querySelectorAll('[data-gvn-peek]').forEach(function (node) {
       node.removeAttribute('data-gvn-peek');
       node.removeAttribute('title');
+    });
+    document.querySelectorAll('[data-gvn-freq]').forEach(function (node) {
+      node.removeAttribute('data-gvn-freq');
+    });
+    document.querySelectorAll('[data-gvn-origdate]').forEach(function (node) {
+      node.textContent = node.getAttribute('data-gvn-origdate');
+      node.removeAttribute('data-gvn-origdate');
     });
     document.querySelectorAll('tr.zA .brd').forEach(function (node) {
       node.style.removeProperty('--gvn-attachment-shift');
@@ -2189,6 +2224,12 @@
         unreadByGroup[groups[index]] = (unreadByGroup[groups[index]] || 0) + 1;
       }
     });
+    var senderCounts = {};
+    partsList.forEach(function (parts) {
+      var s = Adapter.senderData(parts);
+      var key = String(s.email || s.name || '').toLowerCase();
+      if (key) senderCounts[key] = (senderCounts[key] || 0) + 1;
+    });
 
     rows.forEach(function (row, index) {
       var parts = partsList[index];
@@ -2233,6 +2274,39 @@
       if (parts.attachments) row.setAttribute('data-gvn-attach', 'true');
       else row.removeAttribute('data-gvn-attach');
 
+      // Highlight rules: tint a row whose sender/subject contains a term.
+      if (state.highlightRules.length) {
+        var subjectStr = parts.subject ? String(parts.subject.textContent || '') : '';
+        var hlColor = Core.highlightColor(
+          state.highlightRules, sender.name + ' ' + sender.email + ' ' + subjectStr
+        );
+        if (hlColor) {
+          row.setAttribute('data-gvn-highlight', 'true');
+          row.style.setProperty('--gvn-highlight', hlColor);
+          row.style.setProperty('--gvn-highlight-bg', hexToRgba(hlColor, 0.14));
+        } else {
+          row.removeAttribute('data-gvn-highlight');
+          row.style.removeProperty('--gvn-highlight');
+          row.style.removeProperty('--gvn-highlight-bg');
+        }
+      } else if (row.hasAttribute('data-gvn-highlight')) {
+        row.removeAttribute('data-gvn-highlight');
+        row.style.removeProperty('--gvn-highlight');
+        row.style.removeProperty('--gvn-highlight-bg');
+      }
+
+      // Sender frequency: mark the sender name when they appear more than once
+      // in the current view, e.g. "×3".
+      if (parts.sender) {
+        var freqKey = String(sender.email || sender.name || '').toLowerCase();
+        var freq = freqKey ? senderCounts[freqKey] : 0;
+        if (state.settings.senderFrequency && freq > 1) {
+          parts.sender.setAttribute('data-gvn-freq', String(freq));
+        } else {
+          parts.sender.removeAttribute('data-gvn-freq');
+        }
+      }
+
       // Quick-peek: hovering the subject shows the full subject + snippet (the
       // fullest text the inbox page holds; the body loads only when opened).
       if (parts.subject) {
@@ -2244,6 +2318,32 @@
         } else if (parts.subject.getAttribute('data-gvn-peek') === 'true') {
           parts.subject.removeAttribute('data-gvn-peek');
           parts.subject.removeAttribute('title');
+        }
+      }
+
+      // Relative dates: swap the innermost date span's text for "2h" / "Yesterday"
+      // etc. Original kept in data-gvn-origdate; idempotent so it can't loop the
+      // refresh observer, and restored when the option is off.
+      if (parts.dateCell) {
+        var dateSpans = parts.dateCell.querySelectorAll('span');
+        var dateSpan = null;
+        for (var di = dateSpans.length - 1; di >= 0; di--) {
+          if (!dateSpans[di].querySelector('*')) { dateSpan = dateSpans[di]; break; }
+        }
+        if (dateSpan) {
+          if (state.settings.relativeDates) {
+            var parsed = Core.parseGmailDate(Adapter.dateCandidates(parts), now);
+            var rel = parsed ? Core.relativeDate(parsed, now) : '';
+            if (rel) {
+              if (!dateSpan.hasAttribute('data-gvn-origdate')) {
+                dateSpan.setAttribute('data-gvn-origdate', dateSpan.textContent);
+              }
+              if (dateSpan.textContent !== rel) dateSpan.textContent = rel;
+            }
+          } else if (dateSpan.hasAttribute('data-gvn-origdate')) {
+            dateSpan.textContent = dateSpan.getAttribute('data-gvn-origdate');
+            dateSpan.removeAttribute('data-gvn-origdate');
+          }
         }
       }
 
@@ -3123,6 +3223,10 @@
         state.savedViews = Core.normalizeSavedViews(changes[SAVED_VIEWS_KEY].newValue);
         scheduleRefresh();
       }
+      if (changes[HIGHLIGHT_RULES_KEY]) {
+        state.highlightRules = Core.normalizeHighlightRules(changes[HIGHLIGHT_RULES_KEY].newValue);
+        scheduleRefresh();
+      }
       return;
     }
     if (area !== 'sync') return;
@@ -3404,7 +3508,8 @@
     readLogoOverrides(),
     readPinnedLabels(),
     readSenderRules(),
-    readSavedViews()
+    readSavedViews(),
+    readHighlightRules()
   ]).then(function (values) {
     if (state.destroyed) return;
     state.settings = Core.normalizeSettings(values[0]);

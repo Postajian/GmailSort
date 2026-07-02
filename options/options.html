@@ -64,6 +64,9 @@
         <label class="check"><input type="checkbox" name="groupUnreadCounts"> Show &ldquo;&mdash; N NEW&rdquo; counts on date-group lines</label>
         <label class="check"><input type="checkbox" name="autoMasthead"> <strong>Auto masthead</strong> &mdash; the title matches the current view (INBOX / ALL MAIL / label name)</label>
         <label class="check"><input type="checkbox" name="quickPeek"> <strong>Quick-peek</strong> &mdash; hover a subject to see the full subject + snippet (the body only loads when you open the email)</label>
+        <label class="check"><input type="checkbox" name="senderFrequency"> <strong>Sender frequency</strong> &mdash; show &ldquo;&times;N&rdquo; when a sender appears more than once in view</label>
+        <label class="check"><input type="checkbox" name="relativeDates"> <strong>Relative dates</strong> &mdash; show &ldquo;2h&rdquo; / &ldquo;Yesterday&rdquo; instead of the time (older than a month keeps the date)</label>
+        <label>Accent colour <input type="color" name="accentColor"></label>
       </fieldset>
 
       <fieldset>
@@ -150,6 +153,17 @@
       </fieldset>
 
       <fieldset>
+        <legend>Highlight rules</legend>
+        <p class="hint">Tint any row whose sender or subject contains a word you choose. Great for spotting invoices, a boss, a project name, etc. First matching rule wins.</p>
+        <div class="row">
+          <input type="text" id="hl-term" placeholder="word to match (e.g. invoice)" maxlength="80">
+          <input type="color" id="hl-color" value="#c9a84c" aria-label="Highlight colour">
+          <button type="button" id="hl-add">Add highlight</button>
+        </div>
+        <div id="hl-list" class="override-list"></div>
+      </fieldset>
+
+      <fieldset>
         <legend>Auto-sort inbox (optional companion)</legend>
         <p class="hint">Automatically label incoming mail with the companion Google Apps Script. It runs inside your own Google account &mdash; GmailView never sees your mail.</p>
         <div class="row">
@@ -201,6 +215,7 @@
         <label>Preview offset <input type="number" name="previewOffset" min="-10000" max="10000" step="4"></label>
         <label>Date offset <input type="number" name="dateOffset" min="-10000" max="10000" step="4"></label>
         <label>Right inset <input type="number" name="rightInset" min="0" max="240" step="4"></label>
+        <label>Reading width cap (0 = full) <input type="number" name="listMaxWidth" min="0" max="5000" step="20"></label>
         <input type="hidden" name="headerSenderX">
         <input type="hidden" name="headerTimeSentX">
         <input type="hidden" name="headerLogoX">

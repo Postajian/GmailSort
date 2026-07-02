@@ -599,6 +599,82 @@
     });
   }
 
+  // ----- Highlight rules ------------------------------------------------
+  var HIGHLIGHT_RULES_KEY = 'gmailViewNextHighlightRules';
+  var hlTerm = document.getElementById('hl-term');
+  var hlColor = document.getElementById('hl-color');
+  var hlAddBtn = document.getElementById('hl-add');
+  var hlList = document.getElementById('hl-list');
+
+  function loadHighlights(callback) {
+    safeLocalGet(HIGHLIGHT_RULES_KEY, function (stored, error) {
+      callback(Core.normalizeHighlightRules(!error && stored && stored[HIGHLIGHT_RULES_KEY]));
+    });
+  }
+
+  function renderHighlights(list) {
+    if (!hlList) return;
+    hlList.innerHTML = '';
+    if (!list.length) {
+      var empty = document.createElement('p');
+      empty.className = 'hint';
+      empty.textContent = 'No highlight rules yet.';
+      hlList.appendChild(empty);
+      return;
+    }
+    list.forEach(function (rule, index) {
+      var rowEl = document.createElement('div');
+      rowEl.className = 'row override-row';
+      var swatch = document.createElement('span');
+      swatch.className = 'override-swatch';
+      swatch.style.background = rule.color;
+      var label = document.createElement('span');
+      label.className = 'override-name';
+      label.textContent = rule.term;
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'secondary';
+      del.textContent = 'Remove';
+      del.addEventListener('click', function () {
+        loadHighlights(function (current) {
+          var next = current.filter(function (r, i) { return i !== index; });
+          var payload = {};
+          payload[HIGHLIGHT_RULES_KEY] = next;
+          safeLocalSet(payload, function (error) {
+            if (error) { showStatus('Could not remove.'); return; }
+            renderHighlights(next);
+            showStatus('Removed ' + rule.term + '.');
+          });
+        });
+      });
+      rowEl.appendChild(swatch);
+      rowEl.appendChild(label);
+      rowEl.appendChild(del);
+      hlList.appendChild(rowEl);
+    });
+  }
+
+  if (hlList) loadHighlights(renderHighlights);
+
+  if (hlAddBtn) {
+    hlAddBtn.addEventListener('click', function () {
+      var term = (hlTerm.value || '').trim();
+      var color = (hlColor.value || '').trim();
+      if (!term) { showStatus('Type a word to match first.'); return; }
+      loadHighlights(function (list) {
+        var next = Core.normalizeHighlightRules(list.concat([{ term: term, color: color }]));
+        var payload = {};
+        payload[HIGHLIGHT_RULES_KEY] = next;
+        safeLocalSet(payload, function (error) {
+          if (error) { showStatus('Could not save.'); return; }
+          hlTerm.value = '';
+          renderHighlights(next);
+          showStatus('Highlighting ' + term + '.');
+        });
+      });
+    });
+  }
+
   // ----- Density presets ------------------------------------------------
   var DENSITY_PRESETS = {
     compact: { density: 'compact', rowHeight: 32 },
@@ -627,6 +703,7 @@
   var LOCAL_BACKUP_KEYS = [
     'gmailViewNextSenderRules',
     'gmailViewNextSavedViews',
+    'gmailViewNextHighlightRules',
     'gmailViewNextLogoOverrides',
     'gmailViewNextPinnedLabels',
     'gmailViewNextPresets',
@@ -659,6 +736,9 @@
 
     clean.gmailViewNextSavedViews =
       Core.normalizeSavedViews(src.gmailViewNextSavedViews);
+
+    clean.gmailViewNextHighlightRules =
+      Core.normalizeHighlightRules(src.gmailViewNextHighlightRules);
 
     var colours = {};
     var rawColours = src.gmailViewNextLogoOverrides;
@@ -739,6 +819,7 @@
           safeLocalSet(cleanLocal, function (localError) {
             if (typeof renderRules === 'function') renderRules(cleanLocal.gmailViewNextSenderRules);
             if (typeof renderViews === 'function') renderViews(cleanLocal.gmailViewNextSavedViews);
+            if (typeof renderHighlights === 'function') renderHighlights(cleanLocal.gmailViewNextHighlightRules);
             if (typeof renderOverrides === 'function') renderOverrides(cleanLocal.gmailViewNextLogoOverrides);
             if (typeof renderPinned === 'function') renderPinned(cleanLocal.gmailViewNextPinnedLabels);
             if (typeof refreshPresets === 'function') refreshPresets();

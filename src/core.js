@@ -28,6 +28,12 @@
     autoMasthead: false,
     showCleanup: false,
     quickPeek: false,
+    senderFrequency: false,
+    relativeDates: false,
+    collapsibleGroups: false,
+    stickyGroupHeaders: false,
+    accentColor: '#c9a84c',
+    listMaxWidth: 0,
     mergeTabsRow: true,
     hideTabPromotions: false,
     hideTabSocial: false,
@@ -192,6 +198,14 @@
       autoMasthead: value.autoMasthead === true,
       showCleanup: value.showCleanup === true,
       quickPeek: value.quickPeek === true,
+      senderFrequency: value.senderFrequency === true,
+      relativeDates: value.relativeDates === true,
+      collapsibleGroups: value.collapsibleGroups === true,
+      stickyGroupHeaders: value.stickyGroupHeaders === true,
+      accentColor: /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(value.accentColor || '').trim())
+        ? String(value.accentColor).trim()
+        : DEFAULT_SETTINGS.accentColor,
+      listMaxWidth: clampNumber(value.listMaxWidth, 0, 5000, DEFAULT_SETTINGS.listMaxWidth),
       mergeTabsRow: value.mergeTabsRow !== false,
       hideTabPromotions: value.hideTabPromotions === true,
       hideTabSocial: value.hideTabSocial === true,
@@ -535,6 +549,52 @@
     return out;
   }
 
+  // A short relative label for a date ("now", "5m", "2h", "Yesterday", "3d",
+  // "2w"). Returns '' for anything older than a month so the caller keeps
+  // Gmail's absolute date, which reads better for old mail. Pure + testable.
+  function relativeDate(dateValue, nowValue) {
+    var now = nowValue instanceof Date ? nowValue : new Date(nowValue || Date.now());
+    var date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return '';
+    var diff = now.getTime() - date.getTime();
+    if (diff < 60000) return 'now';
+    var minutes = Math.floor(diff / 60000);
+    if (minutes < 60) return minutes + 'm';
+    var hours = Math.floor(minutes / 60);
+    if (hours < 24) return hours + 'h';
+    var days = Math.floor(hours / 24);
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return days + 'd';
+    if (days < 30) return Math.floor(days / 7) + 'w';
+    return '';
+  }
+
+  // ----- Highlight rules ----------------------------------------------------
+  // Colour a row when its text contains one of the user's terms. Each rule is
+  // { term, color }; first match wins. Pure + testable.
+  function normalizeHighlightRules(value) {
+    if (!Array.isArray(value)) return [];
+    var out = [];
+    value.slice(0, 50).forEach(function (entry) {
+      if (!entry || typeof entry !== 'object') return;
+      var term = String(entry.term || '').trim().toLowerCase().slice(0, 80);
+      var color = String(entry.color || '').trim();
+      if (term && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(color)) {
+        out.push({ term: term, color: color });
+      }
+    });
+    return out;
+  }
+
+  function highlightColor(rules, text) {
+    if (!rules || !rules.length) return '';
+    var hay = String(text || '').toLowerCase();
+    for (var i = 0; i < rules.length; i++) {
+      if (hay.indexOf(rules[i].term) !== -1) return rules[i].color;
+    }
+    return '';
+  }
+
   // ----- Inbox summary (front-page digest + stats panel) --------------------
   // Aggregate the visible inbox rows into counts the panel can render. Pure +
   // testable: each record is { name, email, domain, unread, group }. Returns
@@ -700,6 +760,9 @@
     gmailSearchHash: gmailSearchHash,
     vipDomainsQuery: vipDomainsQuery,
     normalizeSavedViews: normalizeSavedViews,
+    relativeDate: relativeDate,
+    normalizeHighlightRules: normalizeHighlightRules,
+    highlightColor: highlightColor,
     summarizeInbox: summarizeInbox,
     orderLabels: orderLabels,
     TRIAL_DAYS: TRIAL_DAYS,
