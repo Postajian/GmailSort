@@ -3286,6 +3286,8 @@
     var overlay = document.getElementById('gmail-view-next-ui');
     var sidebarHandle = document.getElementById('gmail-view-next-sidebar-resizer');
     var globalDividers = document.getElementById('gmail-view-next-global-dividers');
+    var helpOverlay = document.getElementById('gmail-view-next-help-overlay');
+    if (helpOverlay) helpOverlay.remove();
     if (style) style.remove();
     if (overlay) overlay.remove();
     if (sidebarHandle) sidebarHandle.remove();
@@ -3428,6 +3430,69 @@
     scheduleRefresh();
   }
 
+  // Help overlay (Alt+Shift+H): a self-contained panel listing the keyboard
+  // shortcuts and where the features live. Static content, no Gmail DOM changes.
+  function ensureHelpOverlay() {
+    var el = document.getElementById('gmail-view-next-help-overlay');
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = 'gmail-view-next-help-overlay';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-label', 'GmailView help');
+    el.style.display = 'none';
+    el.innerHTML =
+      '<div class="gvn-help-card">'
+      + '<div class="gvn-help-head">GmailView &mdash; quick help'
+      + '<button type="button" class="gvn-help-close" aria-label="Close">×</button></div>'
+      + '<div class="gvn-help-body">'
+      + '<div class="gvn-help-h">Keyboard shortcuts</div>'
+      + '<ul>'
+      + '<li><b>Alt+Shift+G</b> &mdash; toggle the redesign on/off</li>'
+      + '<li><b>Alt+Shift+Z</b> &mdash; Zen mode (hide sidebar, rail, tabs)</li>'
+      + '<li><b>Alt+Shift+P</b> &mdash; save the inbox as PDF</li>'
+      + '<li><b>Alt+Shift+H</b> &mdash; open/close this help</li>'
+      + '</ul>'
+      + '<div class="gvn-help-h">In the Options page</div>'
+      + '<ul>'
+      + '<li>Theme presets, accent colour, auto masthead, relative dates, quick-peek</li>'
+      + '<li>Front page: digest, stats, quick filters, cleanup wizard, group by company</li>'
+      + '<li>Sender rules (VIP/mute/hide), highlight rules, saved views, sender colours</li>'
+      + '<li>Density presets, reading-width cap, full backup (export/import everything)</li>'
+      + '</ul>'
+      + '<div class="gvn-help-h">In the inbox</div>'
+      + '<ul>'
+      + '<li>Click a front-page sender chip or bar to filter to that sender</li>'
+      + '<li>VIP / Mute / Hide buttons on the stats rows act on all of a sender&rsquo;s mail</li>'
+      + '<li>📎 marks rows with attachments; &times;N marks repeat senders</li>'
+      + '</ul>'
+      + '<p class="gvn-help-foot">Open the full settings from the GmailView toolbar icon &rarr; Options.</p>'
+      + '</div></div>';
+    addListener(el, 'click', function (event) {
+      if (event.target === el || (event.target.className || '').indexOf('gvn-help-close') !== -1) {
+        el.style.display = 'none';
+      }
+    });
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function toggleHelpOverlay() {
+    var el = ensureHelpOverlay();
+    el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+  }
+
+  function handleHelpHotkey(event) {
+    if (!state.settings || state.settings.toggleHotkey === false) return;
+    if (!event.altKey || !event.shiftKey || event.ctrlKey || event.metaKey) return;
+    var isH = event.code === 'KeyH' || String(event.key || '').toLowerCase() === 'h';
+    if (!isH) return;
+    var el = document.activeElement;
+    if (el && (el.isContentEditable ||
+      /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName || ''))) return;
+    event.preventDefault();
+    toggleHelpOverlay();
+  }
+
   // Alt+Shift+Z toggles Zen mode (hide sidebar, rail, tabs for a clean reading
   // column). Flips `zenMode` in sync storage and applies it instantly.
   function handleZenHotkey(event) {
@@ -3478,6 +3543,7 @@
 
     addListener(window, 'keydown', handleToggleHotkey, true);
     addListener(window, 'keydown', handleZenHotkey, true);
+    addListener(window, 'keydown', handleHelpHotkey, true);
     addListener(window, 'keydown', handlePrintHotkey, true);
     addListener(window, 'hashchange', maybeRollupLabel);
     addListener(window, 'hashchange', scheduleRefresh);

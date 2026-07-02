@@ -142,6 +142,16 @@
         + '#gmail-view-next-sidebar-resizer{display:none!important;}'
         + '}',
       '.gvn-label-count{margin-left:6px;font-weight:600;opacity:.7;}',
+      // Help overlay (Alt+Shift+H)
+      '#gmail-view-next-help-overlay{position:fixed;inset:0;z-index:2147483646;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);}',
+      '#gmail-view-next-help-overlay .gvn-help-card{width:min(560px,92vw);max-height:86vh;overflow:auto;background:var(--gvn-band);color:var(--gvn-ink);border:2px solid var(--gvn-rule);box-shadow:0 8px 40px rgba(0,0,0,.4);font-family:' + FONT + ';}',
+      '#gmail-view-next-help-overlay .gvn-help-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:2px solid var(--gvn-rule);font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;}',
+      '#gmail-view-next-help-overlay .gvn-help-close{border:1px solid var(--gvn-rule);background:var(--gvn-paper);color:var(--gvn-ink);width:26px;height:26px;font-size:16px;line-height:1;cursor:pointer;}',
+      '#gmail-view-next-help-overlay .gvn-help-body{padding:12px 18px 16px;}',
+      '#gmail-view-next-help-overlay .gvn-help-h{margin:12px 0 4px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gvn-muted);}',
+      '#gmail-view-next-help-overlay ul{margin:0;padding-left:20px;font-size:14px;line-height:1.7;}',
+      '#gmail-view-next-help-overlay b{color:var(--gvn-gold);}',
+      '#gmail-view-next-help-overlay .gvn-help-foot{margin:12px 0 0;font-size:12px;color:var(--gvn-muted);}',
       // Sharp 90-degree corners across every GmailView UI element (user preference).
       '#gmail-view-next-ui,#gmail-view-next-ui *{border-radius:0!important;}',
       '#gmail-view-next-frontpage,#gmail-view-next-frontpage *{border-radius:0!important;}',
