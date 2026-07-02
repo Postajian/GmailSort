@@ -292,6 +292,8 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-rule="vip"] span[email]{font-weight:700!important;}',
       // Group-by-company: colour bar on the right of the sender column.
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-domain="true"] td.yX{box-shadow:inset -3px 0 0 var(--gvn-domain-color,transparent)!important;}',
+      // Attachment marker: a small paperclip after the sender name.
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-attach="true"] span[email]::after{content:"\\01F4CE";font-size:11px;opacity:.55;margin-left:5px;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA .xT{position:relative!important;z-index:4!important;display:flex!important;align-items:center!important;width:100%!important;min-width:0!important;height:' + rowHeight + 'px!important;min-height:' + rowHeight + 'px!important;overflow:visible!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA .xT::before{content:"";position:relative!important;z-index:20!important;display:' + markDisplay + ';flex:0 0 22px!important;width:22px!important;height:22px!important;margin-left:4px!important;margin-right:30px!important;transform:translateX(' + logoShift + 'px) scale(' + logoScale + ')!important;transform-origin:center!important;background-image:var(--gvn-logo,none);background-color:var(--gvn-paper)!important;background-position:center;background-size:contain;background-repeat:no-repeat;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.12)!important;pointer-events:none!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA .xT .yi{display:none!important;}',

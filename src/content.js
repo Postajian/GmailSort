@@ -1818,6 +1818,9 @@
       node.removeAttribute('data-gvn-domain');
       node.style.removeProperty('--gvn-domain-color');
     });
+    document.querySelectorAll('[data-gvn-attach]').forEach(function (node) {
+      node.removeAttribute('data-gvn-attach');
+    });
     document.querySelectorAll('tr.zA .brd').forEach(function (node) {
       node.style.removeProperty('--gvn-attachment-shift');
     });
@@ -2222,6 +2225,9 @@
         row.removeAttribute('data-gvn-domain');
         row.style.removeProperty('--gvn-domain-color');
       }
+
+      if (parts.attachments) row.setAttribute('data-gvn-attach', 'true');
+      else row.removeAttribute('data-gvn-attach');
 
       // Hidden senders are excluded from the briefing/stats so the numbers
       // match what the user actually sees in the list.
