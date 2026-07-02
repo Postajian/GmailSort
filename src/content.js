@@ -1821,6 +1821,10 @@
     document.querySelectorAll('[data-gvn-attach]').forEach(function (node) {
       node.removeAttribute('data-gvn-attach');
     });
+    document.querySelectorAll('[data-gvn-peek]').forEach(function (node) {
+      node.removeAttribute('data-gvn-peek');
+      node.removeAttribute('title');
+    });
     document.querySelectorAll('tr.zA .brd').forEach(function (node) {
       node.style.removeProperty('--gvn-attachment-shift');
     });
@@ -2228,6 +2232,20 @@
 
       if (parts.attachments) row.setAttribute('data-gvn-attach', 'true');
       else row.removeAttribute('data-gvn-attach');
+
+      // Quick-peek: hovering the subject shows the full subject + snippet (the
+      // fullest text the inbox page holds; the body loads only when opened).
+      if (parts.subject) {
+        if (state.settings.quickPeek) {
+          var subjectText = String(parts.subject.textContent || '').trim();
+          var previewText = parts.preview ? String(parts.preview.textContent || '').trim() : '';
+          parts.subject.setAttribute('data-gvn-peek', 'true');
+          parts.subject.title = previewText ? subjectText + '\n\n' + previewText : subjectText;
+        } else if (parts.subject.getAttribute('data-gvn-peek') === 'true') {
+          parts.subject.removeAttribute('data-gvn-peek');
+          parts.subject.removeAttribute('title');
+        }
+      }
 
       // Hidden senders are excluded from the briefing/stats so the numbers
       // match what the user actually sees in the list.
