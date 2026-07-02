@@ -152,8 +152,6 @@
       '#gmail-view-next-help-overlay ul{margin:0;padding-left:20px;font-size:14px;line-height:1.7;}',
       '#gmail-view-next-help-overlay b{color:var(--gvn-gold);}',
       '#gmail-view-next-help-overlay .gvn-help-foot{margin:12px 0 0;font-size:12px;color:var(--gvn-muted);}',
-      // Sticky group header (floating; positioned by JS)
-      '#gmail-view-next-sticky-group{position:fixed;z-index:3;display:none;box-sizing:border-box;pointer-events:none;padding:3px 0 3px ' + (contentIndent + groupTextGap) + 'px;background:var(--gvn-band);border-bottom:2px solid var(--gvn-rule);font-family:' + FONT + ';font-size:' + groupFontSize + 'px;font-weight:1000;line-height:20px;color:var(--gvn-ink);letter-spacing:' + settings.groupLetterSpacing + 'px;text-transform:uppercase;white-space:nowrap;overflow:hidden;}',
       // Sharp 90-degree corners across every GmailView UI element (user preference).
       '#gmail-view-next-ui,#gmail-view-next-ui *{border-radius:0!important;}',
       '#gmail-view-next-frontpage,#gmail-view-next-frontpage *{border-radius:0!important;}',
