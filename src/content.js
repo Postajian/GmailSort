@@ -2514,7 +2514,9 @@
     overlay.style.display = 'block';
 
     var mastheadTitle = masthead.querySelector('.gvn-masthead-title');
-    mastheadTitle.textContent = state.settings.masthead;
+    mastheadTitle.textContent = state.settings.autoMasthead
+      ? Core.viewTitle(location.hash, state.settings.masthead)
+      : state.settings.masthead;
     mastheadTitle.style.left =
       'calc(50% + ' + Math.round(state.settings.inboxOffset) + 'px)';
     mastheadTitle.setAttribute(

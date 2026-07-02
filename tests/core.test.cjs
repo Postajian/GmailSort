@@ -290,6 +290,15 @@ test('orderLabels keeps original order when nothing is pinned or active', () => 
   assert.deepEqual(core.orderLabels(entries).map((e) => e.name), ['A', 'B']);
 });
 
+test('viewTitle names the view, keeping the custom masthead on the inbox', () => {
+  assert.equal(core.viewTitle('#inbox', 'THE POST'), 'THE POST');
+  assert.equal(core.viewTitle('', 'THE POST'), 'THE POST');
+  assert.equal(core.viewTitle('#all', 'THE POST'), 'ALL MAIL');
+  assert.equal(core.viewTitle('#starred', 'THE POST'), 'STARRED');
+  assert.equal(core.viewTitle('#search/from%3Ame', 'THE POST'), 'SEARCH');
+  assert.equal(core.viewTitle('#label/Money%2FPayPal', 'THE POST'), 'MONEY/PAYPAL');
+});
+
 test('recognizes inbox, all mail, thread, and other routes', () => {
   assert.equal(core.routeMode('#inbox'), 'inbox');
   assert.equal(core.routeMode('#inbox/FMfcgzQ123456789'), 'thread');

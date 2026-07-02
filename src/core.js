@@ -25,6 +25,7 @@
     groupByDomain: false,
     zenMode: false,
     sciFiAccents: false,
+    autoMasthead: false,
     mergeTabsRow: true,
     hideTabPromotions: false,
     hideTabSocial: false,
@@ -186,6 +187,7 @@
       groupByDomain: value.groupByDomain === true,
       zenMode: value.zenMode === true,
       sciFiAccents: value.sciFiAccents === true,
+      autoMasthead: value.autoMasthead === true,
       mergeTabsRow: value.mergeTabsRow !== false,
       hideTabPromotions: value.hideTabPromotions === true,
       hideTabSocial: value.hideTabSocial === true,
@@ -474,6 +476,24 @@
     }
   }
 
+  // The masthead title for the current Gmail view. Inbox (and unknown views)
+  // keep the user's custom masthead; other list views name themselves. Pure +
+  // testable. Used only when the "auto masthead" setting is on.
+  function viewTitle(hash, fallback) {
+    var h = String(hash || '').toLowerCase();
+    var base = String(fallback || '').trim();
+    var label = decodeLabelHash(hash);
+    if (label) return label.toUpperCase().slice(0, 24);
+    if (h.indexOf('#all') === 0) return 'ALL MAIL';
+    if (h.indexOf('#search') === 0) return 'SEARCH';
+    if (h.indexOf('#starred') === 0) return 'STARRED';
+    if (h.indexOf('#imp') === 0) return 'IMPORTANT';
+    if (h.indexOf('#snoozed') === 0) return 'SNOOZED';
+    if (h.indexOf('#sent') === 0) return 'SENT';
+    if (h.indexOf('#drafts') === 0) return 'DRAFTS';
+    return base;
+  }
+
   // Build a Gmail search query that rolls a parent/umbrella label up together
   // with every descendant sub-label. Returns "" when the label has no children
   // (a leaf), so the caller leaves normal Gmail navigation alone.
@@ -653,6 +673,7 @@
     labelColor: labelColor,
     isSubLabel: isSubLabel,
     decodeLabelHash: decodeLabelHash,
+    viewTitle: viewTitle,
     labelRollupQuery: labelRollupQuery,
     SENDER_RULES: SENDER_RULES,
     normalizeSenderRules: normalizeSenderRules,
