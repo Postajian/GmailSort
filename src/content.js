@@ -868,6 +868,28 @@
     quickButton.setAttribute('aria-label', 'Open quick settings');
     quickButton.addEventListener('click', toggleQuickPanel);
     masthead.appendChild(quickButton);
+    var focusButton = document.createElement('button');
+    focusButton.className = 'gvn-tab-focus';
+    focusButton.type = 'button';
+    focusButton.textContent = 'Focus';
+    focusButton.title = 'Focus mode — hide Promotions, Social & Forums';
+    focusButton.setAttribute('aria-label', 'Toggle focus mode');
+    focusButton.addEventListener('click', function () {
+      setQuickSetting('focusMode', !(state.settings.focusMode === true));
+      updateQuickButtons();
+    });
+    masthead.appendChild(focusButton);
+    var tabOrderButton = document.createElement('button');
+    tabOrderButton.className = 'gvn-tab-order';
+    tabOrderButton.type = 'button';
+    tabOrderButton.textContent = 'Tabs';
+    tabOrderButton.setAttribute('aria-label', 'Change category tab order');
+    tabOrderButton.addEventListener('click', function () {
+      var idx = TAB_ORDER_CYCLE.indexOf(state.settings.tabOrder);
+      setQuickSetting('tabOrder', TAB_ORDER_CYCLE[(idx + 1) % TAB_ORDER_CYCLE.length]);
+      updateQuickButtons();
+    });
+    masthead.appendChild(tabOrderButton);
     var centerButton = document.createElement('button');
     centerButton.className = 'gvn-center-button';
     centerButton.type = 'button';
@@ -972,6 +994,7 @@
     document.body.appendChild(overlay);
     updateTypeEditor();
     updateBackgroundToggle();
+    updateQuickButtons();
     return overlay;
   }
 
@@ -984,6 +1007,21 @@
     button.textContent = on ? 'Paper: on' : 'Paper: off';
     if (on) button.setAttribute('data-active', 'true');
     else button.removeAttribute('data-active');
+  }
+
+  function updateQuickButtons() {
+    var overlay = document.getElementById('gmail-view-next-ui');
+    if (!overlay) return;
+    var focusBtn = overlay.querySelector('.gvn-tab-focus');
+    if (focusBtn) {
+      focusBtn.setAttribute('data-active', String(state.settings.focusMode === true));
+    }
+    var tabBtn = overlay.querySelector('.gvn-tab-order');
+    if (tabBtn) {
+      tabBtn.title = 'Tab order: ' +
+        (TAB_ORDER_LABELS[state.settings.tabOrder] || state.settings.tabOrder) +
+        ' — click to change';
+    }
   }
 
   function toggleBackgroundMode() {
@@ -3325,6 +3363,7 @@
       renderFrontPage();
       positionOverlay(rows[0]);
       positionGlobalDividers(rows[0]);
+      updateQuickButtons();
       watchTable();
     } catch (error) {
       logError('Refresh failed.', error);
