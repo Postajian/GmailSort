@@ -41,12 +41,26 @@
           </select>
         </label>
         <p class="hint" style="margin:2px 0 6px;">Dark, Sepia and High contrast use an opaque paper tone, so they read the same over any Gmail theme. Light follows your &ldquo;Transparent background&rdquo; choice below.</p>
+        <label>Accent colour <input type="color" name="accentColor"></label>
         <label class="check"><input type="checkbox" name="transparentBackground"> Transparent background &mdash; show your Gmail theme</label>
         <label class="check"><input type="checkbox" name="readablePanel"> White reading panel (off = newspaper fully see-through)</label>
-        <label class="check"><input type="checkbox" name="mergeTabsRow"> Merge category tabs into the toolbar row</label>
-        <label class="check"><input type="checkbox" name="focusMode"> <strong>Focus mode</strong> &mdash; hide Promotions, Social &amp; Forums in one click</label>
-        <label class="check"><input type="checkbox" name="zenMode"> <strong>Zen mode</strong> &mdash; hide the sidebar, app rail &amp; tabs for a clean reading column (<strong>Alt+Shift+Z</strong>)</label>
+        <label class="check"><input type="checkbox" name="unreadEmphasis"> Emphasize unread mail (bold + gold dot &amp; edge)</label>
+        <label class="check"><input type="checkbox" name="groupUnreadCounts"> Show &ldquo;&mdash; N NEW&rdquo; counts on date-group lines</label>
         <label class="check"><input type="checkbox" name="sciFiAccents"> <strong>Sci-fi accents</strong> &mdash; subtle gold glow on the front page, bars &amp; masthead</label>
+        <label class="check"><input type="checkbox" name="zenMode"> <strong>Zen mode</strong> &mdash; hide the sidebar, app rail &amp; tabs (<strong>Alt+Shift+Z</strong>)</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Reading &amp; rows</legend>
+        <label class="check"><input type="checkbox" name="autoMasthead"> <strong>Auto masthead</strong> &mdash; the title matches the current view (INBOX / ALL MAIL / label name)</label>
+        <label class="check"><input type="checkbox" name="quickPeek"> <strong>Quick-peek</strong> &mdash; hover a subject to see the full subject + snippet</label>
+        <label class="check"><input type="checkbox" name="senderFrequency"> <strong>Sender frequency</strong> &mdash; show &ldquo;&times;N&rdquo; when a sender appears more than once in view</label>
+        <label class="check"><input type="checkbox" name="relativeDates"> <strong>Relative dates</strong> &mdash; show &ldquo;2h&rdquo; / &ldquo;Yesterday&rdquo; instead of the time (older than a month keeps the date)</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Category tabs</legend>
+        <label class="check"><input type="checkbox" name="mergeTabsRow"> Merge category tabs into the toolbar row</label>
         <label>Tab order
           <select name="tabOrder">
             <option value="default">Default (Primary &middot; Promotions &middot; Social)</option>
@@ -55,18 +69,12 @@
           </select>
         </label>
         <p class="hint" style="margin:2px 0 6px;">Reorders the merged category tabs (needs &ldquo;Merge category tabs&rdquo; on).</p>
-        <p class="hint" style="margin:6px 0 2px;">Or hide individual category tabs (Primary always stays). The remaining tabs spread to fill the row:</p>
+        <label class="check"><input type="checkbox" name="focusMode"> <strong>Focus mode</strong> &mdash; hide Promotions, Social &amp; Forums in one click</label>
+        <p class="hint" style="margin:6px 0 2px;">Or hide individual tabs (Primary always stays):</p>
         <label class="check"><input type="checkbox" name="hideTabPromotions"> Hide the Promotions tab</label>
         <label class="check"><input type="checkbox" name="hideTabSocial"> Hide the Social tab</label>
         <label class="check"><input type="checkbox" name="hideTabUpdates"> Hide the Updates tab</label>
         <label class="check"><input type="checkbox" name="hideTabForums"> Hide the Forums tab</label>
-        <label class="check"><input type="checkbox" name="unreadEmphasis"> Emphasize unread mail (bold + gold dot &amp; edge)</label>
-        <label class="check"><input type="checkbox" name="groupUnreadCounts"> Show &ldquo;&mdash; N NEW&rdquo; counts on date-group lines</label>
-        <label class="check"><input type="checkbox" name="autoMasthead"> <strong>Auto masthead</strong> &mdash; the title matches the current view (INBOX / ALL MAIL / label name)</label>
-        <label class="check"><input type="checkbox" name="quickPeek"> <strong>Quick-peek</strong> &mdash; hover a subject to see the full subject + snippet (the body only loads when you open the email)</label>
-        <label class="check"><input type="checkbox" name="senderFrequency"> <strong>Sender frequency</strong> &mdash; show &ldquo;&times;N&rdquo; when a sender appears more than once in view</label>
-        <label class="check"><input type="checkbox" name="relativeDates"> <strong>Relative dates</strong> &mdash; show &ldquo;2h&rdquo; / &ldquo;Yesterday&rdquo; instead of the time (older than a month keeps the date)</label>
-        <label>Accent colour <input type="color" name="accentColor"></label>
       </fieldset>
 
       <fieldset>
