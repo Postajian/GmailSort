@@ -11,6 +11,7 @@
   var LOGO_OVERRIDES_KEY = 'gmailViewNextLogoOverrides';
   var PINNED_LABELS_KEY = 'gmailViewNextPinnedLabels';
   var SENDER_RULES_KEY = 'gmailViewNextSenderRules';
+  var SAVED_VIEWS_KEY = 'gmailViewNextSavedViews';
   var COLUMN_NAMES = ['sender', 'time-sent', 'logo', 'subject', 'preview', 'date'];
   var COLUMN_LAYOUT_SETTINGS = Object.freeze({
     sender: { header: 'headerSenderX', boundary: 'senderOffset' },
@@ -81,6 +82,7 @@
     logoPending: {},
     logoOverrides: {},
     senderRules: {},
+    savedViews: [],
     pinnedLabels: [],
     inboxRecords: [],
     listeners: []
@@ -350,6 +352,18 @@
         reportApiError('Could not read sender rules.', error);
         if (!error) {
           state.senderRules = Core.normalizeSenderRules(stored && stored[SENDER_RULES_KEY]);
+        }
+        resolve();
+      });
+    });
+  }
+
+  function readSavedViews() {
+    return new Promise(function (resolve) {
+      safeStorageGet('local', SAVED_VIEWS_KEY, function (stored, error) {
+        reportApiError('Could not read saved views.', error);
+        if (!error) {
+          state.savedViews = Core.normalizeSavedViews(stored && stored[SAVED_VIEWS_KEY]);
         }
         resolve();
       });
@@ -1842,6 +1856,15 @@
     { key: 'today', label: 'Today', query: 'newer_than:1d in:inbox' },
     { key: 'all', label: 'All mail', query: '' }
   ];
+  // Cleanup wizard: one-click searches that tee up Gmail's own bulk select +
+  // archive/delete. We only navigate — we never delete anything ourselves.
+  var CLEANUP_SEARCHES = [
+    { label: 'Old promotions', query: 'category:promotions older_than:30d' },
+    { label: 'Old social', query: 'category:social older_than:30d' },
+    { label: 'Newsletters', query: '"unsubscribe" older_than:30d' },
+    { label: 'Large (>5MB)', query: 'larger:5M' },
+    { label: 'Unread promos', query: 'category:promotions is:unread older_than:14d' }
+  ];
 
   function removeFrontPage() {
     var existing = document.getElementById(FRONTPAGE_ID);
@@ -1956,8 +1979,10 @@
     var wantDigest = state.settings.showDigest;
     var wantStats = state.settings.showStats;
     var wantFilters = state.settings.showQuickFilters;
+    var wantCleanup = state.settings.showCleanup;
     var wantLegend = state.settings.groupByDomain;
-    if (!wantDigest && !wantStats && !wantFilters) {
+    var savedViews = state.savedViews || [];
+    if (!wantDigest && !wantStats && !wantFilters && !wantCleanup && !savedViews.length) {
       removeFrontPage();
       return;
     }
@@ -1978,7 +2003,9 @@
     // the observer forever. We only repaint when the numbers actually change.
     var signature = [
       wantDigest ? 'd' : '', wantStats ? 's' : '', wantFilters ? 'q' : '',
-      wantLegend ? 'g' : '', Core.vipDomainsQuery(state.senderRules) ? 'v' : '',
+      wantCleanup ? 'c' : '', wantLegend ? 'g' : '',
+      Core.vipDomainsQuery(state.senderRules) ? 'v' : '',
+      savedViews.map(function (view) { return view.name; }).join(','),
       summary.total, summary.unread, summary.senderCount,
       summary.topSenders.map(function (s) { return s.key + ':' + s.count + ':' + s.unread; }).join(','),
       summary.groups.map(function (g) { return g.name + ':' + g.count + ':' + g.unread; }).join(',')
@@ -2011,6 +2038,32 @@
         filters.appendChild(fpFilterButton(filter.label, filter.query));
       });
       panel.appendChild(filters);
+    }
+
+    if (savedViews.length) {
+      var viewsRow = document.createElement('div');
+      viewsRow.className = 'gvn-fp-filters';
+      var viewsLabel = document.createElement('span');
+      viewsLabel.className = 'gvn-fp-filters-label';
+      viewsLabel.textContent = 'Saved views';
+      viewsRow.appendChild(viewsLabel);
+      savedViews.forEach(function (view) {
+        viewsRow.appendChild(fpFilterButton(view.name, view.query));
+      });
+      panel.appendChild(viewsRow);
+    }
+
+    if (wantCleanup) {
+      var cleanup = document.createElement('div');
+      cleanup.className = 'gvn-fp-filters';
+      var cleanupLabel = document.createElement('span');
+      cleanupLabel.className = 'gvn-fp-filters-label';
+      cleanupLabel.textContent = 'Clean up';
+      cleanup.appendChild(cleanupLabel);
+      CLEANUP_SEARCHES.forEach(function (item) {
+        cleanup.appendChild(fpFilterButton(item.label, item.query));
+      });
+      panel.appendChild(cleanup);
     }
 
     if (wantDigest) {
@@ -3042,6 +3095,10 @@
         state.senderRules = Core.normalizeSenderRules(changes[SENDER_RULES_KEY].newValue);
         scheduleRefresh();
       }
+      if (changes[SAVED_VIEWS_KEY]) {
+        state.savedViews = Core.normalizeSavedViews(changes[SAVED_VIEWS_KEY].newValue);
+        scheduleRefresh();
+      }
       return;
     }
     if (area !== 'sync') return;
@@ -3322,7 +3379,8 @@
     readLabelTypography(),
     readLogoOverrides(),
     readPinnedLabels(),
-    readSenderRules()
+    readSenderRules(),
+    readSavedViews()
   ]).then(function (values) {
     if (state.destroyed) return;
     state.settings = Core.normalizeSettings(values[0]);

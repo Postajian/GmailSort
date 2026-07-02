@@ -147,6 +147,20 @@ test('front-page and group-by-domain toggles default off and accept booleans', (
   assert.equal(core.normalizeSettings({ showDigest: 'yes' }).showDigest, false);
 });
 
+test('normalizeSavedViews keeps only named searches and caps fields', () => {
+  const views = core.normalizeSavedViews([
+    { name: 'Work unread', query: 'is:unread label:Work' },
+    { name: '  ', query: 'x' },
+    { name: 'No query', query: '' },
+    'nonsense',
+    { name: 'A'.repeat(60), query: 'q' }
+  ]);
+  assert.equal(views.length, 2);
+  assert.deepEqual(views[0], { name: 'Work unread', query: 'is:unread label:Work' });
+  assert.equal(views[1].name.length, 40);
+  assert.deepEqual(core.normalizeSavedViews('nope'), []);
+});
+
 test('quick filters, zen mode and sci-fi accents default off and accept booleans', () => {
   assert.equal(core.DEFAULT_SETTINGS.showQuickFilters, false);
   assert.equal(core.DEFAULT_SETTINGS.zenMode, false);

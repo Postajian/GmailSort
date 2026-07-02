@@ -524,6 +524,81 @@
     });
   }
 
+  // ----- Saved views ----------------------------------------------------
+  var SAVED_VIEWS_KEY = 'gmailViewNextSavedViews';
+  var viewName = document.getElementById('view-name');
+  var viewQuery = document.getElementById('view-query');
+  var viewAddBtn = document.getElementById('view-add');
+  var viewList = document.getElementById('view-list');
+
+  function loadViews(callback) {
+    safeLocalGet(SAVED_VIEWS_KEY, function (stored, error) {
+      var list = !error && stored && stored[SAVED_VIEWS_KEY];
+      callback(Core.normalizeSavedViews(list));
+    });
+  }
+
+  function renderViews(list) {
+    if (!viewList) return;
+    viewList.innerHTML = '';
+    if (!list.length) {
+      var empty = document.createElement('p');
+      empty.className = 'hint';
+      empty.textContent = 'No saved views yet.';
+      viewList.appendChild(empty);
+      return;
+    }
+    list.forEach(function (view, index) {
+      var rowEl = document.createElement('div');
+      rowEl.className = 'row override-row';
+      var label = document.createElement('span');
+      label.className = 'override-name';
+      label.textContent = view.name + '  —  ' + view.query;
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'secondary';
+      del.textContent = 'Remove';
+      del.addEventListener('click', function () {
+        loadViews(function (current) {
+          var next = current.filter(function (v, i) { return i !== index; });
+          var payload = {};
+          payload[SAVED_VIEWS_KEY] = next;
+          safeLocalSet(payload, function (error) {
+            if (error) { showStatus('Could not remove.'); return; }
+            renderViews(next);
+            showStatus('Removed view ' + view.name + '.');
+          });
+        });
+      });
+      rowEl.appendChild(label);
+      rowEl.appendChild(del);
+      viewList.appendChild(rowEl);
+    });
+  }
+
+  if (viewList) loadViews(renderViews);
+
+  if (viewAddBtn) {
+    viewAddBtn.addEventListener('click', function () {
+      var name = (viewName.value || '').trim().slice(0, 40);
+      var query = (viewQuery.value || '').trim().slice(0, 200);
+      if (!name) { showStatus('Type a view name first.'); return; }
+      if (!query) { showStatus('Type a Gmail search first.'); return; }
+      loadViews(function (list) {
+        var next = Core.normalizeSavedViews(list.concat([{ name: name, query: query }]));
+        var payload = {};
+        payload[SAVED_VIEWS_KEY] = next;
+        safeLocalSet(payload, function (error) {
+          if (error) { showStatus('Could not save.'); return; }
+          viewName.value = '';
+          viewQuery.value = '';
+          renderViews(next);
+          showStatus('Saved view ' + name + '.');
+        });
+      });
+    });
+  }
+
   // ----- Density presets ------------------------------------------------
   var DENSITY_PRESETS = {
     compact: { density: 'compact', rowHeight: 32 },
@@ -551,6 +626,7 @@
   // ----- Full backup (settings + local rules/colours/pins/presets) ------
   var LOCAL_BACKUP_KEYS = [
     'gmailViewNextSenderRules',
+    'gmailViewNextSavedViews',
     'gmailViewNextLogoOverrides',
     'gmailViewNextPinnedLabels',
     'gmailViewNextPresets',
@@ -580,6 +656,9 @@
 
     clean.gmailViewNextSenderRules =
       Core.normalizeSenderRules(src.gmailViewNextSenderRules);
+
+    clean.gmailViewNextSavedViews =
+      Core.normalizeSavedViews(src.gmailViewNextSavedViews);
 
     var colours = {};
     var rawColours = src.gmailViewNextLogoOverrides;
@@ -659,6 +738,7 @@
         safeSyncSet(cleanSettings, function (syncError) {
           safeLocalSet(cleanLocal, function (localError) {
             if (typeof renderRules === 'function') renderRules(cleanLocal.gmailViewNextSenderRules);
+            if (typeof renderViews === 'function') renderViews(cleanLocal.gmailViewNextSavedViews);
             if (typeof renderOverrides === 'function') renderOverrides(cleanLocal.gmailViewNextLogoOverrides);
             if (typeof renderPinned === 'function') renderPinned(cleanLocal.gmailViewNextPinnedLabels);
             if (typeof refreshPresets === 'function') refreshPresets();

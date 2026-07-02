@@ -71,6 +71,7 @@
         <label class="check"><input type="checkbox" name="showDigest"> <strong>Front-page digest</strong> &mdash; a briefing strip with totals and the top senders in view (click a sender to filter)</label>
         <label class="check"><input type="checkbox" name="showStats"> <strong>Inbox stats panel</strong> &mdash; bar charts of the busiest senders and activity by period, each with one-click VIP / Mute / Hide</label>
         <label class="check"><input type="checkbox" name="showQuickFilters"> <strong>Quick filter bar</strong> &mdash; one-tap Unread / Attachments / Today / VIPs / All mail</label>
+        <label class="check"><input type="checkbox" name="showCleanup"> <strong>Cleanup wizard</strong> &mdash; one-click searches (old promotions, newsletters, large mail) that tee up Gmail&rsquo;s bulk select. Never deletes anything for you.</label>
         <label class="check"><input type="checkbox" name="groupByDomain"> <strong>Group senders by company</strong> &mdash; tag rows from the same domain (adds a colour legend to the front page)</label>
       </fieldset>
 
@@ -134,6 +135,17 @@
           <button type="button" id="rule-add">Add rule</button>
         </div>
         <div id="rule-list" class="override-list"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Saved views</legend>
+        <p class="hint">Save a named Gmail search you can jump to from the front-page bar. Use any Gmail search, e.g. <code>is:unread from:boss@work.com</code> or <code>has:attachment newer_than:7d</code>. Needs the front page enabled to show the buttons.</p>
+        <div class="row">
+          <input type="text" id="view-name" placeholder="name (e.g. Work unread)" maxlength="40">
+          <input type="text" id="view-query" placeholder="gmail search (is:unread label:Work)" maxlength="200">
+          <button type="button" id="view-add">Save view</button>
+        </div>
+        <div id="view-list" class="override-list"></div>
       </fieldset>
 
       <fieldset>

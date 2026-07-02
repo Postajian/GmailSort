@@ -26,6 +26,7 @@
     zenMode: false,
     sciFiAccents: false,
     autoMasthead: false,
+    showCleanup: false,
     mergeTabsRow: true,
     hideTabPromotions: false,
     hideTabSocial: false,
@@ -188,6 +189,7 @@
       zenMode: value.zenMode === true,
       sciFiAccents: value.sciFiAccents === true,
       autoMasthead: value.autoMasthead === true,
+      showCleanup: value.showCleanup === true,
       mergeTabsRow: value.mergeTabsRow !== false,
       hideTabPromotions: value.hideTabPromotions === true,
       hideTabSocial: value.hideTabSocial === true,
@@ -516,6 +518,21 @@
     }).join(' OR ');
   }
 
+  // ----- Saved views --------------------------------------------------------
+  // A list of named Gmail searches the user can jump to. Each entry is
+  // { name, query }; query is a raw Gmail search string. Pure + testable.
+  function normalizeSavedViews(value) {
+    if (!Array.isArray(value)) return [];
+    var out = [];
+    value.slice(0, 50).forEach(function (entry) {
+      if (!entry || typeof entry !== 'object') return;
+      var name = String(entry.name || '').trim().slice(0, 40);
+      var query = String(entry.query || '').trim().slice(0, 200);
+      if (name && query) out.push({ name: name, query: query });
+    });
+    return out;
+  }
+
   // ----- Inbox summary (front-page digest + stats panel) --------------------
   // Aggregate the visible inbox rows into counts the panel can render. Pure +
   // testable: each record is { name, email, domain, unread, group }. Returns
@@ -680,6 +697,7 @@
     senderRuleFor: senderRuleFor,
     gmailSearchHash: gmailSearchHash,
     vipDomainsQuery: vipDomainsQuery,
+    normalizeSavedViews: normalizeSavedViews,
     summarizeInbox: summarizeInbox,
     orderLabels: orderLabels,
     TRIAL_DAYS: TRIAL_DAYS,
