@@ -162,7 +162,8 @@ test('relativeDate gives short labels and blanks out old dates', () => {
   assert.equal(core.relativeDate(new Date('2026-07-02T09:00:00Z'), now), '3h');
   assert.equal(core.relativeDate(new Date('2026-07-01T12:00:00Z'), now), 'Yesterday');
   assert.equal(core.relativeDate(new Date('2026-06-29T12:00:00Z'), now), '3d');
-  assert.equal(core.relativeDate(new Date('2026-05-01T12:00:00Z'), now), '');
+  assert.equal(core.relativeDate(new Date('2026-05-01T12:00:00Z'), now), '2mo');
+  assert.equal(core.relativeDate(new Date('2024-07-02T12:00:00Z'), now), '2y');
 });
 
 test('highlight rules keep valid entries and match text', () => {

@@ -574,7 +574,8 @@
     if (days === 1) return 'Yesterday';
     if (days < 7) return days + 'd';
     if (days < 30) return Math.floor(days / 7) + 'w';
-    return '';
+    if (days < 365) return Math.floor(days / 30) + 'mo';
+    return Math.floor(days / 365) + 'y';
   }
 
   // ----- Highlight rules ----------------------------------------------------
