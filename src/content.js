@@ -593,16 +593,17 @@
     var navRect = target.nav.getBoundingClientRect();
     var compose = document.querySelector('[gh="cm"]');
     var composeBottom = compose ? compose.getBoundingClientRect().bottom : navRect.top;
-    // Anchor the line's top to the Inbox row's top border. Find it robustly
-    // (href is language-independent); fall back to just under Compose.
-    var inbox = document.querySelector('a[href$="#inbox"]')
-      || document.querySelector('a[href*="#inbox"]')
-      || document.querySelector('[data-tooltip="Inbox"]')
-      || document.querySelector('[aria-label="Inbox"]');
-    var top = inbox
-      ? Math.round(inbox.getBoundingClientRect().top)
-      : Math.round(composeBottom + 8);
-    top = Math.max(top, Math.round(composeBottom));
+    // Anchor the line's top to the Inbox row: the top-most interactive row that
+    // sits below the Compose button. Robust to Gmail's markup / language.
+    var rowTop = null;
+    var candidates = target.nav.querySelectorAll('a[href], [role="link"], [data-tooltip], [role="menuitem"]');
+    for (var i = 0; i < candidates.length; i++) {
+      var cr = candidates[i].getBoundingClientRect();
+      if (cr.height > 4 && cr.top >= composeBottom - 4) {
+        if (rowTop === null || cr.top < rowTop) rowTop = cr.top;
+      }
+    }
+    var top = Math.round(rowTop !== null ? rowTop : composeBottom + 24);
     var height = Math.max(0, Math.round(navRect.bottom - top));
     if (height < 10 || navRect.width < 40) { el.style.display = 'none'; return; }
     el.style.left = Math.round(navRect.left) + 'px';
