@@ -2787,14 +2787,26 @@
   function decorateLabels() {
     var scoped = labelScopeInfo();
     var items = scoped.map(function (entry) { return entry.item; });
-    scoped.forEach(function (scope) {
+    // Roll unread up to parents: a top-level label counts as "has new mail" if
+    // it OR any of the sub-labels immediately under it has unread mail. Subs
+    // (indented) are the consecutive sub items following a parent.
+    var effectiveUnread = scoped.map(function (s) { return s.item.unread === true; });
+    scoped.forEach(function (scope, index) {
+      if (scope.sub) return;
+      var any = effectiveUnread[index];
+      for (var j = index + 1; j < scoped.length && scoped[j].sub; j++) {
+        if (scoped[j].item.unread) any = true;
+      }
+      effectiveUnread[index] = any;
+    });
+    scoped.forEach(function (scope, index) {
       var item = scope.item;
       item.entry.setAttribute('data-gvn-label-entry', 'true');
       applyLabelTypography(item);
       syncLabelCheckbox(item);
       // Flags for indent guides / new-mail glow / row tint.
       item.entry.setAttribute('data-gvn-sublabel', String(scope.sub === true));
-      item.entry.setAttribute('data-gvn-label-unread', String(item.unread === true));
+      item.entry.setAttribute('data-gvn-label-unread', String(effectiveUnread[index] === true));
       var swatchColor = getComputedStyle(item.swatch).backgroundColor;
       var displayColor = isNeutralColor(swatchColor) ? Core.labelColor(item.name) : swatchColor;
       item.entry.style.setProperty('--gvn-label-row', displayColor);
