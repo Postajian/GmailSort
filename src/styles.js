@@ -72,50 +72,57 @@
     var compactSenderWidth = Math.max(150, senderWidth - 30);
     var compactContentIndent = Math.max(72, contentIndent - 48);
     var markDisplay = settings.showSenderMarks ? 'block' : 'none';
-    var themeOn = settings.transparentBackground;
-    var panelClear = themeOn && !settings.readablePanel;
-    var outer = themeOn ? 'transparent' : PAPER;
-    var paper = panelClear ? 'transparent' : PAPER;
-    var muted = panelClear ? '#333333' : MUTED;
-    var hairline = panelClear ? '#6b6b6b' : HAIRLINE;
-    var dividerColor = panelClear ? '#6b6b6b' : DIVIDER;
+    // Each theme provides its OPAQUE base palette (paper/outer colour, ink,
+    // rules). Transparency (the PAPER toggle) is applied afterwards, so it now
+    // works on every theme — not just Light.
+    var themePaper = PAPER;
+    var themeOuter = PAPER;
     var ink = INK;
+    var muted = MUTED;
+    var hairline = HAIRLINE;
+    var dividerColor = DIVIDER;
     var ruleColor = '#000000';
     if (settings.theme === 'dark') {
-      // Evening edition: an opaque warm-dark paper with cream ink and light
-      // rules. Forces opacity so it reads well over any Gmail theme.
-      outer = '#141210';
-      paper = '#1b1814';
+      themePaper = '#1b1814';
+      themeOuter = '#141210';
       ink = '#ece4d2';
       muted = '#a79e8b';
       hairline = 'rgba(236,228,210,0.18)';
       dividerColor = 'rgba(236,228,210,0.16)';
       ruleColor = '#d9cfb8';
     } else if (settings.theme === 'sepia') {
-      // Aged-paper edition: warm cream stock with sienna ink. Opaque so the
-      // tone is consistent over any Gmail background.
-      outer = '#efe3cc';
-      paper = '#f7efe0';
+      themePaper = '#f7efe0';
+      themeOuter = '#efe3cc';
       ink = '#43321f';
       muted = '#8a755a';
       hairline = 'rgba(67,50,31,0.18)';
       dividerColor = 'rgba(67,50,31,0.14)';
       ruleColor = '#7a5c3a';
     } else if (settings.theme === 'contrast') {
-      // High-contrast edition: pure black on pure white with heavy rules for
-      // maximum legibility. Opaque on purpose.
-      outer = '#ffffff';
-      paper = '#ffffff';
+      themePaper = '#ffffff';
+      themeOuter = '#ffffff';
       ink = '#000000';
       muted = '#1f1f1f';
       hairline = '#000000';
       dividerColor = '#000000';
       ruleColor = '#000000';
     }
+
+    // Transparent background shows the Gmail theme behind; PAPER off makes the
+    // message panel see-through too. Both apply on any theme now.
+    var themeOn = settings.transparentBackground;
+    var panelClear = themeOn && !settings.readablePanel;
+    // Light theme needs darker hairlines to stay readable over a light Gmail bg.
+    if (settings.theme === 'light' && panelClear) {
+      muted = '#333333';
+      hairline = '#6b6b6b';
+      dividerColor = '#6b6b6b';
+    }
+    var outer = themeOn ? 'transparent' : themeOuter;
+    var paper = panelClear ? 'transparent' : themePaper;
     // The fixed top strips (masthead, column headers, tabs) always need a SOLID
-    // backing so scrolled rows can't show through them — even in transparent
-    // mode, where the message area itself stays see-through.
-    var band = (paper === 'transparent') ? PAPER : paper;
+    // backing so scrolled rows can't show through them — use the theme's paper.
+    var band = (paper === 'transparent') ? themePaper : paper;
     // User-chosen accent (defaults to the newspaper gold) drives --gvn-gold.
     var accent = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(settings.accentColor || ''))
       ? settings.accentColor
