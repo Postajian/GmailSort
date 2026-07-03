@@ -593,13 +593,15 @@
     var navRect = target.nav.getBoundingClientRect();
     var compose = document.querySelector('[gh="cm"]');
     var composeBottom = compose ? compose.getBoundingClientRect().bottom : navRect.top;
-    // Start the line partway down the gap between the Compose button and the
-    // Inbox row. 0 = right under Compose (higher), 1 = at the Inbox top border
-    // (lower). 0.5 = halfway.
-    var RAIL_TOP_FRACTION = 0.4;
-    var inbox = target.nav.querySelector('a[href*="#inbox"]');
-    var inboxTop = inbox ? inbox.getBoundingClientRect().top : composeBottom + 12;
-    var top = Math.round(composeBottom + (inboxTop - composeBottom) * RAIL_TOP_FRACTION);
+    // Anchor the line's top to the Inbox row's top border. Find it robustly
+    // (href is language-independent); fall back to just under Compose.
+    var inbox = document.querySelector('a[href$="#inbox"]')
+      || document.querySelector('a[href*="#inbox"]')
+      || document.querySelector('[data-tooltip="Inbox"]')
+      || document.querySelector('[aria-label="Inbox"]');
+    var top = inbox
+      ? Math.round(inbox.getBoundingClientRect().top)
+      : Math.round(composeBottom + 8);
     top = Math.max(top, Math.round(composeBottom));
     var height = Math.max(0, Math.round(navRect.bottom - top));
     if (height < 10 || navRect.width < 40) { el.style.display = 'none'; return; }
