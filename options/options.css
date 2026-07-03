@@ -46,9 +46,9 @@ header > p:last-child {
 
 form {
   display: grid;
-  /* 6 single cards + two double-width cards (Senders & views, Layout) = 10
-     cells = 5 x 2, so a fixed 5-column grid fills two symmetric rows. */
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* 4 single cards + two double-width cards (Senders/views/labels, Layout) = 8
+     cells = 4 x 2, so a fixed 4-column grid fills two symmetric rows. */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-auto-flow: row dense;
   align-items: stretch;
   gap: 18px;

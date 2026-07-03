@@ -55,27 +55,6 @@
         <label class="check"><input type="checkbox" name="relativeDates"> <strong>Relative dates</strong> &mdash; append the age after the date so you see both (e.g. &ldquo;/ 3h&rdquo;, &ldquo;/ 1w&rdquo;, &ldquo;/ 2mo&rdquo;, &ldquo;/ 1y&rdquo;)</label>
       </fieldset>
 
-      <fieldset id="rows-labels">
-        <legend>Labels &amp; highlights</legend>
-
-        <div class="subhead">Pinned labels</div>
-        <p class="hint">Pin favourite custom labels so they float to the top of the sidebar. Type the label&rsquo;s name (the leaf name, e.g. <code>PayPal</code>).</p>
-        <div class="row">
-          <input type="text" id="pin-name" placeholder="label name (PayPal)" maxlength="120">
-          <button type="button" id="pin-add">Pin label</button>
-        </div>
-        <div id="pin-list" class="override-list"></div>
-
-        <div class="subhead">Highlight rules</div>
-        <p class="hint">Tint any row whose sender or subject contains a word you choose. Great for spotting invoices, a boss, a project name, etc. First matching rule wins.</p>
-        <div class="row">
-          <input type="text" id="hl-term" placeholder="word to match (e.g. invoice)" maxlength="80">
-          <input type="color" id="hl-color" value="#c9a84c" aria-label="Highlight colour">
-          <button type="button" id="hl-add">Add highlight</button>
-        </div>
-        <div id="hl-list" class="override-list"></div>
-      </fieldset>
-
       <fieldset>
         <legend>Front page &amp; insights</legend>
         <p class="hint">An optional newspaper &ldquo;front page&rdquo; above the inbox. It reads only the messages currently loaded in your list &mdash; nothing leaves your browser.</p>
@@ -88,7 +67,7 @@
 
 
       <fieldset>
-        <legend>Backup &amp; presets</legend>
+        <legend>Backup, presets &amp; auto-sort</legend>
         <p class="hint">Export saves your whole layout to a file you can re-import later. Presets store named looks you can switch between in one click.</p>
         <div class="row">
           <button type="button" id="export">Export settings</button>
@@ -110,10 +89,22 @@
           <button type="button" id="apply-preset" class="secondary">Apply</button>
           <button type="button" id="delete-preset" class="secondary">Delete</button>
         </div>
+
+        <div class="subhead">Auto-sort inbox (companion)</div>
+        <p class="hint">Automatically label incoming mail with the companion Google Apps Script. It runs inside your own Google account &mdash; GmailView never sees your mail.</p>
+        <div class="row">
+          <a class="linkbtn" href="https://script.google.com/home/projects/create" target="_blank" rel="noopener">Open Google Apps Script &#8599;</a>
+        </div>
+        <ol class="hint" style="margin:8px 0 0; padding-left:20px; line-height:1.6;">
+          <li>Click the button above &rarr; start a <strong>New project</strong>.</li>
+          <li>Paste the script from your project folder <code>11_Auto_Sorter/LabelSorter.gs</code>.</li>
+          <li>Keep <code>DRY_RUN = true</code> to preview in the logs, then set it to <code>false</code>.</li>
+          <li>Run once to authorize, then add a time-based <strong>Trigger</strong> (e.g. every 15&nbsp;minutes).</li>
+        </ol>
       </fieldset>
 
       <fieldset id="senders-views">
-        <legend>Senders &amp; views</legend>
+        <legend>Senders, views &amp; labels</legend>
 
         <div class="subhead">Sender colours</div>
         <p class="hint">Pin a colour for a sender&rsquo;s tile &mdash; it overrides the fetched logo with a clean coloured letter. Use the domain, e.g. <code>paypal.com</code>.</p>
@@ -145,20 +136,23 @@
           <button type="button" id="view-add">Save view</button>
         </div>
         <div id="view-list" class="override-list"></div>
-      </fieldset>
 
-      <fieldset>
-        <legend>Auto-sort inbox (optional companion)</legend>
-        <p class="hint">Automatically label incoming mail with the companion Google Apps Script. It runs inside your own Google account &mdash; GmailView never sees your mail.</p>
+        <div class="subhead">Pinned labels</div>
+        <p class="hint">Pin favourite custom labels so they float to the top of the sidebar. Type the label&rsquo;s name (the leaf name, e.g. <code>PayPal</code>).</p>
         <div class="row">
-          <a class="linkbtn" href="https://script.google.com/home/projects/create" target="_blank" rel="noopener">Open Google Apps Script &#8599;</a>
+          <input type="text" id="pin-name" placeholder="label name (PayPal)" maxlength="120">
+          <button type="button" id="pin-add">Pin label</button>
         </div>
-        <ol class="hint" style="margin:8px 0 0; padding-left:20px; line-height:1.6;">
-          <li>Click the button above &rarr; start a <strong>New project</strong>.</li>
-          <li>Paste the script from your project folder <code>11_Auto_Sorter/LabelSorter.gs</code>.</li>
-          <li>Keep <code>DRY_RUN = true</code> to preview in the logs, then set it to <code>false</code>.</li>
-          <li>Run once to authorize, then add a time-based <strong>Trigger</strong> (e.g. every 15&nbsp;minutes).</li>
-        </ol>
+        <div id="pin-list" class="override-list"></div>
+
+        <div class="subhead">Highlight rules</div>
+        <p class="hint">Tint any row whose sender or subject contains a word you choose. Great for spotting invoices, a boss, a project name, etc. First matching rule wins.</p>
+        <div class="row">
+          <input type="text" id="hl-term" placeholder="word to match (e.g. invoice)" maxlength="80">
+          <input type="color" id="hl-color" value="#c9a84c" aria-label="Highlight colour">
+          <button type="button" id="hl-add">Add highlight</button>
+        </div>
+        <div id="hl-list" class="override-list"></div>
       </fieldset>
 
       <fieldset id="gvn-layout">
