@@ -593,7 +593,11 @@
     var navRect = target.nav.getBoundingClientRect();
     var compose = document.querySelector('[gh="cm"]');
     var composeBottom = compose ? compose.getBoundingClientRect().bottom : navRect.top;
-    var top = Math.max(navRect.top, Math.round(composeBottom + 6));
+    // Anchor the top to the Inbox row so the line starts at its top border;
+    // never let it rise above the Compose button.
+    var inbox = target.nav.querySelector('a[href*="#inbox"]');
+    var topAnchor = inbox ? inbox.getBoundingClientRect().top : composeBottom + 6;
+    var top = Math.round(Math.max(composeBottom, topAnchor));
     var height = Math.max(0, Math.round(navRect.bottom - top));
     if (height < 10 || navRect.width < 40) { el.style.display = 'none'; return; }
     el.style.left = Math.round(navRect.left) + 'px';
