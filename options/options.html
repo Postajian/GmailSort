@@ -53,12 +53,31 @@
         <label class="check"><input type="checkbox" name="zenMode"> <strong>Zen mode</strong> &mdash; hide the sidebar, app rail &amp; tabs (<strong>Alt+Shift+Z</strong>)</label>
       </fieldset>
 
-      <fieldset>
-        <legend>Reading &amp; rows</legend>
+      <fieldset id="rows-labels">
+        <legend>Rows, labels &amp; highlights</legend>
+
+        <div class="subhead">Row extras</div>
         <label class="check"><input type="checkbox" name="autoMasthead"> <strong>Auto masthead</strong> &mdash; the title matches the current view (INBOX / ALL MAIL / label name)</label>
         <label class="check"><input type="checkbox" name="quickPeek"> <strong>Quick-peek</strong> &mdash; hover a subject to see the full subject + snippet</label>
         <label class="check"><input type="checkbox" name="senderFrequency"> <strong>Sender frequency</strong> &mdash; show &ldquo;&times;N&rdquo; when a sender appears more than once in view</label>
         <label class="check"><input type="checkbox" name="relativeDates"> <strong>Relative dates</strong> &mdash; show &ldquo;2h&rdquo; / &ldquo;Yesterday&rdquo; instead of the time (older than a month keeps the date)</label>
+
+        <div class="subhead">Pinned labels</div>
+        <p class="hint">Pin favourite custom labels so they float to the top of the sidebar. Type the label&rsquo;s name (the leaf name, e.g. <code>PayPal</code>).</p>
+        <div class="row">
+          <input type="text" id="pin-name" placeholder="label name (PayPal)" maxlength="120">
+          <button type="button" id="pin-add">Pin label</button>
+        </div>
+        <div id="pin-list" class="override-list"></div>
+
+        <div class="subhead">Highlight rules</div>
+        <p class="hint">Tint any row whose sender or subject contains a word you choose. Great for spotting invoices, a boss, a project name, etc. First matching rule wins.</p>
+        <div class="row">
+          <input type="text" id="hl-term" placeholder="word to match (e.g. invoice)" maxlength="80">
+          <input type="color" id="hl-color" value="#c9a84c" aria-label="Highlight colour">
+          <button type="button" id="hl-add">Add highlight</button>
+        </div>
+        <div id="hl-list" class="override-list"></div>
       </fieldset>
 
       <fieldset>
@@ -97,16 +116,6 @@
         </div>
       </fieldset>
 
-      <fieldset>
-        <legend>Pinned labels</legend>
-        <p class="hint">Pin favourite custom labels so they float to the top of the sidebar. Type the label&rsquo;s name (the leaf name, e.g. <code>PayPal</code>).</p>
-        <div class="row">
-          <input type="text" id="pin-name" placeholder="label name (PayPal)" maxlength="120">
-          <button type="button" id="pin-add">Pin label</button>
-        </div>
-        <div id="pin-list" class="override-list"></div>
-      </fieldset>
-
       <fieldset id="senders-views">
         <legend>Senders &amp; views</legend>
 
@@ -140,17 +149,6 @@
           <button type="button" id="view-add">Save view</button>
         </div>
         <div id="view-list" class="override-list"></div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Highlight rules</legend>
-        <p class="hint">Tint any row whose sender or subject contains a word you choose. Great for spotting invoices, a boss, a project name, etc. First matching rule wins.</p>
-        <div class="row">
-          <input type="text" id="hl-term" placeholder="word to match (e.g. invoice)" maxlength="80">
-          <input type="color" id="hl-color" value="#c9a84c" aria-label="Highlight colour">
-          <button type="button" id="hl-add">Add highlight</button>
-        </div>
-        <div id="hl-list" class="override-list"></div>
       </fieldset>
 
       <fieldset>
