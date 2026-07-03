@@ -2510,10 +2510,13 @@
             var parsed = Core.parseGmailDate(Adapter.dateCandidates(parts), now);
             var rel = parsed ? Core.relativeDate(parsed, now) : '';
             if (rel) {
-              if (!dateSpan.hasAttribute('data-gvn-origdate')) {
-                dateSpan.setAttribute('data-gvn-origdate', dateSpan.textContent);
+              var orig = dateSpan.getAttribute('data-gvn-origdate');
+              if (orig === null) {
+                orig = dateSpan.textContent;
+                dateSpan.setAttribute('data-gvn-origdate', orig);
               }
-              if (dateSpan.textContent !== rel) dateSpan.textContent = rel;
+              var combined = orig + ' / ' + rel;
+              if (dateSpan.textContent !== combined) dateSpan.textContent = combined;
             }
           } else if (dateSpan.hasAttribute('data-gvn-origdate')) {
             dateSpan.textContent = dateSpan.getAttribute('data-gvn-origdate');
