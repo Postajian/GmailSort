@@ -455,7 +455,6 @@
     root.setAttribute('data-gvn-color-labels', String(state.settings.colorLabels));
     root.setAttribute('data-gvn-label-indent', String(state.settings.labelIndentGuides));
     root.setAttribute('data-gvn-label-glow', String(state.settings.labelNewMailGlow));
-    root.setAttribute('data-gvn-sidebar-rail', String(state.settings.sidebarGoldRail));
     root.setAttribute('data-gvn-label-editing', String(state.editingLabels));
     root.setAttribute(
       'data-gvn-sidebar-sized',
@@ -563,6 +562,44 @@
     handle.style.display = 'block';
     handle.setAttribute('aria-valuemax', String(Math.round(maximum)));
     handle.setAttribute('aria-valuenow', String(Math.round(currentWidth)));
+  }
+
+  // Golden rail: a fixed line down the sidebar's left edge, from just under the
+  // Compose button (Gmail's stable [gh="cm"] marker) to the bottom of the nav.
+  // Both anchors are scroll-stable, so the line never creeps over Compose.
+  function ensureSidebarRail() {
+    var el = document.getElementById('gmail-view-next-sidebar-rail');
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = 'gmail-view-next-sidebar-rail';
+    el.setAttribute('aria-hidden', 'true');
+    el.style.display = 'none';
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function positionSidebarRail() {
+    var el = ensureSidebarRail();
+    if (
+      !state.settings.sidebarGoldRail ||
+      !state.settings.enabled ||
+      Core.routeMode(location.hash) !== 'inbox'
+    ) {
+      el.style.display = 'none';
+      return;
+    }
+    var target = locateSidebarTarget();
+    if (!target) { el.style.display = 'none'; return; }
+    var navRect = target.nav.getBoundingClientRect();
+    var compose = document.querySelector('[gh="cm"]');
+    var composeBottom = compose ? compose.getBoundingClientRect().bottom : navRect.top;
+    var top = Math.max(navRect.top, Math.round(composeBottom + 6));
+    var height = Math.max(0, Math.round(navRect.bottom - top));
+    if (height < 10 || navRect.width < 40) { el.style.display = 'none'; return; }
+    el.style.left = Math.round(navRect.left) + 'px';
+    el.style.top = top + 'px';
+    el.style.height = height + 'px';
+    el.style.display = 'block';
   }
 
   function startSidebarDrag(event) {
@@ -3359,6 +3396,7 @@
     try {
       updateRootFlags();
       positionSidebarResizer();
+      positionSidebarRail();
       mergeTabsRow();
       checkSelectorHealth();
       var overlay = document.getElementById('gmail-view-next-ui');
@@ -3470,7 +3508,6 @@
     document.documentElement.removeAttribute('data-gvn-color-labels');
     document.documentElement.removeAttribute('data-gvn-label-indent');
     document.documentElement.removeAttribute('data-gvn-label-glow');
-    document.documentElement.removeAttribute('data-gvn-sidebar-rail');
     document.documentElement.removeAttribute('data-gvn-label-editing');
     document.documentElement.removeAttribute('data-gvn-sidebar-sized');
     document.documentElement.style.removeProperty('--gvn-sidebar-width');
@@ -3488,6 +3525,8 @@
     if (helpOverlay) helpOverlay.remove();
     var quickPanel = document.getElementById('gmail-view-next-quick');
     if (quickPanel) quickPanel.remove();
+    var sidebarRail = document.getElementById('gmail-view-next-sidebar-rail');
+    if (sidebarRail) sidebarRail.remove();
     if (style) style.remove();
     if (overlay) overlay.remove();
     if (sidebarHandle) sidebarHandle.remove();
