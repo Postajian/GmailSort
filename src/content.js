@@ -1044,7 +1044,8 @@
     { key: 'hideTabSocial', label: 'Hide Social tab' },
     { key: 'hideTabUpdates', label: 'Hide Updates tab' },
     { key: 'hideTabForums', label: 'Hide Forums tab' },
-    { key: 'focusMode', label: 'Focus mode (hide Promotions/Social/Forums)' }
+    { key: 'focusMode', label: 'Focus mode (hide Promotions/Social/Forums)' },
+    { key: 'sidebarGoldRail', label: 'Golden sidebar rail' }
   ];
   var THEME_CYCLE = ['light', 'dark', 'sepia', 'contrast'];
   var THEME_LABELS = { light: 'Light', dark: 'Dark', sepia: 'Sepia', contrast: 'Contrast' };
