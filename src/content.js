@@ -454,6 +454,9 @@
     root.setAttribute('data-gvn-tab-order', state.settings.tabOrder);
     root.setAttribute('data-gvn-hide-rail', String(state.settings.hideRail));
     root.setAttribute('data-gvn-color-labels', String(state.settings.colorLabels));
+    root.setAttribute('data-gvn-label-indent', String(state.settings.labelIndentGuides));
+    root.setAttribute('data-gvn-label-tint', String(state.settings.labelRowTint));
+    root.setAttribute('data-gvn-label-glow', String(state.settings.labelNewMailGlow));
     root.setAttribute('data-gvn-label-editing', String(state.editingLabels));
     root.setAttribute(
       'data-gvn-sidebar-sized',
@@ -2046,9 +2049,12 @@
     document.querySelectorAll('[data-gvn-label-entry="true"]').forEach(function (entry) {
       entry.removeAttribute('data-gvn-label-entry');
       entry.removeAttribute('data-gvn-label');
+      entry.removeAttribute('data-gvn-sublabel');
+      entry.removeAttribute('data-gvn-label-unread');
       entry.style.removeProperty('--gvn-label-font-size');
       entry.style.removeProperty('--gvn-label-font-weight');
       entry.style.removeProperty('--gvn-label-font-style');
+      entry.style.removeProperty('--gvn-label-row');
       var checkbox = entry.querySelector('.gvn-label-check');
       if (checkbox) checkbox.remove();
       var swatch = entry.querySelector(Adapter.SELECTORS.labelSwatch);
@@ -2779,18 +2785,26 @@
   }
 
   function decorateLabels() {
-    var items = customLabelItems();
-    items.forEach(function (item) {
+    var scoped = labelScopeInfo();
+    var items = scoped.map(function (entry) { return entry.item; });
+    scoped.forEach(function (scope) {
+      var item = scope.item;
       item.entry.setAttribute('data-gvn-label-entry', 'true');
       applyLabelTypography(item);
       syncLabelCheckbox(item);
+      // Flags for indent guides / new-mail glow / row tint.
+      item.entry.setAttribute('data-gvn-sublabel', String(scope.sub === true));
+      item.entry.setAttribute('data-gvn-label-unread', String(item.unread === true));
+      var swatchColor = getComputedStyle(item.swatch).backgroundColor;
+      var displayColor = isNeutralColor(swatchColor) ? Core.labelColor(item.name) : swatchColor;
+      item.entry.style.setProperty('--gvn-label-row', displayColor);
       if (!state.settings.colorLabels) {
         item.entry.removeAttribute('data-gvn-label');
         item.swatch.style.removeProperty('--gvn-label-color');
         return;
       }
       if (SYSTEM_LABELS.test(item.name)) return;
-      if (!isNeutralColor(getComputedStyle(item.swatch).backgroundColor)) return;
+      if (!isNeutralColor(swatchColor)) return;
       item.entry.setAttribute('data-gvn-label', 'true');
       item.swatch.style.setProperty('--gvn-label-color', Core.labelColor(item.name));
     });
@@ -3443,6 +3457,9 @@
     document.documentElement.removeAttribute('data-gvn-tab-order');
     document.documentElement.removeAttribute('data-gvn-hide-rail');
     document.documentElement.removeAttribute('data-gvn-color-labels');
+    document.documentElement.removeAttribute('data-gvn-label-indent');
+    document.documentElement.removeAttribute('data-gvn-label-tint');
+    document.documentElement.removeAttribute('data-gvn-label-glow');
     document.documentElement.removeAttribute('data-gvn-label-editing');
     document.documentElement.removeAttribute('data-gvn-sidebar-sized');
     document.documentElement.style.removeProperty('--gvn-sidebar-width');

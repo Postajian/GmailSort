@@ -383,6 +383,12 @@
       'html[data-gvn-active="true"] [data-gvn-label-entry="true"] span:not(.qj),',
       'html[data-gvn-active="true"] [data-gvn-label-entry="true"] .aio{font-size:var(--gvn-label-font-size,' + labelFontSize + 'px)!important;font-weight:var(--gvn-label-font-weight,inherit)!important;font-style:var(--gvn-label-font-style,normal)!important;line-height:1.35!important;}',
       'html[data-gvn-label-editing="true"] [data-gvn-label-entry="true"]{padding-right:24px!important;}',
+      // Sub-label indent guides: a soft vertical line on nested labels.
+      'html[data-gvn-active="true"][data-gvn-label-indent="true"] [data-gvn-label-entry="true"][data-gvn-sublabel="true"]{box-shadow:inset 3px 0 0 -1px var(--gvn-divider)!important;}',
+      // Whole-row label tint: a faint wash of the label colour across the row.
+      'html[data-gvn-active="true"][data-gvn-label-tint="true"] [data-gvn-label-entry="true"]{background:color-mix(in srgb, var(--gvn-label-row, transparent) 14%, transparent)!important;}',
+      // New-mail glow: an accent bar on labels that have unread mail.
+      'html[data-gvn-active="true"][data-gvn-label-glow="true"] [data-gvn-label-entry="true"][data-gvn-label-unread="true"]{box-shadow:inset 4px 0 0 var(--gvn-gold)!important;}',
       '.gvn-label-check{position:absolute!important;z-index:1;right:5px;top:50%;width:14px!important;height:14px!important;margin:0!important;border:1px solid #777!important;border-radius:2px!important;box-sizing:border-box!important;transform:translateY(-50%);-webkit-appearance:none!important;appearance:none!important;background:#fff!important;cursor:pointer;pointer-events:auto!important;}',
       '.gvn-label-check:checked{border-color:#555!important;background:#555!important;}',
       '.gvn-label-check:checked::after{content:"";position:absolute;left:3px;top:2px;width:6px;height:3px;border:solid #fff;border-width:0 0 2px 2px;transform:rotate(-45deg);}',
