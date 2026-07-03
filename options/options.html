@@ -62,25 +62,6 @@
       </fieldset>
 
       <fieldset>
-        <legend>Category tabs</legend>
-        <label class="check"><input type="checkbox" name="mergeTabsRow"> Merge category tabs into the toolbar row</label>
-        <label>Tab order
-          <select name="tabOrder">
-            <option value="default">Default (Primary &middot; Promotions &middot; Social)</option>
-            <option value="promotions-first">Promotions &middot; Primary &middot; Social</option>
-            <option value="social-first">Social &middot; Primary &middot; Promotions</option>
-          </select>
-        </label>
-        <p class="hint" style="margin:2px 0 6px;">Reorders the merged category tabs (needs &ldquo;Merge category tabs&rdquo; on).</p>
-        <label class="check"><input type="checkbox" name="focusMode"> <strong>Focus mode</strong> &mdash; hide Promotions, Social &amp; Forums in one click</label>
-        <p class="hint" style="margin:6px 0 2px;">Or hide individual tabs (Primary always stays):</p>
-        <label class="check"><input type="checkbox" name="hideTabPromotions"> Hide the Promotions tab</label>
-        <label class="check"><input type="checkbox" name="hideTabSocial"> Hide the Social tab</label>
-        <label class="check"><input type="checkbox" name="hideTabUpdates"> Hide the Updates tab</label>
-        <label class="check"><input type="checkbox" name="hideTabForums"> Hide the Forums tab</label>
-      </fieldset>
-
-      <fieldset>
         <legend>Front page &amp; insights</legend>
         <p class="hint">An optional newspaper &ldquo;front page&rdquo; above the inbox. It reads only the messages currently loaded in your list &mdash; nothing leaves your browser.</p>
         <label class="check"><input type="checkbox" name="showDigest"> <strong>Front-page digest</strong> &mdash; a briefing strip with totals and the top senders in view (click a sender to filter)</label>
@@ -126,8 +107,10 @@
         <div id="pin-list" class="override-list"></div>
       </fieldset>
 
-      <fieldset>
-        <legend>Sender colours</legend>
+      <fieldset id="senders-views">
+        <legend>Senders &amp; views</legend>
+
+        <div class="subhead">Sender colours</div>
         <p class="hint">Pin a colour for a sender&rsquo;s tile &mdash; it overrides the fetched logo with a clean coloured letter. Use the domain, e.g. <code>paypal.com</code>.</p>
         <div class="row">
           <input type="text" id="override-domain" placeholder="sender domain (paypal.com)" maxlength="120">
@@ -135,10 +118,8 @@
           <button type="button" id="override-add">Pin colour</button>
         </div>
         <div id="override-list" class="override-list"></div>
-      </fieldset>
 
-      <fieldset>
-        <legend>Sender rules</legend>
+        <div class="subhead">Sender rules</div>
         <p class="hint">Tag a sender by domain to change how its mail looks in the inbox: <strong>VIP</strong> pins a gold edge and bold name, <strong>Mute</strong> dims it and drops the &ldquo;new&rdquo; emphasis, <strong>Hide</strong> removes it from the list. All reversible &mdash; remove the rule to undo. Use the domain, e.g. <code>newsletters.com</code>.</p>
         <div class="row">
           <input type="text" id="rule-domain" placeholder="sender domain (newsletters.com)" maxlength="120">
@@ -150,10 +131,8 @@
           <button type="button" id="rule-add">Add rule</button>
         </div>
         <div id="rule-list" class="override-list"></div>
-      </fieldset>
 
-      <fieldset>
-        <legend>Saved views</legend>
+        <div class="subhead">Saved views</div>
         <p class="hint">Save a named Gmail search you can jump to from the front-page bar. Use any Gmail search, e.g. <code>is:unread from:boss@work.com</code> or <code>has:attachment newer_than:7d</code>. Needs the front page enabled to show the buttons.</p>
         <div class="row">
           <input type="text" id="view-name" placeholder="name (e.g. Work unread)" maxlength="40">

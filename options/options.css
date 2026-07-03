@@ -46,12 +46,23 @@ header > p:last-child {
 
 form {
   display: grid;
-  /* 12 single cards + the double-width Layout card = 14 cells = 7 x 2, so a
-     fixed 7-column grid fills two complete, symmetric rows on wide screens. */
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  /* 8 single cards + two double-width cards (Senders & views, Layout) = 12
+     cells = 6 x 2, so a fixed 6-column grid fills two symmetric rows. */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   grid-auto-flow: row dense;
   align-items: stretch;
   gap: 18px;
+}
+
+#senders-views {
+  grid-column: span 2;
+}
+
+.subhead {
+  font: 700 16px "Times New Roman", serif;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #d8c99a;
 }
 
 @media (max-width: 1700px) {
