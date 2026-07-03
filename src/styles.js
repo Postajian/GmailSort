@@ -382,6 +382,8 @@
       // Sub-label indent guides: a clear vertical line + indent on nested labels.
       'html[data-gvn-active="true"][data-gvn-label-indent="true"] [data-gvn-label-entry="true"][data-gvn-sublabel="true"]{box-shadow:inset 2px 0 0 var(--gvn-rule)!important;padding-left:16px!important;}',
       // Whole-row label tint: a wash of the label colour across the row.
+      // Golden rail: a continuous gold line down the full left edge of the sidebar.
+      'html[data-gvn-active="true"][data-gvn-sidebar-rail="true"] [data-gvn-sidebar-host="true"]{box-shadow:inset 4px 0 0 var(--gvn-gold)!important;}',
       // New-mail glow: a gold accent bar on labels that have unread mail.
       'html[data-gvn-active="true"][data-gvn-label-glow="true"] [data-gvn-label-entry="true"][data-gvn-label-unread="true"]{box-shadow:inset 5px 0 0 var(--gvn-gold)!important;}',
       '.gvn-label-check{position:absolute!important;z-index:1;right:5px;top:50%;width:14px!important;height:14px!important;margin:0!important;border:1px solid #777!important;border-radius:2px!important;box-sizing:border-box!important;transform:translateY(-50%);-webkit-appearance:none!important;appearance:none!important;background:#fff!important;cursor:pointer;pointer-events:auto!important;}',

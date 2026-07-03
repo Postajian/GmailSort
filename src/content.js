@@ -455,6 +455,7 @@
     root.setAttribute('data-gvn-color-labels', String(state.settings.colorLabels));
     root.setAttribute('data-gvn-label-indent', String(state.settings.labelIndentGuides));
     root.setAttribute('data-gvn-label-glow', String(state.settings.labelNewMailGlow));
+    root.setAttribute('data-gvn-sidebar-rail', String(state.settings.sidebarGoldRail));
     root.setAttribute('data-gvn-label-editing', String(state.editingLabels));
     root.setAttribute(
       'data-gvn-sidebar-sized',
@@ -3468,6 +3469,7 @@
     document.documentElement.removeAttribute('data-gvn-color-labels');
     document.documentElement.removeAttribute('data-gvn-label-indent');
     document.documentElement.removeAttribute('data-gvn-label-glow');
+    document.documentElement.removeAttribute('data-gvn-sidebar-rail');
     document.documentElement.removeAttribute('data-gvn-label-editing');
     document.documentElement.removeAttribute('data-gvn-sidebar-sized');
     document.documentElement.style.removeProperty('--gvn-sidebar-width');
