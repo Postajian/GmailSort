@@ -221,10 +221,6 @@
       '#gmail-view-next-frontpage .gvn-fp-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;padding-top:10px;border-top:1px solid var(--gvn-divider);}',
       '#gmail-view-next-frontpage .gvn-fp-legend-item{display:inline-flex;align-items:center;gap:6px;font-size:12px;}',
       '#gmail-view-next-frontpage .gvn-fp-legend-swatch{width:12px;height:12px;border-radius:2px;flex:0 0 auto;}',
-      // Zen mode: strip the sidebar, app rail and category tabs for a clean column.
-      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-zen="true"] [data-gvn-sidebar-host="true"]{display:none!important;}',
-      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-zen="true"] .aKh{display:none!important;}',
-      'html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-zen="true"] .bAw:not(:has(.IU)),html[data-gvn-active="true"][data-gvn-route="inbox"][data-gvn-zen="true"] .aUx:not(:has(.IU)){display:none!important;}',
       // Sci-fi accent pass: subtle gold glow on the panels, bars and masthead.
       '@keyframes gvnScifiPulse{0%,100%{box-shadow:0 0 0 1px var(--gvn-gold),0 0 10px rgba(201,168,76,.18);}50%{box-shadow:0 0 0 1px var(--gvn-gold),0 0 22px rgba(201,168,76,.45);}}',
       'html[data-gvn-scifi="true"] #gmail-view-next-frontpage{animation:gvnScifiPulse 4s ease-in-out infinite;}',

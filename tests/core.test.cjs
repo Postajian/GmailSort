@@ -193,15 +193,13 @@ test('normalizeSavedViews keeps only named searches and caps fields', () => {
   assert.deepEqual(core.normalizeSavedViews('nope'), []);
 });
 
-test('quick filters, zen mode and sci-fi accents default off and accept booleans', () => {
+test('quick filters and sci-fi accents default off and accept booleans', () => {
   assert.equal(core.DEFAULT_SETTINGS.showQuickFilters, false);
-  assert.equal(core.DEFAULT_SETTINGS.zenMode, false);
   assert.equal(core.DEFAULT_SETTINGS.sciFiAccents, false);
-  const on = core.normalizeSettings({ showQuickFilters: true, zenMode: true, sciFiAccents: true });
+  const on = core.normalizeSettings({ showQuickFilters: true, sciFiAccents: true });
   assert.equal(on.showQuickFilters, true);
-  assert.equal(on.zenMode, true);
   assert.equal(on.sciFiAccents, true);
-  assert.equal(core.normalizeSettings({ zenMode: 1 }).zenMode, false);
+  assert.equal(core.normalizeSettings({ sciFiAccents: 1 }).sciFiAccents, false);
 });
 
 test('gmailSearchHash encodes queries and falls back to inbox', () => {

@@ -449,7 +449,6 @@
     root.setAttribute('data-gvn-hide-tab-updates', String(state.settings.hideTabUpdates));
     root.setAttribute('data-gvn-hide-tab-forums', String(state.settings.hideTabForums));
     root.setAttribute('data-gvn-focus', String(state.settings.focusMode));
-    root.setAttribute('data-gvn-zen', String(state.settings.zenMode));
     root.setAttribute('data-gvn-scifi', String(state.settings.sciFiAccents));
     root.setAttribute('data-gvn-tab-order', state.settings.tabOrder);
     root.setAttribute('data-gvn-hide-rail', String(state.settings.hideRail));
@@ -3467,7 +3466,6 @@
     document.documentElement.removeAttribute('data-gvn-hide-tab-updates');
     document.documentElement.removeAttribute('data-gvn-hide-tab-forums');
     document.documentElement.removeAttribute('data-gvn-focus');
-    document.documentElement.removeAttribute('data-gvn-zen');
     document.documentElement.removeAttribute('data-gvn-scifi');
     document.documentElement.removeAttribute('data-gvn-tab-order');
     document.documentElement.removeAttribute('data-gvn-hide-rail');
@@ -3652,7 +3650,6 @@
       + '<div class="gvn-help-h">Keyboard shortcuts</div>'
       + '<ul>'
       + '<li><b>Alt+Shift+G</b> &mdash; toggle the redesign on/off</li>'
-      + '<li><b>Alt+Shift+Z</b> &mdash; Zen mode (hide sidebar, rail, tabs)</li>'
       + '<li><b>Alt+Shift+P</b> &mdash; save the inbox as PDF</li>'
       + '<li><b>Alt+Shift+H</b> &mdash; open/close this help</li>'
       + '</ul>'
@@ -3697,24 +3694,6 @@
     toggleHelpOverlay();
   }
 
-  // Alt+Shift+Z toggles Zen mode (hide sidebar, rail, tabs for a clean reading
-  // column). Flips `zenMode` in sync storage and applies it instantly.
-  function handleZenHotkey(event) {
-    if (!state.settings || state.settings.toggleHotkey === false) return;
-    if (!event.altKey || !event.shiftKey || event.ctrlKey || event.metaKey) return;
-    var isZ = event.code === 'KeyZ' || String(event.key || '').toLowerCase() === 'z';
-    if (!isZ) return;
-    var el = document.activeElement;
-    if (el && (el.isContentEditable ||
-      /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName || ''))) return;
-    event.preventDefault();
-    var next = !state.settings.zenMode;
-    safeStorageSet('sync', { zenMode: next });
-    state.settings.zenMode = next;
-    updateRootFlags();
-    scheduleRefresh();
-  }
-
   // Alt+Shift+P opens the print dialog (Save as PDF). The @media print rules
   // make the inbox print as a clean black-on-white newspaper page.
   function handlePrintHotkey(event) {
@@ -3746,7 +3725,6 @@
     state.observer.observe(document.body, { childList: true, subtree: true });
 
     addListener(window, 'keydown', handleToggleHotkey, true);
-    addListener(window, 'keydown', handleZenHotkey, true);
     addListener(window, 'keydown', handleHelpHotkey, true);
     addListener(window, 'keydown', handlePrintHotkey, true);
     addListener(window, 'hashchange', maybeRollupLabel);
