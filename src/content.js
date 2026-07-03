@@ -596,7 +596,7 @@
     // Start the line partway down the gap between the Compose button and the
     // Inbox row. 0 = right under Compose (higher), 1 = at the Inbox top border
     // (lower). 0.5 = halfway.
-    var RAIL_TOP_FRACTION = 0.5;
+    var RAIL_TOP_FRACTION = 0.45;
     var inbox = target.nav.querySelector('a[href*="#inbox"]');
     var inboxTop = inbox ? inbox.getBoundingClientRect().top : composeBottom + 12;
     var top = Math.round(composeBottom + (inboxTop - composeBottom) * RAIL_TOP_FRACTION);
