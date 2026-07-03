@@ -454,7 +454,6 @@
     root.setAttribute('data-gvn-hide-rail', String(state.settings.hideRail));
     root.setAttribute('data-gvn-color-labels', String(state.settings.colorLabels));
     root.setAttribute('data-gvn-label-indent', String(state.settings.labelIndentGuides));
-    root.setAttribute('data-gvn-label-tint', String(state.settings.labelRowTint));
     root.setAttribute('data-gvn-label-glow', String(state.settings.labelNewMailGlow));
     root.setAttribute('data-gvn-label-editing', String(state.editingLabels));
     root.setAttribute(
@@ -2053,7 +2052,6 @@
       entry.style.removeProperty('--gvn-label-font-size');
       entry.style.removeProperty('--gvn-label-font-weight');
       entry.style.removeProperty('--gvn-label-font-style');
-      entry.style.removeProperty('--gvn-label-row');
       var checkbox = entry.querySelector('.gvn-label-check');
       if (checkbox) checkbox.remove();
       var swatch = entry.querySelector(Adapter.SELECTORS.labelSwatch);
@@ -2810,8 +2808,6 @@
       item.entry.setAttribute('data-gvn-sublabel', String(scope.sub === true));
       item.entry.setAttribute('data-gvn-label-unread', String(effectiveUnread[index] === true));
       var swatchColor = getComputedStyle(item.swatch).backgroundColor;
-      var displayColor = isNeutralColor(swatchColor) ? Core.labelColor(item.name) : swatchColor;
-      item.entry.style.setProperty('--gvn-label-row', displayColor);
       if (!state.settings.colorLabels) {
         item.entry.removeAttribute('data-gvn-label');
         item.swatch.style.removeProperty('--gvn-label-color');
@@ -3471,7 +3467,6 @@
     document.documentElement.removeAttribute('data-gvn-hide-rail');
     document.documentElement.removeAttribute('data-gvn-color-labels');
     document.documentElement.removeAttribute('data-gvn-label-indent');
-    document.documentElement.removeAttribute('data-gvn-label-tint');
     document.documentElement.removeAttribute('data-gvn-label-glow');
     document.documentElement.removeAttribute('data-gvn-label-editing');
     document.documentElement.removeAttribute('data-gvn-sidebar-sized');
