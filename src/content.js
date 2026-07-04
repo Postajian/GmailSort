@@ -939,6 +939,17 @@
       updateQuickButtons();
     });
     masthead.appendChild(tabOrderButton);
+    var railButton = document.createElement('button');
+    railButton.className = 'gvn-rail-toggle';
+    railButton.type = 'button';
+    railButton.textContent = 'Rail';
+    railButton.title = 'Golden sidebar rail on/off';
+    railButton.setAttribute('aria-label', 'Toggle golden sidebar rail');
+    railButton.addEventListener('click', function () {
+      setQuickSetting('sidebarGoldRail', !(state.settings.sidebarGoldRail === true));
+      updateQuickButtons();
+    });
+    masthead.appendChild(railButton);
     var centerButton = document.createElement('button');
     centerButton.className = 'gvn-center-button';
     centerButton.type = 'button';
@@ -1070,6 +1081,10 @@
       tabBtn.title = 'Tab order: ' +
         (TAB_ORDER_LABELS[state.settings.tabOrder] || state.settings.tabOrder) +
         ' — click to change';
+    }
+    var railBtn = overlay.querySelector('.gvn-rail-toggle');
+    if (railBtn) {
+      railBtn.setAttribute('data-active', String(state.settings.sidebarGoldRail === true));
     }
   }
 
