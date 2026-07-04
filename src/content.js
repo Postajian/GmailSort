@@ -454,7 +454,11 @@
     root.setAttribute('data-gvn-hide-rail', String(state.settings.hideRail));
     root.setAttribute('data-gvn-color-labels', String(state.settings.colorLabels));
     root.setAttribute('data-gvn-label-indent', String(state.settings.labelIndentGuides));
-    root.setAttribute('data-gvn-label-glow', String(state.settings.labelNewMailGlow));
+    // The rail "off" mode also clears the per-label new-mail glow, so off means
+    // no gold anywhere in the sidebar.
+    root.setAttribute('data-gvn-label-glow', String(
+      state.settings.labelNewMailGlow && state.settings.sidebarGoldRail !== 'off'
+    ));
     root.setAttribute('data-gvn-label-editing', String(state.editingLabels));
     root.setAttribute(
       'data-gvn-sidebar-sized',
@@ -960,7 +964,7 @@
     railButton.title = 'Golden rail: cycle off / labels / full';
     railButton.setAttribute('aria-label', 'Cycle golden sidebar rail');
     railButton.addEventListener('click', function () {
-      var modes = ['off', 'labels', 'full'];
+      var modes = ['full', 'labels', 'off'];
       var idx = modes.indexOf(state.settings.sidebarGoldRail);
       setQuickSetting('sidebarGoldRail', modes[(idx + 1) % modes.length]);
       updateQuickButtons();
