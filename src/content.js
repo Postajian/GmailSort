@@ -56,7 +56,7 @@
     globalThis.__gmailViewNext.destroy();
   }
 
-  var SYSTEM_LABELS = /^(inbox|starred|snoozed|sent|drafts?|spam|trash|important|chats?|categories|more|less|all mail|scheduled|manage labels|create new label|compose|social|updates|forums|promotions|primary)$/i;
+  var SYSTEM_LABELS = /^(inbox|starred|snoozed|sent|drafts?|spam|trash|important|chats?|categories|more|less|all mail|scheduled|manage labels|create new label|compose|social|updates|forums|promotions|primary|purchases|purchase|k(a|ä)ufe|eink(a|ä)ufe)$/i;
   var state = {
     settings: Core.normalizeSettings(Core.DEFAULT_SETTINGS),
     observer: null,
