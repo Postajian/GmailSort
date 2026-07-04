@@ -598,13 +598,21 @@
     var navRect = target.nav.getBoundingClientRect();
     var top;
     if (mode === 'labels') {
-      // Start at the first custom label (excludes Inbox/Starred/Purchases and the
-      // other system rows, which aren't tagged as custom label entries).
+      // Start at the "Labels" section header (GmailView marks it with the label
+      // count badge), so system rows above it like Purchases are excluded.
       var labelTop = null;
-      var labels = document.querySelectorAll('[data-gvn-label-entry="true"]');
-      for (var k = 0; k < labels.length; k++) {
-        var lr = labels[k].getBoundingClientRect();
-        if (lr.height > 4 && (labelTop === null || lr.top < labelTop)) labelTop = lr.top;
+      var headerBadge = document.querySelector('.gvn-label-count');
+      if (headerBadge) {
+        var hr = headerBadge.getBoundingClientRect();
+        if (hr.height > 0) labelTop = hr.top;
+      }
+      if (labelTop === null) {
+        // Fallback: first custom label row.
+        var labels = document.querySelectorAll('[data-gvn-label-entry="true"]');
+        for (var k = 0; k < labels.length; k++) {
+          var lr = labels[k].getBoundingClientRect();
+          if (lr.height > 4 && (labelTop === null || lr.top < labelTop)) labelTop = lr.top;
+        }
       }
       if (labelTop === null) { el.style.display = 'none'; return; }
       top = Math.round(labelTop);
