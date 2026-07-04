@@ -389,7 +389,7 @@
       // of the sidebar (see positionSidebarRail).
       '#gmail-view-next-sidebar-rail{position:fixed;z-index:2;width:4px;background:var(--gvn-gold);pointer-events:none;display:none;}',
       // New-mail glow: a gold accent bar on labels that have unread mail.
-      'html[data-gvn-active="true"][data-gvn-label-glow="true"] [data-gvn-label-entry="true"][data-gvn-label-unread="true"]{box-shadow:inset 5px 0 0 var(--gvn-gold)!important;}',
+      'html[data-gvn-active="true"][data-gvn-label-glow="true"] [data-gvn-label-entry="true"][data-gvn-label-unread="true"]{box-shadow:inset 4px 0 0 var(--gvn-gold)!important;}',
       '.gvn-label-check{position:absolute!important;z-index:1;right:5px;top:50%;width:14px!important;height:14px!important;margin:0!important;border:1px solid #777!important;border-radius:2px!important;box-sizing:border-box!important;transform:translateY(-50%);-webkit-appearance:none!important;appearance:none!important;background:#fff!important;cursor:pointer;pointer-events:auto!important;}',
       '.gvn-label-check:checked{border-color:#555!important;background:#555!important;}',
       '.gvn-label-check:checked::after{content:"";position:absolute;left:3px;top:2px;width:6px;height:3px;border:solid #fff;border-width:0 0 2px 2px;transform:rotate(-45deg);}',
