@@ -29,7 +29,7 @@
     quickPeek: false,
     labelIndentGuides: false,
     labelNewMailGlow: true,
-    sidebarGoldRail: true,
+    sidebarGoldRail: 'full',
     labelRollupUnread: false,
     hideClutterLabels: false,
     senderFrequency: false,
@@ -203,7 +203,12 @@
       quickPeek: value.quickPeek === true,
       labelIndentGuides: value.labelIndentGuides === true,
       labelNewMailGlow: value.labelNewMailGlow !== false,
-      sidebarGoldRail: value.sidebarGoldRail !== false,
+      sidebarGoldRail: (function () {
+        var v = value.sidebarGoldRail;
+        if (v === true) return 'full';
+        if (v === false) return 'off';
+        return (v === 'off' || v === 'labels' || v === 'full') ? v : 'full';
+      })(),
       labelRollupUnread: value.labelRollupUnread === true,
       hideClutterLabels: value.hideClutterLabels === true,
       senderFrequency: value.senderFrequency === true,

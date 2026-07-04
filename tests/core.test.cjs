@@ -194,6 +194,16 @@ test('normalizeSavedViews keeps only named searches and caps fields', () => {
   assert.deepEqual(core.normalizeSavedViews('nope'), []);
 });
 
+test('sidebarGoldRail defaults to full, accepts off/labels/full, migrates booleans', () => {
+  assert.equal(core.DEFAULT_SETTINGS.sidebarGoldRail, 'full');
+  assert.equal(core.normalizeSettings({}).sidebarGoldRail, 'full');
+  assert.equal(core.normalizeSettings({ sidebarGoldRail: 'off' }).sidebarGoldRail, 'off');
+  assert.equal(core.normalizeSettings({ sidebarGoldRail: 'labels' }).sidebarGoldRail, 'labels');
+  assert.equal(core.normalizeSettings({ sidebarGoldRail: true }).sidebarGoldRail, 'full');
+  assert.equal(core.normalizeSettings({ sidebarGoldRail: false }).sidebarGoldRail, 'off');
+  assert.equal(core.normalizeSettings({ sidebarGoldRail: 'weird' }).sidebarGoldRail, 'full');
+});
+
 test('quick filters and sci-fi accents default off and accept booleans', () => {
   assert.equal(core.DEFAULT_SETTINGS.showQuickFilters, false);
   assert.equal(core.DEFAULT_SETTINGS.sciFiAccents, false);

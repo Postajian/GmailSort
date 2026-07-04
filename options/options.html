@@ -23,7 +23,13 @@
         <label class="check"><input type="checkbox" name="colorLabels"> Color uncolored custom labels</label>
         <label class="check"><input type="checkbox" name="labelIndentGuides"> <strong>Sub-label indent guides</strong> &mdash; a soft line on nested labels</label>
         <label class="check"><input type="checkbox" name="labelNewMailGlow"> <strong>New-mail glow</strong> &mdash; accent bar on labels with unread mail</label>
-        <label class="check"><input type="checkbox" name="sidebarGoldRail"> <strong>Golden sidebar rail</strong> &mdash; a continuous gold line down the left edge of the sidebar</label>
+        <label>Golden sidebar rail
+          <select name="sidebarGoldRail">
+            <option value="off">Off</option>
+            <option value="labels">Labels only</option>
+            <option value="full">Full (from Inbox)</option>
+          </select>
+        </label>
         <label class="check"><input type="checkbox" name="showSenderMarks"> Show local sender monograms</label>
         <label class="check"><input type="checkbox" name="richLogos"> Fetch real sender logos (sends sender domains to a logo service; off = local letters only)</label>
         <label class="check"><input type="checkbox" name="debugTools"> Developer tools (show the in-Gmail &ldquo;Inspect&rdquo; button) &mdash; off for normal use</label>

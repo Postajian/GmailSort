@@ -580,8 +580,9 @@
 
   function positionSidebarRail() {
     var el = ensureSidebarRail();
+    var mode = state.settings.sidebarGoldRail;
     if (
-      !state.settings.sidebarGoldRail ||
+      mode === 'off' ||
       !state.settings.enabled ||
       Core.routeMode(location.hash) !== 'inbox'
     ) {
@@ -591,19 +592,32 @@
     var target = locateSidebarTarget();
     if (!target) { el.style.display = 'none'; return; }
     var navRect = target.nav.getBoundingClientRect();
-    var compose = document.querySelector('[gh="cm"]');
-    var composeBottom = compose ? compose.getBoundingClientRect().bottom : navRect.top;
-    // Anchor the line's top to the Inbox row: the top-most interactive row that
-    // sits below the Compose button. Robust to Gmail's markup / language.
-    var rowTop = null;
-    var candidates = target.nav.querySelectorAll('a[href], [role="link"], [data-tooltip], [role="menuitem"]');
-    for (var i = 0; i < candidates.length; i++) {
-      var cr = candidates[i].getBoundingClientRect();
-      if (cr.height > 4 && cr.top >= composeBottom - 4) {
-        if (rowTop === null || cr.top < rowTop) rowTop = cr.top;
+    var top;
+    if (mode === 'labels') {
+      // Start at the first custom label (excludes Inbox/Starred/Purchases and the
+      // other system rows, which aren't tagged as custom label entries).
+      var labelTop = null;
+      var labels = document.querySelectorAll('[data-gvn-label-entry="true"]');
+      for (var k = 0; k < labels.length; k++) {
+        var lr = labels[k].getBoundingClientRect();
+        if (lr.height > 4 && (labelTop === null || lr.top < labelTop)) labelTop = lr.top;
       }
+      if (labelTop === null) { el.style.display = 'none'; return; }
+      top = Math.round(labelTop);
+    } else {
+      // Full: anchor to the Inbox row (top-most interactive row below Compose).
+      var compose = document.querySelector('[gh="cm"]');
+      var composeBottom = compose ? compose.getBoundingClientRect().bottom : navRect.top;
+      var rowTop = null;
+      var candidates = target.nav.querySelectorAll('a[href], [role="link"], [data-tooltip], [role="menuitem"]');
+      for (var i = 0; i < candidates.length; i++) {
+        var cr = candidates[i].getBoundingClientRect();
+        if (cr.height > 4 && cr.top >= composeBottom - 4) {
+          if (rowTop === null || cr.top < rowTop) rowTop = cr.top;
+        }
+      }
+      top = Math.round(rowTop !== null ? rowTop : composeBottom + 24);
     }
-    var top = Math.round(rowTop !== null ? rowTop : composeBottom + 24);
     var height = Math.max(0, Math.round(navRect.bottom - top));
     if (height < 10 || navRect.width < 40) { el.style.display = 'none'; return; }
     el.style.left = Math.round(navRect.left) + 'px';
@@ -943,10 +957,12 @@
     railButton.className = 'gvn-rail-toggle';
     railButton.type = 'button';
     railButton.textContent = 'Rail';
-    railButton.title = 'Golden sidebar rail on/off';
-    railButton.setAttribute('aria-label', 'Toggle golden sidebar rail');
+    railButton.title = 'Golden rail: cycle off / labels / full';
+    railButton.setAttribute('aria-label', 'Cycle golden sidebar rail');
     railButton.addEventListener('click', function () {
-      setQuickSetting('sidebarGoldRail', !(state.settings.sidebarGoldRail === true));
+      var modes = ['off', 'labels', 'full'];
+      var idx = modes.indexOf(state.settings.sidebarGoldRail);
+      setQuickSetting('sidebarGoldRail', modes[(idx + 1) % modes.length]);
       updateQuickButtons();
     });
     masthead.appendChild(railButton);
@@ -1084,7 +1100,9 @@
     }
     var railBtn = overlay.querySelector('.gvn-rail-toggle');
     if (railBtn) {
-      railBtn.setAttribute('data-active', String(state.settings.sidebarGoldRail === true));
+      var mode = state.settings.sidebarGoldRail;
+      railBtn.setAttribute('data-active', String(mode !== 'off'));
+      railBtn.title = 'Golden rail: ' + mode + ' — click to cycle (off / labels / full)';
     }
   }
 
@@ -1106,8 +1124,7 @@
     { key: 'hideTabSocial', label: 'Hide Social tab' },
     { key: 'hideTabUpdates', label: 'Hide Updates tab' },
     { key: 'hideTabForums', label: 'Hide Forums tab' },
-    { key: 'focusMode', label: 'Focus mode (hide Promotions/Social/Forums)' },
-    { key: 'sidebarGoldRail', label: 'Golden sidebar rail' }
+    { key: 'focusMode', label: 'Focus mode (hide Promotions/Social/Forums)' }
   ];
   var THEME_CYCLE = ['light', 'dark', 'sepia', 'contrast'];
   var THEME_LABELS = { light: 'Light', dark: 'Dark', sepia: 'Sepia', contrast: 'Contrast' };
