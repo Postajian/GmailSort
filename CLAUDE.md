@@ -29,3 +29,11 @@ Do NOT read the vault for narrow coding tasks unrelated to G9 cross-project cont
 
 After each work block, append a one-line entry to the top of the vault's `wiki/log.md` and update
 the GmailView feature/handoff notes. Do NOT hand-curate the HQ-owned `G9_PROGRESS_LOG.md`.
+
+## LIMIT-HIT BATON (read FIRST when resuming or continuing G9 work)
+
+If you are resuming work (or another AI hit its usage limit), read ONLY
+`C:\Users\exoni\Desktop\Gmail Sort\03_Obsidian_Vault\G9_RESUME_NOW.md` and follow its
+protocol: CLAIM your item there before starting, mark it DONE the moment it is verified,
+rewrite the file live (not at session end). Never redo a DONE item - reconcile instead.
+Do NOT re-read the codebase/vault to catch up; the baton IS the catch-up.
