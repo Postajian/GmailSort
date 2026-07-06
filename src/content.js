@@ -2205,10 +2205,59 @@
       );
       return;
     }
+    var packet = event.target.closest('[data-gvn-packet]');
+    if (packet) {
+      createG9PacketFromFrontPage(packet);
+      return;
+    }
     var nav = event.target.closest('[data-gvn-search]');
     if (nav) {
       var hash = nav.getAttribute('data-gvn-search');
       if (hash && location.hash !== hash) location.hash = hash;
+    }
+  }
+
+  function createG9PacketFromFrontPage(button) {
+    var summary = Core.summarizeInbox(state.inboxRecords, { topLimit: 5 });
+    var topSenders = summary.topSenders.map(function (sender) {
+      return sender.label + ' (' + sender.count + ', unread ' + sender.unread + ')';
+    }).join('; ');
+    var groups = summary.groups.map(function (group) {
+      return group.name + ': ' + group.count + ' / unread ' + group.unread;
+    }).join('; ');
+    var raw = [
+      'Create a G9 mission packet from GmailView/GmailSort.',
+      'Current Gmail view: ' + location.href,
+      'Visible messages: ' + summary.total,
+      'Unread: ' + summary.unread,
+      'Sender count: ' + summary.senderCount,
+      'Top senders: ' + (topSenders || 'none'),
+      'Activity periods: ' + (groups || 'none'),
+      'Task: review this Gmail view and recommend cleanup, triage, saved views, or automation improvements that should connect back into G9 HQ and Quick Launcher.'
+    ].join('\n');
+    var original = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Packet...';
+    try {
+      chrome.runtime.sendMessage({
+        type: 'gvn-packet',
+        raw: raw,
+        intents: ['continue', 'idea'],
+        lane: 'codex'
+      }, function (response) {
+        button.disabled = false;
+        if (chrome.runtime && chrome.runtime.lastError) {
+          button.textContent = 'Bridge offline';
+          setTimeout(function () { button.textContent = original; }, 1600);
+          return;
+        }
+        button.textContent = response && response.ok ? 'Packet saved' : 'Bridge failed';
+        setTimeout(function () { button.textContent = original; }, 1600);
+      });
+    } catch (error) {
+      button.disabled = false;
+      button.textContent = 'Bridge failed';
+      setTimeout(function () { button.textContent = original; }, 1600);
     }
   }
 
@@ -2331,6 +2380,21 @@
     if (panel.getAttribute('data-gvn-sig') === signature) return;
     panel.setAttribute('data-gvn-sig', signature);
     panel.textContent = '';
+
+    var packetRow = document.createElement('div');
+    packetRow.className = 'gvn-fp-filters';
+    var packetLabel = document.createElement('span');
+    packetLabel.className = 'gvn-fp-filters-label';
+    packetLabel.textContent = 'G9';
+    var packetButton = document.createElement('button');
+    packetButton.type = 'button';
+    packetButton.className = 'gvn-fp-filter';
+    packetButton.textContent = 'Create G9 packet';
+    packetButton.title = 'Send the current GmailView summary to Quick Launcher as a mission packet';
+    packetButton.setAttribute('data-gvn-packet', 'current-view');
+    packetRow.appendChild(packetLabel);
+    packetRow.appendChild(packetButton);
+    panel.appendChild(packetRow);
 
     if (wantFilters) {
       var filters = document.createElement('div');
@@ -2560,15 +2624,15 @@
         row.style.removeProperty('--gvn-highlight-bg');
       }
 
-      // Sender frequency: mark the sender name when they appear more than once
-      // in the current view, e.g. "×3".
-      if (parts.sender) {
+      // Sender frequency: mark the sender CELL when they appear more than once
+      // in the current view, e.g. "×3", shown at the right of the sender column.
+      if (parts.senderCell) {
         var freqKey = String(sender.email || sender.name || '').toLowerCase();
         var freq = freqKey ? senderCounts[freqKey] : 0;
         if (state.settings.senderFrequency && freq > 1) {
-          parts.sender.setAttribute('data-gvn-freq', String(freq));
+          parts.senderCell.setAttribute('data-gvn-freq', String(freq));
         } else {
-          parts.sender.removeAttribute('data-gvn-freq');
+          parts.senderCell.removeAttribute('data-gvn-freq');
         }
       }
 

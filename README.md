@@ -1,3 +1,4 @@
+![Version](https://img.shields.io/badge/main-v0.20.93--stable-d4a017) ![Store](https://img.shields.io/badge/Chrome%20store-v0.20.17%20pending-lightgrey) ![Tests](https://img.shields.io/badge/tests-49-2ea44f)
 # Gmail View Next
 
 A clean-room, independent rewrite of the newspaper-inspired Gmail inbox view.

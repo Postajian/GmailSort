@@ -196,7 +196,44 @@ function resolveLogo(domain) {
   return work;
 }
 
+function postQuickLauncher(path, payload) {
+  return fetch('http://localhost:8899' + path, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload || {})
+  }).then(function (response) {
+    return response.json().then(function (data) {
+      if (!response.ok || data.ok === false) {
+        throw new Error((data && data.error) || 'Quick Launcher request failed.');
+      }
+      return data;
+    });
+  });
+}
+
+function createG9Packet(message) {
+  var raw = String((message && message.raw) || '').trim();
+  if (!raw) return Promise.resolve({ ok: false, error: 'No GmailView packet text.' });
+  return postQuickLauncher('/api/packet', {
+    raw: raw,
+    target: 'GmailView / GmailSort',
+    intents: Array.isArray(message.intents) && message.intents.length ? message.intents : ['continue'],
+    selectedApps: ['gmailview', 'quick-launcher'],
+    aiLane: String(message.lane || 'codex').toLowerCase(),
+    templateId: 'gmailview-bridge',
+    notes: 'Created from GmailView/GmailSort packet bridge.'
+  }).then(function (data) {
+    return { ok: true, packet: data.packet || null };
+  });
+}
+
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  if (message && message.type === 'gvn-packet') {
+    createG9Packet(message).then(sendResponse, function (error) {
+      sendResponse({ ok: false, error: String(error && error.message || error) });
+    });
+    return true;
+  }
   if (!message || message.type !== 'gvn-logo' || !message.domain) return false;
   resolveLogo(String(message.domain)).then(sendResponse, function () {
     sendResponse({ error: true });

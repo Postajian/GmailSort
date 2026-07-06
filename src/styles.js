@@ -338,8 +338,9 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-domain="true"] td.yX{box-shadow:inset -3px 0 0 var(--gvn-domain-color,transparent)!important;}',
       // Attachment marker: a small paperclip after the sender name.
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-attach="true"] span[email]::after{content:"\\01F4CE";font-size:11px;opacity:.55;margin-left:5px;}',
-      // Sender frequency: a small "×N" before a repeat sender's name.
-      'html[data-gvn-active="true"][data-gvn-route="inbox"] [data-gvn-freq]::before{content:"\\00D7" attr(data-gvn-freq) "\\00A0";font-weight:700;color:var(--gvn-gold);}',
+      // Sender frequency: a small "×N" at the right edge of the sender column.
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA td.yX[data-gvn-freq]{position:relative!important;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA td.yX[data-gvn-freq]::after{content:"\\00D7" attr(data-gvn-freq);position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--gvn-gold);pointer-events:none;z-index:3;}',
       // Highlight rules: tint the row + a colour bar on the left edge.
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-highlight="true"] td{background-color:var(--gvn-highlight-bg,transparent)!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-highlight="true"]>td:first-child{box-shadow:inset 4px 0 0 var(--gvn-highlight,transparent)!important;}',
