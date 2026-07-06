@@ -338,9 +338,11 @@
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-domain="true"] td.yX{box-shadow:inset -3px 0 0 var(--gvn-domain-color,transparent)!important;}',
       // Attachment marker: a small paperclip after the sender name.
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-attach="true"] span[email]::after{content:"\\01F4CE";font-size:11px;opacity:.55;margin-left:5px;}',
-      // Sender frequency: a small "×N" at the right edge of the sender column.
+      // Sender frequency: a small "×N" at the right edge of the sender column,
+      // bottom-anchored so it aligns with the sender name even on the taller
+      // date-group rows (which have extra top padding for the group label).
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA td.yX[data-gvn-freq]{position:relative!important;}',
-      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA td.yX[data-gvn-freq]::after{content:"\\00D7" attr(data-gvn-freq);position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--gvn-gold);pointer-events:none;z-index:3;}',
+      'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA td.yX[data-gvn-freq]::after{content:"\\00D7" attr(data-gvn-freq);position:absolute;right:2px;bottom:' + Math.max(2, Math.round(rowHeight / 2 - 7)) + 'px;font-size:11px;font-weight:700;color:var(--gvn-gold);pointer-events:none;z-index:3;}',
       // Highlight rules: tint the row + a colour bar on the left edge.
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-highlight="true"] td{background-color:var(--gvn-highlight-bg,transparent)!important;}',
       'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA[data-gvn-highlight="true"]>td:first-child{box-shadow:inset 4px 0 0 var(--gvn-highlight,transparent)!important;}',
