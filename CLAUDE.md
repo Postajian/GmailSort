@@ -25,6 +25,18 @@ Do NOT read the vault for narrow coding tasks unrelated to G9 cross-project cont
 4. **Store vs main:** store-submitted = v0.20.17 (pending review); `main` is ahead (v0.20.33+).
    Features reach users only as a store update after approval.
 
+## New Claude Skills Available (2026-07-08)
+
+Global skills, auto-discovered in every Claude session regardless of folder — reach for these on
+GmailView work instead of forgetting they exist:
+
+- **`extension-create` / `extension-dev` / `extension-manifest` / `extension-analyze` / `extension-test` / `extension-assets` / `extension-payment` / `extension-backend` / `extension-ui` / `extension-review` / `extension-publish` / `extension-migration`** — full Chrome-extension lifecycle skill set (quangpl/browser-extension-skills). Use `extension-review`/`extension-publish` before any future store submission.
+- **`chrome-web-store-compliance`** — checks against 30+ real CWS violation codes + MV3 requirements. Run before submitting the v0.20.18+ update batch once the pending v0.20.17 review clears.
+- **`supply-chain-risk-auditor`, `codeql`, `semgrep`, `sarif-parsing`, `differential-review`, `fp-check`, `variant-analysis`** — Trail-of-Bits security/static-analysis skills, apply to JS/TS review of the extension.
+- **`git-cleanup`, `gh-cli`** — general git hygiene / GitHub CLI helpers.
+
+See [[G9_MASTER_REGISTRY]] "External Dependencies" for the full source list.
+
 ## Documentation protocol ("Update G9")
 
 After each work block, append a one-line entry to the top of the vault's `wiki/log.md` and update

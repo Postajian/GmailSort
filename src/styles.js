@@ -323,8 +323,7 @@
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE span[email]{font-weight:700!important;}\n'
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE .bog{font-weight:700!important;}\n'
           + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.yO .bog{font-weight:400!important;}\n'
-          + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE td.yX .yW::before{content:"";display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;background:var(--gvn-gold);vertical-align:1px;}\n'
-          + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE>td:first-child{background-image:linear-gradient(var(--gvn-gold),var(--gvn-gold))!important;background-repeat:no-repeat!important;background-size:3px 100%!important;background-position:0 0!important;}'
+          + 'html[data-gvn-active="true"][data-gvn-route="inbox"] tr.zA.zE td.yX .yW::before{content:"";display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;background:var(--gvn-gold);vertical-align:1px;}'
         : ''),
       // Smart sender rules: hide removes the row, mute dims it and drops its
       // "new" emphasis, vip pins a persistent gold edge + bold sender.

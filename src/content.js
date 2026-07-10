@@ -79,6 +79,8 @@
     labelTypography: {},
     labelTypographySaveTimer: 0,
     sortingLabels: false,
+    labelListSig: '',
+    labelSettleTimer: 0,
     logoCache: {},
     logoPending: {},
     logoOverrides: {},
@@ -2860,6 +2862,33 @@
     var byActivity = !!state.settings.sortLabelsByActivity;
     var hasPins = (state.pinnedLabels || []).length > 0;
     if (!byActivity && !hasPins) return;
+
+    // Glitch guard: Gmail tears down and rebuilds its whole sidebar every time you
+    // open a thread. Physically moving its label rows mid-rebuild races Gmail's
+    // renderer and briefly flashes duplicate rows ("Newsletters" x3) until it
+    // settles. So we only reorder once the list has stopped churning.
+    var names = items.map(function (item) { return item.name; });
+    // (a) If Gmail is momentarily showing the same label twice, the list is mid-
+    //     render -- bail rather than reorder a glitched list and make it worse.
+    var seen = Object.create(null);
+    for (var s = 0; s < names.length; s++) {
+      if (seen[names[s]]) { state.labelListSig = ''; return; }
+      seen[names[s]] = true;
+    }
+    // (b) Only act when this frame's list is identical to the previous one, i.e.
+    //     Gmail has finished rebuilding. Otherwise remember it and re-check shortly.
+    var sig = names.join('') + '|' + names.length;
+    if (sig !== state.labelListSig) {
+      state.labelListSig = sig;
+      if (!state.labelSettleTimer) {
+        state.labelSettleTimer = setTimeout(function () {
+          state.labelSettleTimer = 0;
+          scheduleRefresh();
+        }, 200);
+      }
+      return;
+    }
+
     var groups = new Map();
     items.forEach(function (item, index) {
       if (!item.row || !item.row.parentElement) return;
@@ -3596,6 +3625,7 @@
     if (state.frame) cancelAnimationFrame(state.frame);
     if (state.labelActivitySaveTimer) clearTimeout(state.labelActivitySaveTimer);
     if (state.labelTypographySaveTimer) clearTimeout(state.labelTypographySaveTimer);
+    if (state.labelSettleTimer) clearTimeout(state.labelSettleTimer);
     if (state.healthTimer) clearTimeout(state.healthTimer);
     hideHealthWarning();
     hideUpgradeBanner();
