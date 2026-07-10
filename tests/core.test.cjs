@@ -345,6 +345,30 @@ test('orderLabels keeps original order when nothing is pinned or active', () => 
   assert.deepEqual(core.orderLabels(entries).map((e) => e.name), ['A', 'B']);
 });
 
+test('labelFamilyBlocks keeps each parent with its consecutive sub-labels', () => {
+  // Newsletters(+2 subs), Nyfter(no subs), Shopping(+3 subs) as flat rows.
+  const flags = [false, true, true, false, false, true, true, true];
+  assert.deepEqual(core.labelFamilyBlocks(flags), [
+    [0, 3],
+    [3, 4],
+    [4, 8]
+  ]);
+});
+
+test('labelFamilyBlocks handles leading subs, empty lists and no subs at all', () => {
+  // Subs with no parent above them form one leading block, never merged up.
+  assert.deepEqual(core.labelFamilyBlocks([true, true, false]), [
+    [0, 2],
+    [2, 3]
+  ]);
+  assert.deepEqual(core.labelFamilyBlocks([]), []);
+  assert.deepEqual(core.labelFamilyBlocks(undefined), []);
+  assert.deepEqual(core.labelFamilyBlocks([false, false]), [
+    [0, 1],
+    [1, 2]
+  ]);
+});
+
 test('viewTitle names the view, keeping the custom masthead on the inbox', () => {
   assert.equal(core.viewTitle('#inbox', 'THE POST'), 'THE POST');
   assert.equal(core.viewTitle('', 'THE POST'), 'THE POST');

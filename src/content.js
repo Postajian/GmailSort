@@ -2857,7 +2857,7 @@
     return -1;
   }
 
-  function applyLabelOrder(items) {
+  function applyLabelOrder(scoped) {
     if (state.sortingLabels) return;
     var byActivity = !!state.settings.sortLabelsByActivity;
     var hasPins = (state.pinnedLabels || []).length > 0;
@@ -2867,7 +2867,7 @@
     // open a thread. Physically moving its label rows mid-rebuild races Gmail's
     // renderer and briefly flashes duplicate rows ("Newsletters" x3) until it
     // settles. So we only reorder once the list has stopped churning.
-    var names = items.map(function (item) { return item.name; });
+    var names = scoped.map(function (scope) { return scope.item.name; });
     // (a) If Gmail is momentarily showing the same label twice, the list is mid-
     //     render -- bail rather than reorder a glitched list and make it worse.
     var seen = Object.create(null);
@@ -2889,36 +2889,56 @@
       return;
     }
 
+    // Gmail renders parents and sub-labels as flat sibling rows, so sorting
+    // individual rows tears families apart: an active sub floats away from its
+    // parent and orphaned children end up hanging under the wrong label. Order
+    // whole family blocks (parent + its consecutive subs) as one unit instead.
+    var ranges = Core.labelFamilyBlocks(
+      scoped.map(function (scope) { return scope.sub === true; })
+    );
     var groups = new Map();
-    items.forEach(function (item, index) {
-      if (!item.row || !item.row.parentElement) return;
-      var parent = item.row.parentElement;
-      if (!groups.has(parent)) groups.set(parent, []);
-      var group = groups.get(parent);
-      if (!group.some(function (entry) { return entry.row === item.row; })) {
-        group.push({
-          row: item.row,
-          name: item.name,
-          index: index,
-          activity: Number(state.labelActivity[item.name]) || 0,
-          pinIndex: pinIndexOf(item.name)
-        });
+    ranges.forEach(function (range, blockIndex) {
+      var rows = [];
+      var parent = null;
+      var activity = 0;
+      var pinIndex = -1;
+      for (var i = range[0]; i < range[1]; i++) {
+        var item = scoped[i].item;
+        if (!item.row || !item.row.parentElement) return;
+        if (!parent) parent = item.row.parentElement;
+        // A family split across containers can't be moved as one unit -- skip
+        // the whole block rather than risk tearing it apart.
+        else if (item.row.parentElement !== parent) return;
+        if (rows.indexOf(item.row) === -1) rows.push(item.row);
+        // The family sorts by its strongest member: best pin slot, most activity.
+        var act = Number(state.labelActivity[item.name]) || 0;
+        if (act > activity) activity = act;
+        var pin = pinIndexOf(item.name);
+        if (pin >= 0 && (pinIndex < 0 || pin < pinIndex)) pinIndex = pin;
       }
+      if (!rows.length) return;
+      if (!groups.has(parent)) groups.set(parent, []);
+      groups.get(parent).push({
+        rows: rows,
+        index: blockIndex,
+        activity: activity,
+        pinIndex: pinIndex
+      });
     });
 
     groups.forEach(function (group, parent) {
       if (group.length < 2) return;
       var sorted = Core.orderLabels(group, { byActivity: byActivity });
-      var changed = sorted.some(function (item, index) {
-        return item.row !== group[index].row;
+      var changed = sorted.some(function (entry, index) {
+        return entry !== group[index];
       });
       if (!changed) return;
 
-      var lastRow = group[group.length - 1].row;
-      var nextSibling = lastRow.nextSibling;
+      var lastRows = group[group.length - 1].rows;
+      var nextSibling = lastRows[lastRows.length - 1].nextSibling;
       var fragment = document.createDocumentFragment();
-      sorted.forEach(function (item) {
-        fragment.appendChild(item.row);
+      sorted.forEach(function (entry) {
+        entry.rows.forEach(function (row) { fragment.appendChild(row); });
       });
       state.sortingLabels = true;
       parent.insertBefore(fragment, nextSibling);
@@ -3005,7 +3025,7 @@
       item.swatch.style.setProperty('--gvn-label-color', Core.labelColor(item.name));
     });
     updateLabelActivity(items);
-    applyLabelOrder(items);
+    applyLabelOrder(scoped);
     updateLabelCount(items.length);
     if (state.editingLabels) updateTypeEditor();
   }

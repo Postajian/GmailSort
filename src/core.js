@@ -722,6 +722,22 @@
     return 'from:(' + domains.join(' OR ') + ') in:inbox';
   }
 
+  // Group a flat, DOM-ordered label list into families: each block is one
+  // parent label plus the consecutive sub-labels right after it. Gmail renders
+  // parents and subs as flat sibling rows, so reordering single rows tears
+  // families apart (subs end up hanging under the wrong parent). Ordering
+  // must move these blocks, never individual rows. `subFlags` is an array of
+  // booleans (true = sub-label); returns [start, end) index ranges. Leading
+  // subs with no parent above them form one untouched block of their own.
+  function labelFamilyBlocks(subFlags) {
+    var blocks = [];
+    for (var i = 0; i < (subFlags || []).length; i++) {
+      if (!subFlags[i] || !blocks.length) blocks.push([i, i + 1]);
+      else blocks[blocks.length - 1][1] = i + 1;
+    }
+    return blocks;
+  }
+
   // Order label rows: pinned favourites first (in the order they were pinned),
   // then the rest either by recent activity (desc) or their original order.
   // Pure + testable. Each entry: { index, activity, pinIndex } where pinIndex
@@ -778,6 +794,7 @@
     normalizeHighlightRules: normalizeHighlightRules,
     highlightColor: highlightColor,
     summarizeInbox: summarizeInbox,
+    labelFamilyBlocks: labelFamilyBlocks,
     orderLabels: orderLabels,
     TRIAL_DAYS: TRIAL_DAYS,
     licenseState: licenseState,
