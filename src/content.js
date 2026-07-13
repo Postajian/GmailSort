@@ -281,12 +281,33 @@
       safeStorageGet('local', LABEL_ACTIVITY_KEY, function (stored, error) {
         reportApiError('Could not read label activity.', error);
         var value = stored && stored[LABEL_ACTIVITY_KEY];
-        if (value && value.day === today && value.activity) {
-          state.labelActivityDay = today;
-          state.labelActivity = value.activity;
-        } else {
-          state.labelActivityDay = today;
-          state.labelActivity = {};
+        state.labelActivityDay = today;
+        state.labelActivity = {};
+        state.labelSignals = {};
+        if (value && value.activity) {
+          // Arrival stamps survive across days on purpose ("newest mail
+          // first" ordering). Prune anything older than 45 days so the
+          // store cannot grow forever as labels come and go.
+          var cutoff = Date.now() - 45 * 24 * 60 * 60 * 1000;
+          Object.keys(value.activity).forEach(function (name) {
+            var at = Number(value.activity[name]);
+            if (Number.isFinite(at) && at > cutoff) {
+              state.labelActivity[name] = at;
+            }
+          });
+        }
+        if (value && value.signals) {
+          // Last-known unread counts: lets the next session detect mail
+          // that arrived while Gmail was closed.
+          Object.keys(value.signals).forEach(function (name) {
+            var signal = value.signals[name];
+            if (signal && typeof signal === 'object') {
+              state.labelSignals[name] = {
+                count: Number(signal.count) || 0,
+                unread: signal.unread === true
+              };
+            }
+          });
         }
         resolve();
       });
@@ -300,7 +321,8 @@
       var value = {};
       value[LABEL_ACTIVITY_KEY] = {
         day: state.labelActivityDay,
-        activity: state.labelActivity
+        activity: state.labelActivity,
+        signals: state.labelSignals
       };
       safeStorageSet('local', value, function (error) {
         reportApiError('Could not save label activity.', error);
@@ -2850,29 +2872,36 @@
     var today = localDayKey();
     var changed = false;
     if (state.labelActivityDay !== today) {
+      // New day: keep the arrival timestamps ("newest mail first" must
+      // survive midnight); only the day marker in the save payload moves.
       state.labelActivityDay = today;
-      state.labelActivity = {};
-      state.labelSignals = {};
       changed = true;
     }
 
     var now = Date.now();
-    items.forEach(function (item, index) {
+    items.forEach(function (item) {
       var signal = {
         count: Number(item.unreadCount) || 0,
         unread: !!item.unread
       };
       var previous = state.labelSignals[item.name];
-      if (!previous) {
-        if (signal.unread && !state.labelActivity[item.name]) {
-          state.labelActivity[item.name] = now - index;
-          changed = true;
-        }
-      } else if (
-        signal.count > previous.count ||
-        (signal.unread && !previous.unread)
+      // First sight only records a baseline, never a stamp. Stamping on
+      // first render made labels leap to the top the moment their row
+      // appeared (expanding a parent reveals its subs) - "I opened it"
+      // is not "it got new mail". Signals persist across sessions, so a
+      // count that grew while Gmail was closed still stamps on next load.
+      if (
+        previous &&
+        (signal.count > previous.count || (signal.unread && !previous.unread))
       ) {
         state.labelActivity[item.name] = now;
+        changed = true;
+      }
+      if (
+        !previous ||
+        previous.count !== signal.count ||
+        previous.unread !== signal.unread
+      ) {
         changed = true;
       }
       state.labelSignals[item.name] = signal;
