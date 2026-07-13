@@ -437,6 +437,11 @@
       '#gmail-view-next-ui .gvn-scope{display:none;align-items:center;gap:3px;height:' + editorHeight + 'px;padding:0 5px;border:1px solid #000;border-radius:5px;background:#fff;color:#000;font:600 ' + editorFontSize + 'px/' + editorLineHeight + 'px Arial,sans-serif;letter-spacing:0;white-space:nowrap;cursor:pointer;}',
       '#gmail-view-next-ui[data-label-editing="true"] .gvn-scope{display:inline-flex;}',
       '#gmail-view-next-ui .gvn-scope-check{width:' + editorSelectSize + 'px;height:' + editorSelectSize + 'px;margin:0;accent-color:#555;cursor:pointer;}',
+      // Reset-styles lives in the label editor only; armed state goes red so the
+      // second (confirming) click is visually unmistakable.
+      '#gmail-view-next-ui .gvn-type-reset{display:none;}',
+      '#gmail-view-next-ui[data-label-editing="true"] .gvn-type-reset{display:inline-block;}',
+      '#gmail-view-next-ui .gvn-type-reset[data-armed="true"]{background:#b00020!important;color:#fff!important;border-color:#b00020!important;}',
       '#gmail-view-next-ui .gvn-type-name{display:none;}',
       '#gmail-view-next-ui .gvn-type-value,#gmail-view-next-ui .gvn-style-value{display:inline-flex;align-items:center;justify-content:center;min-width:' + editorValueWidth + 'px;height:' + editorHeight + 'px;padding:0 5px;box-sizing:border-box;text-align:center;font-size:' + editorFontSize + 'px;font-weight:700;background:#fff;color:#000;border:1px solid #000;border-radius:5px;cursor:text;outline:0;white-space:nowrap;}',
       '#gmail-view-next-ui .gvn-type-value:focus,#gmail-view-next-ui .gvn-style-value:focus{box-shadow:0 0 0 2px ' + GOLD + ';}',

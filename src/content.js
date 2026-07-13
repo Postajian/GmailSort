@@ -882,6 +882,15 @@
       scope.appendChild(document.createTextNode(item[1]));
       typeEditor.appendChild(scope);
     });
+    var resetType = document.createElement('button');
+    resetType.type = 'button';
+    resetType.className = 'gvn-type-reset';
+    resetType.textContent = 'Reset styles';
+    resetType.title =
+      'Clear ALL saved per-label text styles (size, bold, italic). Needs a second click to confirm.';
+    resetType.setAttribute('aria-label', 'Reset all saved label text styles');
+    resetType.addEventListener('click', resetLabelTypography);
+    typeEditor.appendChild(resetType);
     [
       ['Bold', 'bold', 'Toggle bold for selected text'],
       ['Italic', 'italic', 'Toggle italic for selected text']
@@ -1424,6 +1433,30 @@
       stored.size = Math.min(32, Math.max(10, current.size + delta));
       state.labelTypography[name] = stored;
     });
+    scheduleLabelTypographySave();
+    scheduleRefresh();
+    updateTypeEditor();
+  }
+
+  // Wipe every saved per-label text style (size/bold/italic). Destructive, so
+  // Warning Insurance applies: first click only arms the button, a second
+  // click within 3s confirms, and it auto-disarms otherwise. Exists because
+  // styles are saved by label NAME - labels styled while the sidebar was
+  // glitched (subs shown as mains) keep the wrong look until cleared.
+  function resetLabelTypography(event) {
+    var button = event.currentTarget;
+    if (button.getAttribute('data-armed') !== 'true') {
+      button.setAttribute('data-armed', 'true');
+      button.textContent = 'Sure? Click again';
+      setTimeout(function () {
+        button.removeAttribute('data-armed');
+        button.textContent = 'Reset styles';
+      }, 3000);
+      return;
+    }
+    button.removeAttribute('data-armed');
+    button.textContent = 'Reset styles';
+    state.labelTypography = {};
     scheduleLabelTypographySave();
     scheduleRefresh();
     updateTypeEditor();
