@@ -78,7 +78,6 @@
     labelActivitySaveTimer: 0,
     labelTypography: {},
     labelTypographySaveTimer: 0,
-    sortingLabels: false,
     labelListSig: '',
     labelSettleTimer: 0,
     logoCache: {},
@@ -2172,6 +2171,7 @@
   }
 
   function clearLabelDecorations() {
+    clearLabelOrderStyles();
     document.querySelectorAll('[data-gvn-label-entry="true"]').forEach(function (entry) {
       entry.removeAttribute('data-gvn-label-entry');
       entry.removeAttribute('data-gvn-label');
@@ -2890,11 +2890,28 @@
     return -1;
   }
 
+  // Undo every visual ordering hint we ever applied (flex + per-row order).
+  function clearLabelOrderStyles() {
+    document.querySelectorAll('[data-gvn-label-order="true"]').forEach(function (parent) {
+      parent.removeAttribute('data-gvn-label-order');
+      parent.style.removeProperty('display');
+      parent.style.removeProperty('flex-direction');
+      Array.prototype.slice.call(parent.children).forEach(function (child) {
+        child.style.removeProperty('order');
+      });
+    });
+  }
+
+  // Idempotent style write: only touch the DOM when the value really changes,
+  // so the MutationObserver never sees a self-inflicted churn loop.
+  function setFlexOrder(element, value) {
+    if (element.style.order !== String(value)) element.style.order = String(value);
+  }
+
   function applyLabelOrder(scoped) {
-    if (state.sortingLabels) return;
     var byActivity = !!state.settings.sortLabelsByActivity;
     var hasPins = (state.pinnedLabels || []).length > 0;
-    if (!byActivity && !hasPins) return;
+    if (!byActivity && !hasPins) { clearLabelOrderStyles(); return; }
 
     // Glitch guard: Gmail tears down and rebuilds its whole sidebar every time you
     // open a thread. Physically moving its label rows mid-rebuild races Gmail's
@@ -2962,22 +2979,36 @@
     groups.forEach(function (group, parent) {
       if (group.length < 2) return;
       var sorted = Core.orderLabels(group, { byActivity: byActivity });
-      var changed = sorted.some(function (entry, index) {
-        return entry !== group[index];
+      // VISUAL-ONLY reorder via flex order values. Physically moving Gmail's
+      // rows (the old DocumentFragment approach) fights Gmail's renderer: it
+      // keeps internal references to its nodes and re-creates rows on
+      // expand/collapse or unread updates, leaving our moved copies behind as
+      // persistent duplicate labels ("Work" twice, each with its own subs).
+      // CSS order never detaches a node, so duplicates are impossible.
+      if (parent.style.display !== 'flex') parent.style.display = 'flex';
+      if (parent.style.flexDirection !== 'column') parent.style.flexDirection = 'column';
+      if (parent.getAttribute('data-gvn-label-order') !== 'true') {
+        parent.setAttribute('data-gvn-label-order', 'true');
+      }
+      var tracked = [];
+      group.forEach(function (entry) {
+        entry.rows.forEach(function (row) { tracked.push(row); });
       });
-      if (!changed) return;
-
-      var lastRows = group[group.length - 1].rows;
-      var nextSibling = lastRows[lastRows.length - 1].nextSibling;
-      var fragment = document.createDocumentFragment();
+      // Tracked rows swap order values among their own DOM slots; any other
+      // children of the container keep their natural position.
+      var children = Array.prototype.slice.call(parent.children);
+      var slots = [];
+      children.forEach(function (child, index) {
+        if (tracked.indexOf(child) !== -1) slots.push(index);
+        else setFlexOrder(child, index);
+      });
+      var position = 0;
       sorted.forEach(function (entry) {
-        entry.rows.forEach(function (row) { fragment.appendChild(row); });
+        entry.rows.forEach(function (row) {
+          setFlexOrder(row, slots[position]);
+          position += 1;
+        });
       });
-      state.sortingLabels = true;
-      parent.insertBefore(fragment, nextSibling);
-      setTimeout(function () {
-        state.sortingLabels = false;
-      }, 0);
     });
   }
 
@@ -3954,7 +3985,6 @@
     initLicensing();
 
     state.observer = new MutationObserver(function (mutations) {
-      if (state.sortingLabels) return;
       var relevant = mutations.some(function (mutation) {
         return mutation.addedNodes.length || mutation.removedNodes.length;
       });
