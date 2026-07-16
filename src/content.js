@@ -3158,7 +3158,14 @@
     var nav = Adapter.locateSidebar();
     if (!nav) return;
     var existing = nav.querySelector('.gvn-label-count');
-    if (existing) { existing.textContent = String(count); return; }
+    if (existing) {
+      // Assigning textContent replaces the text node even when the string is
+      // identical, which the observer reads as a childList change and answers
+      // with another refresh. Writing only on a real change breaks that loop.
+      var nextCount = String(count);
+      if (existing.textContent !== nextCount) existing.textContent = nextCount;
+      return;
+    }
     var anchor = null;
     var anchorMode = '';
     var withAria = nav.querySelectorAll('[aria-label],[data-tooltip]');
@@ -3214,9 +3221,10 @@
     overlay.style.display = 'block';
 
     var mastheadTitle = masthead.querySelector('.gvn-masthead-title');
-    mastheadTitle.textContent = state.settings.autoMasthead
+    var nextTitle = state.settings.autoMasthead
       ? Core.viewTitle(location.hash, state.settings.masthead)
       : state.settings.masthead;
+    if (mastheadTitle.textContent !== nextTitle) mastheadTitle.textContent = nextTitle;
     mastheadTitle.style.left =
       'calc(50% + ' + Math.round(state.settings.inboxOffset) + 'px)';
     mastheadTitle.setAttribute(
