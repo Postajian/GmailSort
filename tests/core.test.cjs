@@ -378,6 +378,22 @@ test('viewTitle names the view, keeping the custom masthead on the inbox', () =>
   assert.equal(core.viewTitle('#label/Money%2FPayPal', 'THE POST'), 'MONEY/PAYPAL');
 });
 
+test('rectIsLive rejects the all-zero rect of a row that is not laid out', () => {
+  // A row in a hidden list pane, or one measured mid-navigation, keeps all its
+  // cells but measures all zeros. Positioning from it collapses the column
+  // guides onto their raw offsets and paints them down the whole screen.
+  assert.equal(core.rectIsLive({ width: 0, height: 0, left: 0, top: 0 }), false);
+  assert.equal(core.rectIsLive({ width: 640, height: 0, left: 0, top: 0 }), false);
+  assert.equal(core.rectIsLive({ width: 0, height: 20, left: 0, top: 0 }), false);
+  assert.equal(core.rectIsLive(null), false);
+  assert.equal(core.rectIsLive(undefined), false);
+
+  // A real rendered row passes, including one scrolled above the viewport,
+  // which has a negative top but real size.
+  assert.equal(core.rectIsLive({ width: 640, height: 20, left: 200, top: 300 }), true);
+  assert.equal(core.rectIsLive({ width: 640, height: 20, left: 200, top: -80 }), true);
+});
+
 test('recognizes inbox, all mail, thread, and other routes', () => {
   assert.equal(core.routeMode('#inbox'), 'inbox');
   assert.equal(core.routeMode('#inbox/FMfcgzQ123456789'), 'thread');

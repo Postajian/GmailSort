@@ -2773,6 +2773,21 @@
     return container;
   }
 
+  function hideGlobalDividers() {
+    var container = document.getElementById('gmail-view-next-global-dividers');
+    if (container) container.style.display = 'none';
+  }
+
+  // Gmail keeps other list panes in the DOM, so the first row in document order
+  // is not always one the user can see. Anchor the layout to the first row that
+  // is actually laid out.
+  function anchorRow(rows) {
+    for (var i = 0; i < rows.length; i++) {
+      if (Core.rectIsLive(rows[i].getBoundingClientRect())) return rows[i];
+    }
+    return null;
+  }
+
   function positionGlobalDividers(row) {
     var container = ensureGlobalDividers();
     var mode = Core.routeMode(location.hash);
@@ -2789,6 +2804,15 @@
       !parts.subject ||
       !parts.preview
     ) {
+      container.style.display = 'none';
+      return;
+    }
+
+    // The parts existing is not enough: an unlaid-out row has every part but
+    // measures all zeros, which would collapse the guides onto their raw
+    // offsets and paint them full-height down the screen.
+    var rowRect = row.getBoundingClientRect();
+    if (!Core.rectIsLive(rowRect)) {
       container.style.display = 'none';
       return;
     }
@@ -2815,7 +2839,6 @@
     var viewportRect = inbox.viewport
       ? inbox.viewport.getBoundingClientRect()
       : { bottom: window.innerHeight };
-    var rowRect = row.getBoundingClientRect();
     var top = Math.max(0, Math.round(rowRect.top - 26));
     var bottom = Math.min(
       window.innerHeight,
@@ -3678,15 +3701,17 @@
       hideUpgradeBanner();
 
       var rows = Adapter.findRows(document);
-      if (!rows.length) {
+      var anchor = rows.length ? anchorRow(rows) : null;
+      if (!anchor) {
         if (overlay) overlay.style.display = 'none';
+        hideGlobalDividers();
         return;
       }
 
       decorateRows(rows);
       renderFrontPage();
-      positionOverlay(rows[0]);
-      positionGlobalDividers(rows[0]);
+      positionOverlay(anchor);
+      positionGlobalDividers(anchor);
       updateQuickButtons();
       watchTable();
     } catch (error) {

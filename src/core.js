@@ -174,6 +174,15 @@
     return Math.min(max, Math.max(min, parsed));
   }
 
+  // Gmail keeps list panes in the DOM that are not laid out, and a row measured
+  // mid-navigation has not been laid out yet either. Both report an all-zero
+  // rect, so anything positioned from one lands at its raw offset instead of on
+  // a real column boundary.
+  function rectIsLive(rect) {
+    if (!rect) return false;
+    return Number(rect.width) > 0 && Number(rect.height) > 0;
+  }
+
   function normalizeBoolean(value, fallback) {
     return typeof value === 'boolean' ? value : fallback;
   }
@@ -773,6 +782,7 @@
     CATEGORY_COLORS: CATEGORY_COLORS,
     normalizeSettings: normalizeSettings,
     centeredLayoutSettings: centeredLayoutSettings,
+    rectIsLive: rectIsLive,
     routeMode: routeMode,
     parseGmailDate: parseGmailDate,
     groupForDate: groupForDate,
