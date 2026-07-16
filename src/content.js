@@ -1261,6 +1261,14 @@
     panel.appendChild(body);
   }
 
+  // The gear that opens the panel lives in the overlay masthead, but the panel
+  // itself hangs off document.body. Whenever the overlay goes away the panel
+  // has no reachable close button left, so it must go with it.
+  function hideQuickPanel() {
+    var panel = document.getElementById('gmail-view-next-quick');
+    if (panel) panel.style.display = 'none';
+  }
+
   function toggleQuickPanel() {
     var panel = document.getElementById('gmail-view-next-quick');
     if (!panel) {
@@ -3687,6 +3695,7 @@
       if (state.settings.enabled) decorateLabels();
       if (!state.settings.enabled || mode !== 'inbox') {
         if (overlay) overlay.style.display = 'none';
+        hideQuickPanel();
         clearRowDecorations();
         if (!state.settings.enabled) clearLabelDecorations();
         return;
@@ -3694,6 +3703,7 @@
       if (!licenseAllows()) {
         // Trial expired and not paid -> revert to plain Gmail + show upgrade.
         if (overlay) overlay.style.display = 'none';
+        hideQuickPanel();
         clearRowDecorations();
         showUpgradeBanner();
         return;
