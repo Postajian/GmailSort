@@ -2,7 +2,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const core = require('../src/core.js');
 
-const NOW = new Date('2026-06-08T12:00:00+02:00');
+// Gmail shows local times and groups by the reader's local calendar days, so
+// core parses and buckets in local time. Anchor the fixtures with local date
+// parts rather than a fixed-offset instant, or the expectations only hold in
+// the timezone that happened to write them.
+const NOW = new Date(2026, 5, 8, 12, 0);
+const localDate = (year, month, day, hour, minute) =>
+  new Date(year, month, day, hour, minute || 0);
 
 test('normalizes settings and clamps layout values', () => {
   const value = core.normalizeSettings({
@@ -429,13 +435,15 @@ test('creates a centered screen-fit layout without changing typography', () => {
 });
 
 test('parses a same-day clock without moving into the future', () => {
-  assert.equal(
-    core.parseGmailDate('11:30', NOW).toISOString(),
-    '2026-06-08T09:30:00.000Z'
+  // 11:30 already happened today, so it stays on today.
+  assert.deepStrictEqual(
+    core.parseGmailDate('11:30', NOW),
+    localDate(2026, 5, 8, 11, 30)
   );
-  assert.equal(
-    core.parseGmailDate('23:30', NOW).toISOString(),
-    '2026-06-07T21:30:00.000Z'
+  // 23:30 has not happened yet today, so it belongs to yesterday.
+  assert.deepStrictEqual(
+    core.parseGmailDate('23:30', NOW),
+    localDate(2026, 5, 7, 23, 30)
   );
 });
 
@@ -447,23 +455,20 @@ test('parses English and German short dates', () => {
 });
 
 test('groups messages by Gmail-style calendar buckets', () => {
-  assert.equal(core.groupForDate(new Date('2026-06-08T11:00:00+02:00'), NOW), 'LAST 24 HOURS');
-  assert.equal(core.groupForDate(new Date('2026-06-07T00:01:00+02:00'), NOW), 'LAST 24 HOURS');
-  assert.equal(core.groupForDate(new Date('2026-06-06T11:00:00+02:00'), NOW), 'LAST 3 DAYS');
-  assert.equal(core.groupForDate(new Date('2026-06-03T11:00:00+02:00'), NOW), 'LAST 7 DAYS');
+  assert.equal(core.groupForDate(localDate(2026, 5, 8, 11), NOW), 'LAST 24 HOURS');
+  assert.equal(core.groupForDate(localDate(2026, 5, 7, 0, 1), NOW), 'LAST 24 HOURS');
+  assert.equal(core.groupForDate(localDate(2026, 5, 6, 11), NOW), 'LAST 3 DAYS');
+  assert.equal(core.groupForDate(localDate(2026, 5, 3, 11), NOW), 'LAST 7 DAYS');
   assert.equal(
-    core.groupForDate(
-      new Date('2026-06-01T11:00:00+02:00'),
-      new Date('2026-06-20T12:00:00+02:00')
-    ),
+    core.groupForDate(localDate(2026, 5, 1, 11), localDate(2026, 5, 20, 12)),
     'THIS MONTH'
   );
-  assert.equal(core.groupForDate(new Date('2026-05-01T11:00:00+02:00'), NOW), 'MAY 2026');
+  assert.equal(core.groupForDate(localDate(2026, 4, 1, 11), NOW), 'MAY 2026');
 });
 
 test('labels archive months by name and keeps OLDER for unparseable dates', () => {
-  assert.equal(core.groupForDate(new Date('2026-05-19T11:00:00+02:00'), NOW), 'MAY 2026');
-  assert.equal(core.groupForDate(new Date('2025-12-24T11:00:00+01:00'), NOW), 'DECEMBER 2025');
+  assert.equal(core.groupForDate(localDate(2026, 4, 19, 11), NOW), 'MAY 2026');
+  assert.equal(core.groupForDate(localDate(2025, 11, 24, 11), NOW), 'DECEMBER 2025');
   assert.equal(core.groupForDate(new Date('invalid'), NOW), 'OLDER');
 });
 
