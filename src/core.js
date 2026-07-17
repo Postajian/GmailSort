@@ -1,4 +1,4 @@
-(function (root, factory) {
+﻿(function (root, factory) {
   var api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.GmailViewNextCore = api;
@@ -375,7 +375,7 @@
 
     var result = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
     if (result.getTime() - now.getTime() > 5 * 60 * 1000) {
-      result = new Date(result.getTime() - DAY_MS);
+      result = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, hour, minute);
     }
     return result;
   }
@@ -385,7 +385,7 @@
       .trim()
       .toLowerCase()
       .replace(/[.,]/g, '')
-      .replace(/ä/g, 'a');
+      .replace(/Ã¤/g, 'a');
     var match = cleaned.match(/^([a-z]+)\s+(\d{1,2})(?:\s+(\d{4}))?$/);
     var monthName;
     var day;

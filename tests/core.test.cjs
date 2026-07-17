@@ -1,5 +1,8 @@
-const test = require('node:test');
+﻿const test = require('node:test');
 const assert = require('node:assert/strict');
+
+// Pin a DST-observing timezone so calendar-boundary regressions fail on every CI host.
+process.env.TZ = 'Europe/Vienna';
 const core = require('../src/core.js');
 
 // Gmail shows local times and groups by the reader's local calendar days, so
@@ -434,6 +437,13 @@ test('creates a centered screen-fit layout without changing typography', () => {
   assert.equal(value.dateTextGap, 20);
 });
 
+test('keeps the clock time when rolling across the spring DST boundary', () => {
+  const afterSpringForward = new Date(2026, 2, 29, 12, 0);
+  assert.deepStrictEqual(
+    core.parseGmailDate('23:30', afterSpringForward),
+    localDate(2026, 2, 28, 23, 30)
+  );
+});
 test('parses a same-day clock without moving into the future', () => {
   // 11:30 already happened today, so it stays on today.
   assert.deepStrictEqual(
