@@ -1716,9 +1716,10 @@
     var name = overlay.querySelector('.gvn-type-name');
     var value = overlay.querySelector('.gvn-type-value');
     if (name) {
-      name.textContent = selected.length === 1
+      var nextName = selected.length === 1
         ? selected[0].definition.label
         : selected.length + ' columns';
+      if (name.textContent !== nextName) name.textContent = nextName;
     }
     if (value && document.activeElement !== value) {
       if (!selected.length) {
@@ -1727,9 +1728,10 @@
         var values = selected.map(function (item) {
           return Math.round(state.settings[item.definition.size]);
         });
-        value.textContent = values.every(function (item) { return item === values[0]; })
+        var nextValue = values.every(function (item) { return item === values[0]; })
           ? values[0] + 'px'
           : 'Mixed';
+        if (value.textContent !== nextValue) value.textContent = nextValue;
       }
     }
     overlay.querySelectorAll('.gvn-column-label').forEach(function (label) {
@@ -3692,6 +3694,15 @@
     state.frame = 0;
     if (state.destroyed) return;
 
+    // The observer exists to notice GMAIL's changes, but it cannot tell Gmail's
+    // writes from ours, so every write refresh() makes schedules another
+    // refresh() -- the loop v0.20.103 chased writer-by-writer. refresh() is
+    // synchronous, so no other script can touch the DOM while it runs: every
+    // record raised in this window is self-inflicted by definition. Detach for
+    // the duration and the whole bug class is gone, including the 70-odd other
+    // unguarded writers and any added later. Nothing is lost by dropping the
+    // records -- refresh() reads live DOM, never the records themselves.
+    if (state.observer) state.observer.disconnect();
     try {
       updateRootFlags();
       positionSidebarResizer();
@@ -3734,6 +3745,13 @@
       watchTable();
     } catch (error) {
       logError('Refresh failed.', error);
+    } finally {
+      // Reattach on every exit path, including the early returns above and a
+      // thrown refresh -- a miss here would leave the view frozen until the
+      // next scroll or hashchange.
+      if (state.observer && !state.destroyed) {
+        state.observer.observe(document.body, { childList: true, subtree: true });
+      }
     }
   }
 
