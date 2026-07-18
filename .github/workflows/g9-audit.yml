@@ -1,0 +1,49 @@
+name: g9-audit
+
+# G9 free-compute audit lane (Postajian/GmailSort, MV3 Chrome extension).
+# Runs on every push + weekly, costs 0: public GitHub Actions minutes on a
+# personal account. No AI keys, no billing.
+# Adapted 2026-07-18 from the G9-X-Grid pilot lane.
+# This repo has both "npm run check" and "npm test" in package.json, and both
+# use node builtins only (zero dependencies), so no install step is needed.
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks full-history secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  manifest-sanity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: manifest.json parses and is MV3
+        run: |
+          jq empty manifest.json
+          test "$(jq -r .manifest_version manifest.json)" = "3"
+
+  node-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: npm run check
+        run: npm run check
+      - name: npm test
+        run: npm test
