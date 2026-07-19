@@ -2,7 +2,7 @@
 
 To resume ANY G9 work (including when another AI's usage limit was hit), read ONLY:
 
-`C:\Users\exoni\Desktop\Gmail Sort\03_Obsidian_Vault\G9_RESUME_NOW.md`
+`C:\Users\Postajian\Desktop\G9\G9 HQ\03_Obsidian_Vault\G9_RESUME_NOW.md`
 
 That file is the live baton shared by ALL AIs: the holistic picture, a last-hours DONE
 ledger, live claims, and the exact next step. Follow its protocol exactly: CLAIM your item

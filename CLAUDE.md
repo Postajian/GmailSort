@@ -5,7 +5,7 @@ Newspaper-style, editable Gmail workflow. Part of the **G9** umbrella.
 
 ## Wiki Knowledge Base (shared G9 memory)
 
-Path: `C:\Users\exoni\Desktop\Gmail Sort\03_Obsidian_Vault`
+Path: `C:\Users\Postajian\Desktop\G9\G9 HQ\03_Obsidian_Vault`
 
 When you need G9 / cross-project context not already here:
 
@@ -45,7 +45,7 @@ the GmailView feature/handoff notes. Do NOT hand-curate the HQ-owned `G9_PROGRES
 ## LIMIT-HIT BATON (read FIRST when resuming or continuing G9 work)
 
 If you are resuming work (or another AI hit its usage limit), read ONLY
-`C:\Users\exoni\Desktop\Gmail Sort\03_Obsidian_Vault\G9_RESUME_NOW.md` and follow its
+`C:\Users\Postajian\Desktop\G9\G9 HQ\03_Obsidian_Vault\G9_RESUME_NOW.md` and follow its
 protocol: CLAIM your item there before starting, mark it DONE the moment it is verified,
 rewrite the file live (not at session end). Never redo a DONE item - reconcile instead.
 Do NOT re-read the codebase/vault to catch up; the baton IS the catch-up.

@@ -48,7 +48,7 @@ $range = if($lastTag){ "$lastTag..HEAD" } else { "HEAD" }
 $commitCount = [int](git rev-list --count $range 2>$null)
 
 $dirty = @(git status --porcelain).Count
-$relDir = "C:\Users\exoni\Desktop\Gmail Sort\12_Store_Assets\releases"
+$relDir = "C:\Users\Postajian\Desktop\G9\G9 HQ\12_Store_Assets\releases"
 $zipPath = Join-Path $relDir "GmailView-v$next.zip"
 $notesPath = Join-Path $relDir "RELEASE_NOTES_v$next.md"
 
